@@ -1,5 +1,5 @@
 const CACHE_NAME = 'fiadoapp-cache-v1';
-const ARCHIVOS_BASICOS = ['./fiadoapp.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const ARCHIVOS_BASICOS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
