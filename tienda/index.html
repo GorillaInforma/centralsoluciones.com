@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FiadoApp</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg:        #FFFFFF;
+  --surface:   #F7F8FA;
+  --surface2:  #F0F1F5;
+  --surface3:  #E5E7EF;
+  --border:    #E2E4EA;
+  --border2:   #D0D3DC;
+  --txt:       #1A1D29;
+  --txt2:      #6B7280;
+  --txt3:      #9CA3AF;
+  --accent:    #4F7FFF;
+  --accent2:   #6B98FF;
+  --green:     #22C55E;
+  --green-bg:  rgba(34,197,94,0.12);
+  --red:       #EF4444;
+  --red-bg:    rgba(239,68,68,0.12);
+  --amber:     #F59E0B;
+  --amber-bg:  rgba(245,158,11,0.1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  height: 56px;
+  min-height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--txt);
+  letter-spacing: -0.02em;
+}
+
+.logo-icon {
+  width: 30px; height: 30px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+}
+
+.logo-sub { font-size: 0.72rem; color: var(--txt3); font-weight: 400; margin-top: 1px; }
+
+.semana-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--txt2);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.btn-pdf-top {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--txt2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+.btn-pdf-top:hover { background: var(--surface3); color: var(--txt); border-color: var(--border2); }
+.btn-pdf-top svg { flex-shrink: 0; }
+
+/* ── LAYOUT ── */
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── PANEL CHAT ── */
+.panel-chat {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+  min-height: 0;
+}
+
+.chat-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  scroll-behavior: smooth;
+}
+
+.chat-feed::-webkit-scrollbar { width: 4px; }
+.chat-feed::-webkit-scrollbar-track { background: transparent; }
+.chat-feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* Mensajes */
+.msg-row {
+  display: flex;
+  gap: 10px;
+  max-width: 88%;
+}
+
+.msg-row.ia { align-self: flex-start; }
+.msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
+
+.msg-avatar {
+  width: 28px; height: 28px; min-width: 28px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.msg-row.ia .msg-avatar { background: var(--accent); color: white; font-weight: 700; }
+.msg-row.user .msg-avatar { background: var(--surface3); color: var(--txt2); }
+
+.msg-bubble {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  max-width: 100%;
+}
+
+.msg-row.ia .msg-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-top-left-radius: 4px;
+  color: var(--txt);
+}
+
+.msg-row.user .msg-bubble {
+  background: var(--accent);
+  color: white;
+  border-top-right-radius: 4px;
+}
+
+/* Tabla embebida */
+.inline-table {
+  margin-top: 10px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+}
+
+.inline-table .it-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--txt2);
+}
+
+.inline-table .it-row:last-child { border-bottom: none; }
+.inline-table .it-row.it-head { background: rgba(255,255,255,0.04); color: var(--txt3); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.inline-table .it-row.it-total { background: rgba(79,127,255,0.1); color: var(--accent2); font-weight: 600; }
+.inline-table .it-row.it-ok { color: var(--green); }
+.inline-table .it-row.it-bad { color: var(--red); }
+
+/* Typing indicator */
+.typing {
+  align-self: flex-start;
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+}
+
+.typing-dot {
+  width: 6px; height: 6px;
+  background: var(--txt3);
+  border-radius: 50%;
+  animation: tdot 1.4s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes tdot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ── INPUT AREA ── */
+.chat-input-wrap {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 14px 16px;
+  flex-shrink: 0;
+}
+
+.input-box {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 8px 8px 14px;
+  transition: border-color 0.2s;
+}
+
+.input-box:focus-within { border-color: var(--accent); }
+
+#chat-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: var(--txt);
+  resize: none;
+  min-height: 24px;
+  max-height: 96px;
+  line-height: 1.5;
+}
+
+#chat-input::placeholder { color: var(--txt3); }
+
+.input-actions { display: flex; gap: 6px; align-items: flex-end; }
+
+.btn-mic {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--surface3);
+  color: var(--txt2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-mic:hover { background: var(--border); color: var(--txt); }
+.btn-mic.grabando {
+  background: rgba(239,68,68,0.2);
+  border-color: var(--red);
+  color: var(--red);
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+
+.btn-send {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-send:hover { background: var(--accent2); }
+.btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.mic-hint {
+  font-size: 0.7rem;
+  color: var(--txt3);
+  text-align: center;
+  margin-top: 7px;
+  display: none;
+}
+
+.mic-hint.visible { display: block; }
+
+/* ── PANEL CUENTAS ── */
+.panel-cuentas {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  min-height: 0;
+}
+
+.cuentas-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.cuentas-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--txt3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+/* KPI strips */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.kpi {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.kpi-label { font-size: 0.65rem; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+.kpi-val { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--txt); }
+.kpi-val.green { color: var(--green); }
+.kpi-val.red { color: var(--red); }
+.kpi-val.amber { color: var(--amber); }
+
+/* Lista personas */
+.personas-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+.personas-list::-webkit-scrollbar { width: 3px; }
+.personas-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--txt3);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 24px;
+}
+
+.empty-icon { font-size: 2rem; opacity: 0.3; }
+
+/* Tarjeta persona */
+.card-persona {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.card-persona:hover { border-color: var(--border2); }
+.card-persona.pagado { border-left: 3px solid var(--green); }
+.card-persona.adeuda { border-left: 3px solid var(--red); }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  gap: 8px;
+}
+
+.card-nombre {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--txt);
+  text-transform: capitalize;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.badge-estado {
+  font-size: 0.62rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+.badge-estado.pago { background: var(--green-bg); color: var(--green); }
+.badge-estado.deuda { background: var(--red-bg); color: var(--red); }
+
+.card-total {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--txt2);
+}
+
+.chevron {
+  color: var(--txt3);
+  font-size: 0.7rem;
+  transition: transform 0.2s;
+}
+
+/* Items expandidos */
+.card-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.28s ease;
+  border-top: 0 solid var(--border);
+}
+
+.card-body.open {
+  max-height: 400px;
+  border-top-width: 1px;
+}
+
+.dia-bloque { padding: 8px 12px; }
+
+.dia-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--txt3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.item-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--txt2);
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.item-line:last-child { border-bottom: none; }
+.item-precio { font-family: 'JetBrains Mono', monospace; color: var(--txt); font-size: 0.78rem; }
+
+/* Toast / notificación */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--txt);
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  z-index: 99;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">F</div>
+    <div>
+      <div>FiadoApp</div>
+      <div class="logo-sub">Control semanal de crédito</div>
+    </div>
+  </div>
+  <div class="semana-chip" id="semana-chip">—</div>
+  <div class="topbar-right">
+    <button class="btn-pdf-top" id="btn-pdf" title="Exportar reporte PDF">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 9h6M5 11.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Reporte PDF
+    </button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- CHAT -->
+  <div class="panel-chat">
+    <div class="chat-feed" id="chat-feed"></div>
+
+    <div class="chat-input-wrap">
+      <div class="input-box">
+        <textarea
+          id="chat-input"
+          placeholder="Ej: Agrega leche $25 a Rosa, ¿cuánto lleva María?..."
+          rows="1"
+        ></textarea>
+        <div class="input-actions">
+          <button class="btn-mic" id="btn-mic" title="Hablar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="9" y="2" width="6" height="11" rx="3" stroke="currentColor" stroke-width="2"/><path d="M5 10a7 7 0 0014 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="21" x2="12" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="btn-send" id="btn-send" title="Enviar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2L15 22 11 13 2 9l20-7z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="mic-hint" id="mic-hint">🔴 Escuchando... habla ahora</div>
+    </div>
+  </div>
+
+  <!-- CUENTAS -->
+  <div class="panel-cuentas">
+    <div class="cuentas-header">
+      <div class="cuentas-title">Resumen Semana</div>
+      <div class="kpi-strip">
+        <div class="kpi">
+          <div class="kpi-label">Total fiado</div>
+          <div class="kpi-val amber" id="kpi-total">$0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Por cobrar</div>
+          <div class="kpi-val red" id="kpi-cobrar">$0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Pagaron</div>
+          <div class="kpi-val green" id="kpi-pagaron">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Adeudan</div>
+          <div class="kpi-val red" id="kpi-adeudan">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="personas-list" id="personas-list">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">📋</div>
+        <div>Las cuentas aparecerán<br>conforme registres pedidos</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════ ESTADO ════════════
+const DIAS = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+
+const E = {
+  personas: {},
+  semana: calcSemana(),
+  historial: []
+};
+
+function calcSemana() {
+  const hoy = new Date();
+  const d = hoy.getDay();
+  const diff = d === 0 ? -6 : 1 - d;
+  const lun = new Date(hoy); lun.setDate(hoy.getDate() + diff);
+  const dom = new Date(lun); dom.setDate(lun.getDate() + 6);
+  const f = dt => dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short'}).toUpperCase();
+  return `${f(lun)} – ${f(dom)}`;
+}
+
+function diaHoy() {
+  const d = new Date().getDay();
+  return DIAS[d === 0 ? 6 : d - 1];
+}
+
+function totalP(p) {
+  return (p.items || []).reduce((s,i) => s + i.precio * (i.qty || 1), 0);
+}
+
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+// ════════════ IA ════════════
+const histChat = [];
+
+function buildSystem() {
+  return `Eres el asistente de "FiadoApp", sistema de crédito semanal de una tienda.
+Hablas español mexicano informal y conciso. Eres rápido, práctico y amigable.
+Día actual: ${diaHoy()}. Semana: ${E.semana}.
+
+ESTADO ACTUAL:
+${JSON.stringify(E.personas, null, 2)}
+
+HISTORIAL RECIENTE:
+${E.historial.slice(-15).join('\n') || '(vacío)'}
+
+Responde SOLO con JSON sin markdown ni texto extra:
+{
+  "acciones": [
+    {
+      "tipo": "agregar"|"precio"|"pago"|"nopago"|"eliminar"|"corregir"|"noop",
+      "persona": "nombre_minusculas",
+      "dia": "lunes|...|domingo",
+      "producto": "...",
+      "precio": número,
+      "qty": número,
+      "idx": número_índice_opcional
+    }
+  ],
+  "respuesta": "texto amigable al usuario",
+  "tabla": {
+    "tipo": "persona"|"semana"|"pagos"|null,
+    "filas": [["col1","col2",...], ...]
+  }
+}
+
+REGLAS DE INTERPRETACIÓN:
+- "ponle / agrega / apúntale X a Y" → agregar
+- "cámbialo / era / me confundí / corrígelo" → corregir (último ítem relevante)
+- "ya pagó / pagó" → pago
+- "no pagó / quedó de pagar" → nopago
+- "¿cuánto lleva / debe / tiene?" → noop + respuesta con detalle
+- "reporte / todo / resumen" → noop + tabla tipo semana
+- "¿quién pagó? / ¿cuántos pagaron?" → noop + tabla tipo pagos
+- "¿cuánto cobro / debo cobrar?" → noop + total adeudado
+- Si falta precio, pregunta gentilmente
+- Siempre responde con $`;
+}
+
+// ════════════ GROQ (5 keys con rotación automática) ════════════
+const GROQ_KEYS = [
+  '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',
+  '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',
+  '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',
+  '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',
+  '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'
+];
+let groqKeyIdx = 0;
+
+async function groqFetch(payload) {
+  let lastErr = null;
+  for (let i = 0; i < GROQ_KEYS.length; i++) {
+    const key = GROQ_KEYS[(groqKeyIdx + i) % GROQ_KEYS.length];
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.status === 401 || res.status === 429 || res.status >= 500) {
+        lastErr = new Error(`Groq key #${i+1} falló (${res.status})`);
+        continue; // probar siguiente key
+      }
+      if (!res.ok) {
+        lastErr = new Error(`Groq error ${res.status}`);
+        continue;
+      }
+      groqKeyIdx = (groqKeyIdx + i) % GROQ_KEYS.length; // recordar la key que funcionó
+      return await res.json();
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('Todas las keys de Groq fallaron');
+}
+
+async function callIA(msg) {
+  histChat.push({ role:'user', content: msg });
+  const data = await groqFetch({
+    model: 'llama-3.3-70b-versatile',
+    temperature: 0.3,
+    max_tokens: 1000,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: buildSystem() },
+      ...histChat
+    ]
+  });
+  const raw = data.choices?.[0]?.message?.content || '{}';
+  histChat.push({ role:'assistant', content: raw });
+  const clean = raw.replace(/```json|```/gi,'').trim();
+  return JSON.parse(clean);
+}
+
+// ════════════ ACCIONES ════════════
+function ejecutar(acciones) {
+  (acciones||[]).forEach(a => {
+    const tipo = a.tipo;
+    if (tipo === 'noop' || !a.persona) return;
+    const nom = a.persona.toLowerCase().trim();
+    if (!E.personas[nom]) E.personas[nom] = { items:[], pagado:false };
+    const p = E.personas[nom];
+    const dia = a.dia || diaHoy();
+
+    if (tipo === 'agregar') {
+      p.items.push({ dia, producto: a.producto, precio: Number(a.precio), qty: Number(a.qty)||1 });
+      E.historial.push(`+${a.producto} $${a.precio} → ${nom} [${dia}]`);
+    } else if (tipo === 'precio') {
+      const idx = a.idx !== undefined ? a.idx : buscarItem(p, a.producto);
+      if (idx >= 0) { const v = p.items[idx].precio; p.items[idx].precio = Number(a.precio); E.historial.push(`Precio ${p.items[idx].producto}/${nom}: $${v}→$${a.precio}`); }
+    } else if (tipo === 'pago') {
+      p.pagado = true; E.historial.push(`✓ ${nom} PAGÓ`);
+    } else if (tipo === 'nopago') {
+      p.pagado = false; E.historial.push(`✗ ${nom} no pagó`);
+    } else if (tipo === 'eliminar') {
+      const idx = a.idx !== undefined ? a.idx : p.items.length - 1;
+      if (p.items[idx]) { const el = p.items.splice(idx,1)[0]; E.historial.push(`Eliminado: ${el.producto} de ${nom}`); }
+    } else if (tipo === 'corregir') {
+      const idx = a.idx !== undefined ? a.idx : buscarItem(p, a.producto) >= 0 ? buscarItem(p, a.producto) : p.items.length-1;
+      if (p.items[idx]) {
+        const old = {...p.items[idx]};
+        if (a.producto) p.items[idx].producto = a.producto;
+        if (a.precio) p.items[idx].precio = Number(a.precio);
+        if (a.qty) p.items[idx].qty = Number(a.qty);
+        E.historial.push(`Corregido ${nom}: ${old.producto}→${p.items[idx].producto}`);
+      }
+    }
+  });
+}
+
+function buscarItem(p, nombre) {
+  if (!nombre) return p.items.length - 1;
+  const n = nombre.toLowerCase();
+  for (let i = p.items.length-1; i >= 0; i--) {
+    if (p.items[i].producto?.toLowerCase().includes(n)) return i;
+  }
+  return -1;
+}
+
+// ════════════ UI ════════════
+function addMsg(who, texto, tabla) {
+  const feed = document.getElementById('chat-feed');
+  const row = document.createElement('div');
+  row.className = `msg-row ${who}`;
+
+  const av = document.createElement('div');
+  av.className = 'msg-avatar';
+  av.textContent = who === 'ia' ? 'IA' : 'Tú';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = texto;
+
+  // Tabla opcional
+  if (who === 'ia' && tabla?.filas?.length) {
+    const tbl = document.createElement('div');
+    tbl.className = 'inline-table';
+    tabla.filas.forEach((fila, i) => {
+      const r = document.createElement('div');
+      const isTotal = fila[0]?.toUpperCase().includes('TOTAL');
+      const isHead = i === 0 && !isTotal;
+      r.className = `it-row${isHead ? ' it-head' : isTotal ? ' it-total' : ''}`;
+      fila.forEach((c,ci) => {
+        const s = document.createElement('span');
+        s.textContent = c;
+        if (ci > 0) s.style.textAlign = 'right';
+        r.appendChild(s);
+      });
+      tbl.appendChild(r);
+    });
+    bubble.appendChild(tbl);
+  }
+
+  row.appendChild(av);
+  row.appendChild(bubble);
+  feed.appendChild(row);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+let typingEl = null;
+function showTyping() {
+  const feed = document.getElementById('chat-feed');
+  typingEl = document.createElement('div');
+  typingEl.className = 'typing';
+  typingEl.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  feed.appendChild(typingEl);
+  feed.scrollTop = feed.scrollHeight;
+}
+function hideTyping() { typingEl?.remove(); typingEl = null; }
+
+function renderCuentas() {
+  const personas = Object.entries(E.personas);
+  const list = document.getElementById('personas-list');
+  const empty = document.getElementById('empty-state');
+
+  // KPIs
+  const total = personas.reduce((s,[,d]) => s+totalP(d), 0);
+  const noPag = personas.filter(([,d]) => !d.pagado);
+  const pag = personas.filter(([,d]) => d.pagado);
+  const cobrar = noPag.reduce((s,[,d]) => s+totalP(d), 0);
+  document.getElementById('kpi-total').textContent = `$${total.toFixed(0)}`;
+  document.getElementById('kpi-cobrar').textContent = `$${cobrar.toFixed(0)}`;
+  document.getElementById('kpi-pagaron').textContent = pag.length;
+  document.getElementById('kpi-adeudan').textContent = noPag.length;
+
+  if (!personas.length) { empty.style.display = 'flex'; return; }
+  empty.style.display = 'none';
+
+  // Cards
+  personas.forEach(([nom, data]) => {
+    let card = list.querySelector(`[data-n="${nom}"]`);
+    const tot = totalP(data);
+
+    if (!card) {
+      card = document.createElement('div');
+      card.setAttribute('data-n', nom);
+      card.className = 'card-persona';
+      list.appendChild(card);
+
+      // Toggle
+      card.addEventListener('click', e => {
+        if (e.target.closest('.card-head')) {
+          const body = card.querySelector('.card-body');
+          const ch = card.querySelector('.chevron');
+          body.classList.toggle('open');
+          ch.textContent = body.classList.contains('open') ? '▲' : '▼';
+        }
+      });
+    }
+
+    // Agrupar por día
+    const porDia = {};
+    (data.items||[]).forEach(it => { (porDia[it.dia] = porDia[it.dia]||[]).push(it); });
+
+    const bodyOpen = card.querySelector('.card-body')?.classList.contains('open');
+
+    card.className = `card-persona ${data.pagado ? 'pagado' : 'adeuda'}`;
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="card-nombre">${cap(nom)}</div>
+        <div class="card-right">
+          <span class="badge-estado ${data.pagado ? 'pago' : 'deuda'}">${data.pagado ? '✓ Pagó' : 'Adeuda'}</span>
+          <span class="card-total">$${tot.toFixed(0)}</span>
+          <span class="chevron">${bodyOpen ? '▲' : '▼'}</span>
+        </div>
+      </div>
+      <div class="card-body${bodyOpen ? ' open' : ''}">
+        ${DIAS.filter(d => porDia[d]).map(dia => `
+          <div class="dia-bloque">
+            <div class="dia-label">${dia}</div>
+            ${porDia[dia].map(it => `
+              <div class="item-line">
+                <span>${it.qty > 1 ? it.qty+'× ' : ''}${it.producto}</span>
+                <span class="item-precio">$${(it.precio*(it.qty||1)).toFixed(0)}</span>
+              </div>
+            `).join('')}
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // Re-attach toggle (innerHTML reemplaza listeners)
+    card.querySelector('.card-head').addEventListener('click', () => {
+      const body = card.querySelector('.card-body');
+      body.classList.toggle('open');
+      card.querySelector('.chevron').textContent = body.classList.contains('open') ? '▲' : '▼';
+    });
+  });
+}
+
+// Toast
+function toast(msg, dur = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ════════════ VOZ SÍNTESIS ════════════
+function hablar(txt) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = 'es-MX'; u.rate = 1.05;
+  const vs = speechSynthesis.getVoices();
+  const v = vs.find(x => /es[-_](MX|419|ES)/i.test(x.lang)) || vs.find(x => /^es/i.test(x.lang));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+
+// ════════════ MICRÓFONO ════════════
+let SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+let recog = null;
+let escuchando = false;
+
+function toggleMic() {
+  if (!SpeechRec) {
+    toast('Tu navegador no soporta reconocimiento de voz');
+    return;
+  }
+
+  if (escuchando) {
+    recog?.stop();
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    toast('El micrófono requiere HTTPS (o localhost). Abre la app desde tu link de Vercel, no como archivo local.');
+    return;
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    // Sin API de mediaDevices disponible: intentamos igual con el reconocimiento,
+    // que en Chrome/Android suele disparar su propio diálogo de permiso.
+    iniciarRecognition();
+    return;
+  }
+
+  // Pedir permiso explícitamente primero (esto es lo que abre el diálogo del navegador)
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      stream.getTracks().forEach(t => t.stop()); // no necesitamos el stream, solo el permiso
+      iniciarRecognition();
+    })
+    .catch(err => {
+      console.warn('Mic permission denied:', err);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        toast('Bloqueaste el micrófono. Actívalo en los ajustes del sitio (ícono de candado en la barra de direcciones).');
+      } else if (err.name === 'NotFoundError') {
+        toast('No se detectó ningún micrófono en este dispositivo.');
+      } else {
+        toast('No se pudo acceder al micrófono: ' + err.message);
+      }
+    });
+}
+
+function iniciarRecognition() {
+  recog = new SpeechRec();
+  recog.lang = 'es-MX';
+  recog.continuous = false;
+  recog.interimResults = false;
+  recog.maxAlternatives = 1;
+
+  recog.onstart = () => {
+    escuchando = true;
+    document.getElementById('btn-mic').classList.add('grabando');
+    document.getElementById('mic-hint').classList.add('visible');
+  };
+
+  recog.onresult = e => {
+    const txt = e.results[0][0].transcript;
+    document.getElementById('chat-input').value = txt;
+    enviar();
+  };
+
+  recog.onerror = e => {
+    console.warn('SpeechRec error:', e.error);
+    const msgs = {
+      'not-allowed': 'Permiso de micrófono denegado',
+      'no-speech': 'No detecté voz, intenta de nuevo',
+      'network': 'Error de red en reconocimiento de voz',
+      'aborted': null
+    };
+    if (msgs[e.error]) toast(msgs[e.error]);
+    resetMic();
+  };
+
+  recog.onend = () => resetMic();
+
+  try { recog.start(); }
+  catch(e) { console.error(e); resetMic(); }
+}
+
+function resetMic() {
+  escuchando = false;
+  document.getElementById('btn-mic').classList.remove('grabando');
+  document.getElementById('mic-hint').classList.remove('visible');
+}
+
+// ════════════ FLUJO PRINCIPAL ════════════
+let busy = false;
+
+async function enviar() {
+  if (busy) return;
+  const inp = document.getElementById('chat-input');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = ''; inp.style.height = 'auto';
+  busy = true;
+
+  addMsg('user', msg);
+  showTyping();
+
+  try {
+    const r = await callIA(msg);
+    hideTyping();
+    if (r.acciones?.length) { ejecutar(r.acciones); renderCuentas(); }
+    addMsg('ia', r.respuesta || '...', r.tabla);
+    hablar(r.respuesta || '');
+  } catch(e) {
+    hideTyping();
+    const err = 'Hubo un error al procesar. Intenta de nuevo.';
+    addMsg('ia', err);
+    hablar(err);
+    console.error(e);
+  }
+
+  busy = false;
+}
+
+// ════════════ PDF ════════════
+function generarPDF() {
+  const prs = Object.entries(E.personas);
+  if (!prs.length) { toast('No hay registros para exportar'); return; }
+
+  const total = prs.reduce((s,[,d]) => s+totalP(d), 0);
+  const pag = prs.filter(([,d]) => d.pagado);
+  const noPag = prs.filter(([,d]) => !d.pagado);
+  const cobrar = noPag.reduce((s,[,d]) => s+totalP(d), 0);
+  const hoy = new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte Semanal</title><style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#fff;color:#111;padding:32px;font-size:13px}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #0D0F14}
+  h1{font-size:20px;font-weight:700;letter-spacing:-.02em}
+  .meta{color:#666;font-size:11px;margin-top:4px}
+  .badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600}
+  .verde{background:#D1FAE5;color:#065F46}.rojo{background:#FEE2E2;color:#991B1B}
+  .card{border:1px solid #E5E7EB;border-radius:8px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid}
+  .card-h{background:#0D0F14;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+  .card-h .nm{font-weight:600;font-size:14px}
+  .card-h .tot{font-family:monospace;font-size:13px}
+  table{width:100%;border-collapse:collapse}
+  td{padding:6px 16px;border-bottom:1px solid #F3F4F6;font-size:12px}
+  td:last-child{text-align:right;font-family:monospace}
+  .dia-row td{background:#F9FAFB;color:#9CA3AF;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .total-row td{background:#EFF6FF;font-weight:700;color:#1D4ED8}
+  .resumen{background:#0D0F14;color:#E8EAF0;border-radius:8px;padding:20px;margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .kpi{background:rgba(255,255,255,.06);border-radius:6px;padding:12px}
+  .kpi-l{font-size:10px;color:#8B91A8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .kpi-v{font-size:18px;font-weight:700;font-family:monospace}
+  .kv-green{color:#22C55E}.kv-red{color:#EF4444}.kv-amber{color:#F59E0B}
+  </style></head><body>
+  <div class="top">
+    <div>
+      <h1>FiadoApp · Reporte Semanal</h1>
+      <div class="meta">Semana: ${E.semana} &nbsp;|&nbsp; ${hoy}</div>
+    </div>
+  </div>
+  ${prs.map(([nom,data])=>{
+    const tot=totalP(data);
+    const pd={};
+    data.items.forEach(i=>{(pd[i.dia]=pd[i.dia]||[]).push(i);});
+    return `<div class="card">
+      <div class="card-h">
+        <span class="nm">${cap(nom)}</span>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="badge ${data.pagado?'verde':'rojo'}">${data.pagado?'✓ Pagó':'Adeuda'}</span>
+          <span class="tot">$${tot.toFixed(0)}</span>
+        </div>
+      </div>
+      <table>${DIAS.filter(d=>pd[d]).map(dia=>`
+        <tr class="dia-row"><td colspan="2">${dia}</td></tr>
+        ${pd[dia].map(i=>`<tr><td>${i.qty>1?i.qty+'× ':''}${i.producto}</td><td>$${(i.precio*(i.qty||1)).toFixed(0)}</td></tr>`).join('')}
+      `).join('')}
+      <tr class="total-row"><td>Total ${cap(nom)}</td><td>$${tot.toFixed(0)}</td></tr>
+      </table></div>`;
+  }).join('')}
+  <div class="resumen">
+    <div class="kpi"><div class="kpi-l">Total fiado</div><div class="kpi-v kv-amber">$${total.toFixed(0)}</div></div>
+    <div class="kpi"><div class="kpi-l">Por cobrar</div><div class="kpi-v kv-red">$${cobrar.toFixed(0)}</div></div>
+    <div class="kpi"><div class="kpi-l">Pagaron</div><div class="kpi-v kv-green">${pag.length} clientes</div></div>
+    <div class="kpi"><div class="kpi-l">Adeudan</div><div class="kpi-v kv-red">${noPag.length} clientes</div></div>
+  </div>
+  <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script>
+  </body></html>`;
+
+  const w = window.open('','_blank');
+  if (!w) { toast('Permite ventanas emergentes para el PDF'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
+// ════════════ EVENTOS ════════════
+document.getElementById('btn-send').addEventListener('click', enviar);
+document.getElementById('btn-mic').addEventListener('click', toggleMic);
+document.getElementById('btn-pdf').addEventListener('click', generarPDF);
+
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); }
+});
+
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 96) + 'px';
+});
+
+// Precargar voces
+speechSynthesis?.getVoices();
+speechSynthesis?.addEventListener?.('voiceschanged', () => speechSynthesis.getVoices());
+
+// Init
+document.getElementById('semana-chip').textContent = E.semana;
+renderCuentas();
+
+setTimeout(() => {
+  const msg = '¡Hola! Soy FiadoApp. Dime qué hacer: "Agrega leche $22 a Rosa", "Pedro ya pagó", "¿Cuánto lleva María?", "Reporte de la semana". También puedes hablar con el micrófono 🎤';
+  addMsg('ia', msg);
+  setTimeout(() => hablar(msg), 600);
+}, 200);
+</script>
+</body>
+</html>
