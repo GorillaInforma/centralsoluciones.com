@@ -618,6 +618,12 @@ body {
   letter-spacing: 0.02em;
 }
 .item-precio { font-family: 'JetBrains Mono', monospace; color: var(--txt); font-size: 0.78rem; flex-shrink: 0; }
+.item-autor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--accent2);
+  letter-spacing: 0.02em;
+}
 
 .abono-bloque { padding: 8px 12px; border-top: 1px dashed var(--border2); }
 .abono-line {
@@ -705,6 +711,128 @@ body {
   font-size: 0.8rem;
   display: flex; align-items: center; justify-content: center;
 }
+
+/* ── IDENTIDAD (usuario del dispositivo) ── */
+.user-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 10px 5px 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.user-avatar {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.user-chip-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--txt2);
+  white-space: nowrap;
+}
+
+.identidad-overlay {
+  position: fixed; inset: 0;
+  background: rgba(13,15,20,0.55);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+.identidad-overlay.show { display: flex; }
+
+.identidad-modal {
+  background: var(--bg);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 340px;
+  padding: 22px 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+.identidad-titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--txt);
+  margin-bottom: 4px;
+}
+.identidad-sub {
+  font-size: 0.78rem;
+  color: var(--txt2);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.identidad-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.identidad-opcion {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--txt);
+}
+.identidad-opcion:active { background: var(--surface3); }
+.identidad-opcion .user-avatar { width: 26px; height: 26px; font-size: 0.75rem; }
+
+.identidad-mic-row {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.identidad-mic-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.identidad-mic-btn.grabando { background: var(--red); border-color: var(--red); animation: mic-pulse 1.2s ease-in-out infinite; }
+.identidad-mic-txt { font-size: 0.72rem; color: var(--txt3); }
+.identidad-error {
+  font-size: 0.75rem;
+  color: var(--red);
+  text-align: center;
+  margin-top: 10px;
+  display: none;
+}
+.identidad-error.show { display: block; }
+
+/* ── DRIVE STATUS ── */
+.drive-status {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.66rem;
+  color: var(--txt3);
+  padding: 4px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.drive-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--txt3); flex-shrink: 0; }
+.drive-dot.ok { background: var(--green); }
+.drive-dot.err { background: var(--red); }
 </style>
 </head>
 <body>
@@ -723,6 +851,16 @@ body {
     <div class="semana-chip" id="semana-chip">—</div>
     <button class="semana-arrow" id="semana-next" title="Semana siguiente">›</button>
     <input type="date" id="semana-date-input" class="semana-date-input">
+  </div>
+  <div class="topbar-right">
+    <div class="drive-status" id="drive-status" title="Respaldo en Google Drive">
+      <span class="drive-dot" id="drive-dot"></span>
+      <span id="drive-status-txt">Drive</span>
+    </div>
+    <div class="user-chip" id="user-chip" title="Cambiar de usuario">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <span class="user-chip-name" id="user-chip-name">—</span>
+    </div>
   </div>
 </div>
 
@@ -817,12 +955,37 @@ body {
       </div>
     </div>
     <div id="catalogo-clientes-list"></div>
+    <div class="cuentas-header" style="border-top:1px solid var(--border); margin-top:6px;">
+      <div class="cuentas-title">Respaldo en la nube</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn-pdf-top" id="btn-drive-conectar">🔗 Conectar Drive</button>
+        <button class="btn-pdf-top" id="btn-drive-backup">☁️ Respaldar ahora</button>
+        <button class="btn-pdf-top" id="btn-drive-restaurar">⬇️ Restaurar de Drive</button>
+      </div>
+      <div class="identidad-sub" id="drive-info" style="margin-top:8px; margin-bottom:0;">Sin conectar todavía.</div>
+    </div>
   </div>
 
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- Overlay de identidad -->
+<div class="identidad-overlay" id="identidad-overlay">
+  <div class="identidad-modal">
+    <div class="identidad-titulo" id="identidad-titulo">¿Quién eres?</div>
+    <div class="identidad-sub" id="identidad-sub">Toca tu nombre, o dilo por el micrófono.</div>
+    <div class="identidad-opciones" id="identidad-opciones"></div>
+    <div class="identidad-mic-row">
+      <button class="identidad-mic-btn" id="identidad-mic-btn" title="Decir mi nombre">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="9" y="2" width="6" height="11" rx="3" stroke="currentColor" stroke-width="2"/><path d="M5 10a7 7 0 0014 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="21" x2="12" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <span class="identidad-mic-txt" id="identidad-mic-txt">Toca para hablar</span>
+    </div>
+    <div class="identidad-error" id="identidad-error">No te reconocí. Solo puede ser Petra, Eli o Miguel — intenta otra vez.</div>
+  </div>
+</div>
 
 <script>
 // ════════════ ESTADO ════════════
@@ -906,6 +1069,7 @@ function guardarEstado() {
     console.warn('No se pudo guardar en local:', e);
     if (e.name === 'QuotaExceededError') toast('⚠️ Espacio local lleno, no se pudo guardar');
   }
+  programarBackupDrive();
 }
 
 function cargarEstado() {
@@ -1009,7 +1173,7 @@ function aplicarTrasladosUnaVez() {
       if (saldo > 0.5) {
         const claveSig = siguienteClave(clave);
         const perSig = getPeriodo(p, claveSig);
-        perSig.items.push({ dia:'lunes', producto:'Saldo semana anterior', precio: Math.round(saldo*100)/100, qty:1, fecha: new Date().toISOString(), traslado:true });
+        perSig.items.push({ dia:'lunes', producto:'Saldo semana anterior', precio: Math.round(saldo*100)/100, qty:1, fecha: new Date().toISOString(), traslado:true, autor: E.usuarioActual });
         per.trasladado = true;
         cambio = true;
       } else {
@@ -1034,11 +1198,11 @@ function trasladarManual(nombre, montoOpcional) {
   if (monto <= 0) return false;
   const claveSig = siguienteClave(E.clave);
   const perSig = getPeriodo(E.personas[nom], claveSig);
-  perSig.items.push({ dia:'lunes', producto:'Saldo trasladado', precio: Math.round(monto*100)/100, qty:1, fecha:new Date().toISOString(), traslado:true });
+  perSig.items.push({ dia:'lunes', producto:'Saldo trasladado', precio: Math.round(monto*100)/100, qty:1, fecha:new Date().toISOString(), traslado:true, autor: E.usuarioActual });
   // Se registra un abono "virtual" en el periodo actual por el monto trasladado, para no duplicar el saldo
-  per.abonos.push({ monto, fecha: new Date().toISOString(), esTraslado:true });
+  per.abonos.push({ monto, fecha: new Date().toISOString(), esTraslado:true, autor: E.usuarioActual });
   per.trasladado = true;
-  E.historial.push(`Traslado: ${nom} $${monto} → semana siguiente`);
+  E.historial.push(`[${E.usuarioActual}] Traslado: ${nom} $${monto} → semana siguiente`);
   return true;
 }
 
@@ -1070,6 +1234,7 @@ function buildSystem() {
   return `Eres el asistente de "FiadoApp", sistema de crédito semanal de una tienda mexicana. TODOS los precios son en PESOS MEXICANOS (MXN), nunca dólares.
 Hablas español mexicano informal y conciso. Eres rápido, práctico y amigable.
 Fecha real de hoy: ${hoyReal} (${diaHoy()}). Periodo mostrado actualmente en la app: ${E.semana}.
+La persona usando la app ahora mismo es: ${cap(E.usuarioActual||'desconocido')}.
 
 ESTADO ACTUAL DE LA SEMANA MOSTRADA:
 ${JSON.stringify(personasResumen, null, 2)}
@@ -1227,8 +1392,8 @@ function aplicarAgregar(a, precioForzado, nombreForzado) {
   const per = getPeriodo(E.personas[nom], E.clave);
   const dia = a.dia || diaHoy();
   const ahora = new Date();
-  per.items.push({ dia, producto: nombreProd, precio: precioNum, qty: Number(a.qty)||1, fecha: ahora.toISOString() });
-  E.historial.push(`+${nombreProd} $${precioNum} → ${nom} [${dia} ${formatHora(ahora)}]`);
+  per.items.push({ dia, producto: nombreProd, precio: precioNum, qty: Number(a.qty)||1, fecha: ahora.toISOString(), autor: E.usuarioActual });
+  E.historial.push(`[${E.usuarioActual}] +${nombreProd} $${precioNum} → ${nom} [${dia} ${formatHora(ahora)}]`);
 }
 
 // Acciones destructivas ejecutadas SOLO tras confirmar contraseña
@@ -1240,21 +1405,21 @@ function ejecutarDirecta(acciones) {
       if (!nom || !E.personas[nom]) return;
       const per = getPeriodo(E.personas[nom], E.clave);
       const idx = a.idx !== undefined ? a.idx : per.items.length - 1;
-      if (per.items[idx]) { const el = per.items.splice(idx,1)[0]; E.historial.push(`Eliminado: ${el.producto} de ${nom}`); }
+      if (per.items[idx]) { const el = per.items.splice(idx,1)[0]; E.historial.push(`[${E.usuarioActual}] Eliminado: ${el.producto} de ${nom}`); }
     } else if (tipo === 'eliminar_persona') {
       const nom = a.persona ? norm(a.persona) : null;
       if (!nom || !E.personas[nom]) return;
       delete E.personas[nom];
-      E.historial.push(`Registros eliminados por completo: ${nom}`);
+      E.historial.push(`[${E.usuarioActual}] Registros eliminados por completo: ${nom}`);
     } else if (tipo === 'eliminar_todo') {
       E.personas = {};
-      E.historial.push('TODOS los registros de todos los clientes fueron eliminados');
+      E.historial.push(`[${E.usuarioActual}] TODOS los registros de todos los clientes fueron eliminados`);
     } else if (tipo === 'eliminar_producto_catalogo') {
       delete E.catalogoProductos[norm(a.producto)];
-      E.historial.push(`Producto eliminado del catálogo: ${a.producto}`);
+      E.historial.push(`[${E.usuarioActual}] Producto eliminado del catálogo: ${a.producto}`);
     } else if (tipo === 'eliminar_cliente_catalogo') {
       delete E.catalogoClientes[norm(a.persona)];
-      E.historial.push(`Cliente eliminado del catálogo: ${a.persona}`);
+      E.historial.push(`[${E.usuarioActual}] Cliente eliminado del catálogo: ${a.persona}`);
     } else if (tipo === 'fusionar_producto') {
       const nlowElim = norm(a.eliminar);
       const nlowMant = norm(a.mantener);
@@ -1266,7 +1431,7 @@ function ejecutarDirecta(acciones) {
           (per.items||[]).forEach(it => { if (norm(it.producto) === nlowElim) it.producto = nombreFinal; });
         });
       });
-      E.historial.push(`Productos fusionados: "${a.eliminar}" → "${nombreFinal}"`);
+      E.historial.push(`[${E.usuarioActual}] Productos fusionados: "${a.eliminar}" → "${nombreFinal}"`);
     }
   });
 }
@@ -1301,7 +1466,7 @@ function ejecutar(acciones) {
         const f = new Date(a.periodo_fecha + 'T00:00:00');
         if (!isNaN(f)) setSemana(f);
       }
-      E.historial.push(`Periodo cambiado a: ${E.semana}`);
+      E.historial.push(`[${E.usuarioActual}] Periodo cambiado a: ${E.semana}`);
       continue;
     }
 
@@ -1355,18 +1520,18 @@ function ejecutar(acciones) {
 
     if (tipo === 'precio') {
       const idx = a.idx !== undefined ? a.idx : buscarItem(per, a.producto);
-      if (idx >= 0) { const v = per.items[idx].precio; per.items[idx].precio = Number(a.precio); E.historial.push(`Precio ${per.items[idx].producto}/${nom}: $${v}→$${a.precio}`); }
+      if (idx >= 0) { const v = per.items[idx].precio; per.items[idx].precio = Number(a.precio); E.historial.push(`[${E.usuarioActual}] Precio ${per.items[idx].producto}/${nom}: $${v}→$${a.precio}`); }
     } else if (tipo === 'pago') {
-      per.pagado = true; E.historial.push(`✓ ${nom} PAGÓ`);
+      per.pagado = true; E.historial.push(`[${E.usuarioActual}] ✓ ${nom} PAGÓ`);
     } else if (tipo === 'pago_parcial') {
       const monto = Number(a.monto);
       if (monto > 0) {
-        per.abonos.push({ monto, fecha: new Date().toISOString() });
+        per.abonos.push({ monto, fecha: new Date().toISOString(), autor: E.usuarioActual });
         if (saldoPeriodo(per) <= 0.5) per.pagado = true;
-        E.historial.push(`Abono de $${monto} → ${nom}`);
+        E.historial.push(`[${E.usuarioActual}] Abono de $${monto} → ${nom}`);
       }
     } else if (tipo === 'nopago') {
-      per.pagado = false; E.historial.push(`✗ ${nom} no pagó`);
+      per.pagado = false; E.historial.push(`[${E.usuarioActual}] ✗ ${nom} no pagó`);
     } else if (tipo === 'trasladar') {
       const ok = trasladarManual(nom, Number(a.monto) || null);
       if (!ok) resultado.mensajeExtra = 'No hay saldo pendiente para trasladar.';
@@ -1377,7 +1542,8 @@ function ejecutar(acciones) {
         if (a.producto) per.items[idx].producto = a.producto;
         if (a.precio) per.items[idx].precio = Number(a.precio);
         if (a.qty) per.items[idx].qty = Number(a.qty);
-        E.historial.push(`Corregido ${nom}: ${old.producto}→${per.items[idx].producto}`);
+        per.items[idx].autor = E.usuarioActual;
+        E.historial.push(`[${E.usuarioActual}] Corregido ${nom}: ${old.producto}→${per.items[idx].producto}`);
       }
     }
   }
@@ -1467,7 +1633,7 @@ function addMsg(who, texto, tabla) {
 
   const av = document.createElement('div');
   av.className = 'msg-avatar';
-  av.textContent = who === 'ia' ? 'IA' : 'Tú';
+  av.textContent = who === 'ia' ? 'IA' : (E.usuarioActual ? cap(E.usuarioActual)[0] : 'Tú');
 
   const bubble = document.createElement('div');
   bubble.className = 'msg-bubble';
@@ -1591,7 +1757,7 @@ function renderCuentas() {
               <div class="item-line">
                 <div class="item-info">
                   <span class="item-nombre${it.traslado ? ' traslado' : ''}">${it.qty > 1 ? it.qty+'× ' : ''}${it.producto}</span>
-                  ${it.fecha ? `<span class="item-hora">${formatHora(it.fecha)}</span>` : ''}
+                  <span class="item-hora">${it.fecha ? formatHora(it.fecha) : ''}${it.autor ? ` · <span class="item-autor">${cap(it.autor)}</span>` : ''}</span>
                 </div>
                 <span class="item-precio">$${(it.precio*(it.qty||1)).toFixed(0)}</span>
               </div>
@@ -1601,7 +1767,7 @@ function renderCuentas() {
         ${(per.abonos||[]).length ? `
           <div class="abono-bloque">
             <div class="dia-label">Abonos</div>
-            ${per.abonos.map(ab => `<div class="abono-line"><span>${ab.esTraslado?'Trasladado':'Abono'} · ${formatFechaCorta(ab.fecha)}</span><span>-$${ab.monto.toFixed(0)}</span></div>`).join('')}
+            ${per.abonos.map(ab => `<div class="abono-line"><span>${ab.esTraslado?'Trasladado':'Abono'} · ${formatFechaCorta(ab.fecha)}${ab.autor?' · '+cap(ab.autor):''}</span><span>-$${ab.monto.toFixed(0)}</span></div>`).join('')}
           </div>
         ` : ''}
       </div>
@@ -1649,7 +1815,7 @@ function eliminarProductoUI(nlow) {
   const pass = window.prompt('Confirma con la contraseña para eliminar este producto del catálogo:');
   if (pass && norm(pass).includes(PASSWORD_NORM)) {
     delete E.catalogoProductos[nlow];
-    E.historial.push(`Producto eliminado del catálogo: ${nlow}`);
+    E.historial.push(`[${E.usuarioActual}] Producto eliminado del catálogo: ${nlow}`);
     guardarEstado();
     renderCatalogo();
     toast('Producto eliminado del catálogo');
@@ -1662,7 +1828,7 @@ function eliminarClienteUI(nlow) {
   const pass = window.prompt('Confirma con la contraseña para eliminar este cliente del catálogo:');
   if (pass && norm(pass).includes(PASSWORD_NORM)) {
     delete E.catalogoClientes[nlow];
-    E.historial.push(`Cliente eliminado del catálogo: ${nlow}`);
+    E.historial.push(`[${E.usuarioActual}] Cliente eliminado del catálogo: ${nlow}`);
     guardarEstado();
     renderCatalogo();
     toast('Cliente eliminado del catálogo');
@@ -1967,9 +2133,9 @@ function generarPDF() {
       </div>
       <table>${DIAS.filter(d=>pd[d]).map(dia=>`
         <tr class="dia-row"><td colspan="2">${dia}</td></tr>
-        ${pd[dia].map(i=>`<tr><td>${i.qty>1?i.qty+'× ':''}${i.producto}${i.fecha?` <span style="color:#9CA3AF;font-size:10px">(${formatHora(i.fecha)})</span>`:''}</td><td>$${(i.precio*(i.qty||1)).toFixed(0)}</td></tr>`).join('')}
+        ${pd[dia].map(i=>`<tr><td>${i.qty>1?i.qty+'× ':''}${i.producto}${i.fecha?` <span style="color:#9CA3AF;font-size:10px">(${formatHora(i.fecha)}${i.autor?' · '+cap(i.autor):''})</span>`:''}</td><td>$${(i.precio*(i.qty||1)).toFixed(0)}</td></tr>`).join('')}
       `).join('')}
-      ${(per.abonos||[]).map(ab=>`<tr class="abono-row"><td>${ab.esTraslado?'Trasladado':'Abono'} (${formatFechaCorta(ab.fecha)})</td><td>-$${ab.monto.toFixed(0)}</td></tr>`).join('')}
+      ${(per.abonos||[]).map(ab=>`<tr class="abono-row"><td>${ab.esTraslado?'Trasladado':'Abono'} (${formatFechaCorta(ab.fecha)}${ab.autor?' · '+cap(ab.autor):''})</td><td>-$${ab.monto.toFixed(0)}</td></tr>`).join('')}
       <tr class="total-row"><td>Saldo ${cap(nom)}</td><td>$${(pagado?0:saldo).toFixed(0)}</td></tr>
       </table></div>`;
   }).join('')}
@@ -1988,10 +2154,307 @@ function generarPDF() {
   w.document.close();
 }
 
+// ════════════ IDENTIDAD DEL DISPOSITIVO (Petra / Eli / Miguel) ════════════
+const USUARIOS_VALIDOS = ['petra', 'eli', 'miguel'];
+const USUARIO_STORAGE_KEY = 'fiadoapp_usuario_dispositivo';
+
+E.usuarioActual = null;
+
+function iniciales(nombre) { return cap(nombre).charAt(0); }
+
+function cargarUsuarioDispositivo() {
+  try { return localStorage.getItem(USUARIO_STORAGE_KEY); } catch(e) { return null; }
+}
+function guardarUsuarioDispositivo(nombre) {
+  try { localStorage.setItem(USUARIO_STORAGE_KEY, nombre); } catch(e) {}
+}
+
+function pintarChipUsuario() {
+  const nom = E.usuarioActual;
+  document.getElementById('user-chip-name').textContent = nom ? cap(nom) : '—';
+  document.getElementById('user-avatar').textContent = nom ? iniciales(nom) : '?';
+}
+
+function establecerUsuario(nombreValido, { silencioso } = {}) {
+  E.usuarioActual = nombreValido;
+  guardarUsuarioDispositivo(nombreValido);
+  pintarChipUsuario();
+  cerrarIdentidadOverlay();
+  if (!silencioso) {
+    const saludo = `¡Hola ${cap(nombreValido)}! ${saludoPorHora()}.`;
+    addMsg('ia', saludo);
+    setTimeout(() => hablar(saludo), 400);
+  }
+}
+
+function abrirIdentidadOverlay(modo) {
+  // modo: 'inicial' (bloqueante, primera vez en este dispositivo) | 'cambiar' (libre)
+  const overlay = document.getElementById('identidad-overlay');
+  const titulo = document.getElementById('identidad-titulo');
+  const sub = document.getElementById('identidad-sub');
+  const opciones = document.getElementById('identidad-opciones');
+  document.getElementById('identidad-error').classList.remove('show');
+
+  titulo.textContent = modo === 'inicial' ? '¿Quién eres?' : 'Cambiar de usuario';
+  sub.textContent = modo === 'inicial'
+    ? 'Este celular quedará asignado a esta persona. Toca tu nombre o dilo por el micrófono.'
+    : 'Toca el nombre de quien va a usar la app ahora, o dilo por el micrófono.';
+
+  opciones.innerHTML = USUARIOS_VALIDOS.map(u => `
+    <button type="button" class="identidad-opcion" data-u="${u}">
+      <span class="user-avatar">${iniciales(u)}</span> ${cap(u)}
+    </button>
+  `).join('');
+  opciones.querySelectorAll('[data-u]').forEach(btn => {
+    btn.addEventListener('click', () => establecerUsuario(btn.getAttribute('data-u')));
+  });
+
+  overlay.dataset.modo = modo;
+  overlay.classList.add('show');
+}
+
+function cerrarIdentidadOverlay() {
+  document.getElementById('identidad-overlay').classList.remove('show');
+}
+
+function matchUsuarioValido(textoLibre) {
+  const n = norm(textoLibre);
+  let mejor = null;
+  USUARIOS_VALIDOS.forEach(u => {
+    const s = similitud(u, n.split(/\s+/).pop() || n) ;
+    const contiene = n.includes(u);
+    const score = contiene ? 1 : s;
+    if (!mejor || score > mejor.score) mejor = { u, score };
+  });
+  if (mejor && mejor.score >= 0.72) return mejor.u;
+  return null;
+}
+
+// Mic dedicado del overlay de identidad (reutiliza Whisper/Groq)
+let identidadMediaRecorder = null;
+let identidadStream = null;
+let identidadChunks = [];
+let identidadGrabando = false;
+
+async function toggleMicIdentidad() {
+  if (identidadGrabando) { detenerGrabacionIdentidad(); return; }
+  if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    toast('El micrófono requiere HTTPS y un navegador compatible.');
+    return;
+  }
+  try {
+    identidadStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    toast('No se pudo acceder al micrófono.');
+    return;
+  }
+  const mimeType = mimeSoportado();
+  identidadChunks = [];
+  identidadMediaRecorder = mimeType ? new MediaRecorder(identidadStream, { mimeType }) : new MediaRecorder(identidadStream);
+  identidadMediaRecorder.ondataavailable = e => { if (e.data.size > 0) identidadChunks.push(e.data); };
+  identidadMediaRecorder.onstop = procesarAudioIdentidad;
+  identidadMediaRecorder.start();
+  identidadGrabando = true;
+  document.getElementById('identidad-mic-btn').classList.add('grabando');
+  document.getElementById('identidad-mic-txt').textContent = '🔴 Grabando... toca de nuevo';
+}
+
+function detenerGrabacionIdentidad() {
+  if (identidadMediaRecorder && identidadMediaRecorder.state !== 'inactive') identidadMediaRecorder.stop();
+  identidadGrabando = false;
+  document.getElementById('identidad-mic-btn').classList.remove('grabando');
+}
+
+async function procesarAudioIdentidad() {
+  identidadStream?.getTracks().forEach(t => t.stop());
+  const txtEl = document.getElementById('identidad-mic-txt');
+  txtEl.textContent = '⏳ Escuchando...';
+  const blob = new Blob(identidadChunks, { type: identidadMediaRecorder.mimeType || 'audio/webm' });
+  identidadChunks = [];
+  if (blob.size < 800) { txtEl.textContent = 'Toca para hablar'; toast('No se detectó audio'); return; }
+  try {
+    const texto = (await groqTranscribe(blob)).trim();
+    txtEl.textContent = 'Toca para hablar';
+    const u = matchUsuarioValido(texto);
+    if (u) {
+      establecerUsuario(u);
+    } else {
+      const err = document.getElementById('identidad-error');
+      err.classList.add('show');
+      hablar('No te reconocí. Solo puede ser Petra, Eli o Miguel.');
+    }
+  } catch (e) {
+    txtEl.textContent = 'Toca para hablar';
+    toast('Error al transcribir, intenta de nuevo');
+  }
+}
+
+function inicializarIdentidad() {
+  document.getElementById('identidad-mic-btn').addEventListener('click', toggleMicIdentidad);
+  document.getElementById('user-chip').addEventListener('click', () => abrirIdentidadOverlay('cambiar'));
+
+  const guardado = cargarUsuarioDispositivo();
+  if (guardado && USUARIOS_VALIDOS.includes(guardado)) {
+    E.usuarioActual = guardado;
+    pintarChipUsuario();
+  } else {
+    pintarChipUsuario();
+    abrirIdentidadOverlay('inicial');
+  }
+}
+
+// ════════════ RESPALDO EN GOOGLE DRIVE ════════════
+// ⚠️ Pega aquí tu Client ID de Google Cloud (tipo "Aplicación web"), y agrega
+// el dominio donde publiques esta app (ej. https://tu-app.vercel.app) en
+// "Authorized JavaScript origins" dentro de Google Cloud Console.
+const GOOGLE_CLIENT_ID = 'PON_AQUI_TU_CLIENT_ID.apps.googleusercontent.com';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const DRIVE_FILENAME = 'fiadoapp_backup.json';
+
+let driveTokenClient = null;
+let driveAccessToken = null;
+let driveFileId = null;
+let driveBackupTimer = null;
+let driveConectando = false;
+
+function driveConfigurado() {
+  return !!GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('PON_AQUI');
+}
+
+function actualizarDriveStatus(estado, texto) {
+  const dot = document.getElementById('drive-dot');
+  const txt = document.getElementById('drive-status-txt');
+  dot.classList.remove('ok','err');
+  if (estado === 'ok') dot.classList.add('ok');
+  if (estado === 'err') dot.classList.add('err');
+  txt.textContent = texto;
+}
+
+function initGoogleIdentity() {
+  if (!driveConfigurado()) {
+    actualizarDriveStatus('err', 'Sin config.');
+    document.getElementById('drive-info').textContent = 'Falta poner tu Client ID de Google Cloud en el código (variable GOOGLE_CLIENT_ID) para activar el respaldo.';
+    return;
+  }
+  const intentar = () => {
+    if (!window.google?.accounts?.oauth2) { setTimeout(intentar, 300); return; }
+    driveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: DRIVE_SCOPE,
+      callback: (resp) => {
+        driveConectando = false;
+        if (resp.error) { actualizarDriveStatus('err', 'Error'); toast('No se pudo conectar Drive'); return; }
+        driveAccessToken = resp.access_token;
+        actualizarDriveStatus('ok', 'Conectado');
+        document.getElementById('drive-info').textContent = 'Conectado a Google Drive. Los cambios se respaldan automáticamente.';
+        backupADrive(true);
+      }
+    });
+    actualizarDriveStatus(null, 'Drive');
+  };
+  intentar();
+}
+
+function conectarDrive() {
+  if (!driveConfigurado()) { toast('Falta configurar el Client ID de Google en el código'); return; }
+  if (!driveTokenClient) { toast('Google todavía está cargando, intenta en un segundo'); return; }
+  driveConectando = true;
+  driveTokenClient.requestAccessToken({ prompt: driveAccessToken ? '' : 'consent' });
+}
+
+async function driveApi(url, options = {}) {
+  if (!driveAccessToken) throw new Error('sin token');
+  const res = await fetch(url, {
+    ...options,
+    headers: { ...(options.headers||{}), 'Authorization': `Bearer ${driveAccessToken}` }
+  });
+  if (res.status === 401) { driveAccessToken = null; actualizarDriveStatus('err','Reconectar'); throw new Error('token expirado'); }
+  return res;
+}
+
+async function buscarArchivoDrive() {
+  const q = encodeURIComponent(`name='${DRIVE_FILENAME}' and trashed=false`);
+  const res = await driveApi(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,name,modifiedTime)`);
+  const data = await res.json();
+  if (data.files?.length) { driveFileId = data.files[0].id; return data.files[0]; }
+  return null;
+}
+
+function programarBackupDrive() {
+  if (!driveAccessToken) return; // no conectado, no hay nada que hacer
+  clearTimeout(driveBackupTimer);
+  driveBackupTimer = setTimeout(() => backupADrive(), 2500);
+}
+
+async function backupADrive(silencioso) {
+  if (!driveAccessToken) { if (!silencioso) toast('Primero conecta Google Drive'); return; }
+  try {
+    if (!driveFileId) await buscarArchivoDrive();
+    const payload = JSON.stringify({
+      personas: E.personas,
+      catalogoProductos: E.catalogoProductos,
+      catalogoClientes: E.catalogoClientes,
+      historial: E.historial,
+      semanaLunes: E.semanaLunes.toISOString(),
+      _respaldo: new Date().toISOString()
+    });
+    const metadata = { name: DRIVE_FILENAME, mimeType: 'application/json' };
+    const boundary = 'fiadoapp_boundary';
+    const body =
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+      `--${boundary}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n--${boundary}--`;
+
+    const url = driveFileId
+      ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
+      : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+
+    const res = await driveApi(url, {
+      method: driveFileId ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
+      body
+    });
+    const data = await res.json();
+    if (data.id) driveFileId = data.id;
+    actualizarDriveStatus('ok', 'Respaldado');
+    document.getElementById('drive-info').textContent = `Último respaldo: ${new Date().toLocaleString('es-MX')}`;
+    if (!silencioso) toast('☁️ Respaldo guardado en Drive');
+  } catch (e) {
+    console.warn('Backup Drive falló:', e);
+    actualizarDriveStatus('err', 'Error');
+    if (!silencioso) toast('No se pudo respaldar en Drive');
+  }
+}
+
+async function restaurarDesdeDrive() {
+  if (!driveAccessToken) { toast('Primero conecta Google Drive'); return; }
+  if (!window.confirm('Esto reemplazará los datos guardados en este celular con los del respaldo de Drive. ¿Continuar?')) return;
+  try {
+    const archivo = await buscarArchivoDrive();
+    if (!archivo) { toast('No hay respaldo en Drive todavía'); return; }
+    const res = await driveApi(`https://www.googleapis.com/drive/v3/files/${archivo.id}?alt=media`);
+    const data = await res.json();
+    if (data.personas) E.personas = data.personas;
+    if (data.catalogoProductos) E.catalogoProductos = data.catalogoProductos;
+    if (data.catalogoClientes) E.catalogoClientes = data.catalogoClientes;
+    if (Array.isArray(data.historial)) E.historial = data.historial;
+    if (data.semanaLunes) { const f = new Date(data.semanaLunes); if (!isNaN(f)) E.semanaLunes = f; }
+    document.getElementById('semana-chip').textContent = E.semana;
+    renderCuentas();
+    renderCatalogo();
+    toast('✅ Datos restaurados desde Drive');
+  } catch (e) {
+    console.warn(e);
+    toast('No se pudo restaurar desde Drive');
+  }
+}
+
 // ════════════ EVENTOS ════════════
 document.getElementById('btn-send').addEventListener('click', enviar);
 document.getElementById('btn-mic').addEventListener('click', toggleMic);
 document.getElementById('btn-pdf').addEventListener('click', generarPDF);
+document.getElementById('btn-drive-conectar').addEventListener('click', conectarDrive);
+document.getElementById('btn-drive-backup').addEventListener('click', () => backupADrive());
+document.getElementById('btn-drive-restaurar').addEventListener('click', restaurarDesdeDrive);
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -2034,12 +2497,12 @@ speechSynthesis?.addEventListener?.('voiceschanged', () => speechSynthesis.getVo
 
 // Init
 document.getElementById('semana-chip').textContent = E.semana;
+inicializarIdentidad();
+initGoogleIdentity();
 renderCuentas();
 renderCatalogo();
 
 // ════════════ SALUDO PERSONALIZADO (corto) ════════════
-const NOMBRE_DUENA = 'Petra';
-
 function saludoPorHora() {
   const h = new Date().getHours();
   if (h >= 5 && h < 12) return 'Buenos días';
@@ -2048,7 +2511,8 @@ function saludoPorHora() {
 }
 
 function mostrarSaludo() {
-  const msg = `¡Hola ${NOMBRE_DUENA}! ${saludoPorHora()}.`;
+  if (!E.usuarioActual) return; // espera a que se identifique primero
+  const msg = `¡Hola ${cap(E.usuarioActual)}! ${saludoPorHora()}.`;
   addMsg('ia', msg);
   setTimeout(() => hablar(msg), 600);
 }
@@ -2067,5 +2531,6 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 </script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
