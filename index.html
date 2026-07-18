@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Centralsoluciones.com — Directorio profesional de servicios</title>
+<title>Servicios.com — Directorio profesional de servicios</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -198,6 +198,41 @@
   .form-success p{font-size:13.5px;color:var(--muted);max-width:280px;}
   .form-success button{margin-top:6px;background:none;border:none;color:var(--blue-700);font-weight:600;font-size:13.5px;text-decoration:underline;}
 
+  /* ---------- VISOR DE SERVICIO EXTERNO ---------- */
+  #serviceViewer{
+    position:fixed;inset:0;z-index:200;
+    background:rgba(14,44,92,0.55);backdrop-filter:blur(4px);
+    display:flex;flex-direction:column;
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  #serviceViewer.open{opacity:1;pointer-events:auto;}
+  .sv-bar{
+    display:flex;align-items:center;gap:14px;
+    background:var(--blue-900);color:#fff;
+    padding:12px 20px;min-height:56px;flex:none;
+  }
+  #svBack{
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,0.12);border:none;border-radius:8px;
+    color:#fff;font-family:inherit;font-weight:700;font-size:14px;
+    padding:8px 14px;cursor:pointer;transition:background .15s;
+  }
+  #svBack:hover{background:rgba(255,255,255,0.22);}
+  #svBack svg{width:16px;height:16px;stroke:#fff;flex:none;}
+  #svTitle{font-family:'Manrope',sans-serif;font-weight:800;font-size:16px;flex:1;}
+  .sv-domain{font-size:12px;opacity:.6;font-family:'Inter',sans-serif;}
+  #svFrame{
+    flex:1;width:100%;border:none;background:#fff;
+    transform:translateY(6px);
+    transition:transform .3s ease;
+  }
+  #serviceViewer.open #svFrame{transform:translateY(0);}
+
+  /* Sección de servicios externos */
+  #servicios-ext .cat-tile.service-ext-btn .cat-icon-wrap{background:rgba(255,221,0,0.15);}
+  #servicios-ext .cat-tile.service-ext-btn .cat-icon-wrap svg{stroke:#c8900a;}
+
   /* ---------- FOOTER ---------- */
   footer{background:var(--white);border-top:1px solid var(--border);padding:48px 0 24px;}
   .footer-grid{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:36px;padding-bottom:32px;}
@@ -216,7 +251,7 @@
   <div class="nav-inner">
     <a href="#top" class="brand">
       <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg></span>
-      <span class="brand-word">Central<span> Soluciones</span></span>
+      <span class="brand-word">Servicios<span>.com</span></span>
     </a>
     <div class="nav-links">
       <a href="#categorias">Categorías</a>
@@ -253,6 +288,34 @@
     </div>
   </div>
 </header>
+
+<!-- VISOR IFRAME (overlay) -->
+<div id="serviceViewer" role="dialog" aria-modal="true" aria-labelledby="svTitle">
+  <div class="sv-bar">
+    <button id="svBack" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      Volver
+    </button>
+    <span id="svTitle"></span>
+    <span class="sv-domain" id="svDomain"></span>
+  </div>
+  <iframe id="svFrame" title="Servicio externo" allowfullscreen></iframe>
+</div>
+
+<!-- SERVICIOS DE PAGO -->
+<section class="section" id="servicios-ext">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2>Servicios de pago</h2>
+        <p>Realiza trámites y pagos directamente desde aquí, sin abrir una nueva pestaña.</p>
+      </div>
+    </div>
+    <div class="cat-grid" id="serviceGrid"></div>
+  </div>
+</section>
 
 <section class="section" id="categorias">
   <div class="wrap">
@@ -421,7 +484,7 @@
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <span>© Central Soluciones — Directorio profesional de servicios</span>
+      <span>© Servicios.com — Directorio profesional de servicios</span>
       <span>Directorio actualizado en tiempo real</span>
     </div>
   </div>
@@ -577,6 +640,57 @@
     label.classList.add('checked');
   });
 
+  // ── VISOR DE SERVICIO EXTERNO ──────────────────────────────────────
+  const servicios = [
+    {
+      id: 'cfe',
+      nombre: 'CFE',
+      descripcion: 'Paga tu recibo de luz y consulta tu cuenta',
+      url: 'https://norvan.org',
+      icon: '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'   // rayo
+    }
+    // Agrega más servicios aquí con el mismo formato
+  ];
+
+  const serviceGrid = document.getElementById('serviceGrid');
+  if (serviceGrid) {
+    servicios.forEach(s => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cat-tile service-ext-btn';
+      btn.dataset.url = s.url;
+      btn.dataset.nombre = s.nombre;
+      btn.innerHTML = `
+        <div class="cat-icon-wrap">${iconSvg(s.icon)}</div>
+        <h3>${s.nombre}</h3>
+        <span>${s.descripcion}</span>`;
+      btn.addEventListener('click', () => openServiceViewer(s));
+      serviceGrid.appendChild(btn);
+    });
+  }
+
+  function openServiceViewer(s) {
+    document.getElementById('svTitle').textContent = s.nombre;
+    document.getElementById('svFrame').src = s.url;
+    const overlay = document.getElementById('serviceViewer');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  document.getElementById('svBack').addEventListener('click', closeServiceViewer);
+  document.getElementById('serviceViewer').addEventListener('click', function(e) {
+    if (e.target === this) closeServiceViewer();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeServiceViewer(); });
+
+  function closeServiceViewer() {
+    const overlay = document.getElementById('serviceViewer');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    // Limpiar iframe al cerrar para liberar memoria
+    setTimeout(() => { document.getElementById('svFrame').src = ''; }, 300);
+  }
+
   // Forms
   function closeSuccess(successId, formId){
     document.getElementById(successId).classList.remove('show');
@@ -597,3 +711,4 @@
 
 </body>
 </html>
+
