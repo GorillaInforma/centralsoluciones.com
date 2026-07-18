@@ -2,7 +2,7 @@
   "name": "FiadoApp",
   "short_name": "FiadoApp",
   "description": "Control semanal de crédito",
-  "start_url": "./fiadoapp.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#FFFFFF",
@@ -23,3 +23,4 @@
     }
   ]
 }
+
