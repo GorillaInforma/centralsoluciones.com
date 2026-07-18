@@ -1084,7 +1084,7 @@ Responde SOLO con JSON sin markdown ni texto extra:
 {
   "acciones": [
     {
-      "tipo": "agregar"|"precio"|"pago"|"pago_parcial"|"nopago"|"eliminar"|"corregir"|"periodo"|"trasladar"|"registrar_producto"|"registrar_cliente"|"eliminar_producto_catalogo"|"eliminar_cliente_catalogo"|"fusionar_producto"|"noop",
+      "tipo": "agregar"|"precio"|"pago"|"pago_parcial"|"nopago"|"eliminar"|"eliminar_persona"|"eliminar_todo"|"corregir"|"periodo"|"trasladar"|"registrar_producto"|"registrar_cliente"|"eliminar_producto_catalogo"|"eliminar_cliente_catalogo"|"fusionar_producto"|"noop",
       "persona": "nombre_minusculas",
       "dia": "lunes|...|domingo",
       "producto": "...",
@@ -1111,7 +1111,10 @@ REGLAS DE INTERPRETACIÓN:
 - "ya pagó / pagó todo / liquidó" → pago
 - "abonó / dio a cuenta / pagó una parte / pagó $X de lo que debía / dejó $X" → pago_parcial con "monto"
 - "no pagó / quedó de pagar" → nopago
-- "bórralo / elimínalo / quítaselo" → eliminar (el sistema pedirá contraseña automáticamente, tú solo confirma qué se eliminaría en tu respuesta, NO pidas tú la contraseña)
+- "bórralo / elimínalo / quítaselo" (un ítem específico) → eliminar
+- "borra a Fulano / elimina todos los registros de Fulano / quita a Fulano de la lista" → eliminar_persona {persona} — genera UNA acción eliminar_persona POR CADA nombre mencionado (si dicen "borra a Joaquín, Rosa y Juan" son 3 acciones eliminar_persona, una por persona)
+- "borra todo / elimina todos los registros / resetea todo / borra a todos" → eliminar_todo (sin persona)
+- Para CUALQUIER acción destructiva (eliminar, eliminar_persona, eliminar_todo, eliminar_producto_catalogo, eliminar_cliente_catalogo, fusionar_producto): el sistema pedirá confirmación con contraseña automáticamente. En tu "respuesta" SOLO confirma qué se va a eliminar (ej: "Voy a eliminar a Joaquín, Rosa y Juan."). NUNCA escribas ni menciones la contraseña ni pidas tú la confirmación — eso lo hace el sistema aparte.
 - "pásalo / trasládalo / que lo pague la próxima semana / anótaselo para después" → trasladar (con "monto" si especifica cuánto, si no se traslada todo el saldo pendiente)
 - "registra el producto X a $Y" → registrar_producto
 - "registra a Y como cliente" → registrar_cliente
@@ -1131,7 +1134,10 @@ REGLA DE PRECIOS Y CATÁLOGO:
 - Si el producto ya aparece en el catálogo de productos conocidos y el usuario NO da precio, genera la acción "agregar" SIN precio (el sistema completará el precio automáticamente desde el catálogo). No preguntes el precio en ese caso.
 - Si el producto NO está en el catálogo y el usuario no da precio, NO generes ninguna acción "agregar". Deja "acciones": [] y en "respuesta" pregunta el precio (ej: "¿Cuánto cuesta la fresca? En cuanto me digas, se la agrego a Chuy."). Nunca digas "apuntado" o "listo" si todavía no hay precio.
 - Cuando el usuario responda con el precio, genera UNA SOLA acción "agregar" con ese precio, usando el contexto de los mensajes anteriores para persona y producto.
-- Siempre responde los montos en pesos, ejemplo: "$50" (el sistema agrega la palabra "pesos" al hablarlo, tú NO escribas la palabra "pesos" después del signo $ para evitar redundancia).`;
+- Siempre responde los montos en pesos, ejemplo: "$50" (el sistema agrega la palabra "pesos" al hablarlo, tú NO escribas la palabra "pesos" después del signo $ para evitar redundancia).
+
+REGLA DE PRODUCTOS AMBIGUOS O EXTRAÑOS (importante, sobre todo por errores de transcripción de voz):
+- Si el nombre de producto que dice el usuario no se parece a ningún producto conocido del catálogo, ni suena a un producto real de tienda (palabras sueltas raras, algo genérico como "eso", "una cosa", "unas ahoritas", o algo que parece mal transcrito), NO generes la acción "agregar" ni preguntes solo el precio. En su lugar, dale "acciones": [] y en "respuesta" pregunta específicamente a qué producto se refiere, sugiriendo 1-2 opciones parecidas del catálogo si las hay (ej: "No reconozco 'ahoritas' como producto, ¿te refieres a alguno del catálogo o es algo nuevo? Dime el nombre correcto."). Solo procede a agregar cuando el nombre del producto quede claro.`;
 }
 
 // ════════════ GROQ (5 keys con rotación automática) ════════════
@@ -1235,6 +1241,14 @@ function ejecutarDirecta(acciones) {
       const per = getPeriodo(E.personas[nom], E.clave);
       const idx = a.idx !== undefined ? a.idx : per.items.length - 1;
       if (per.items[idx]) { const el = per.items.splice(idx,1)[0]; E.historial.push(`Eliminado: ${el.producto} de ${nom}`); }
+    } else if (tipo === 'eliminar_persona') {
+      const nom = a.persona ? norm(a.persona) : null;
+      if (!nom || !E.personas[nom]) return;
+      delete E.personas[nom];
+      E.historial.push(`Registros eliminados por completo: ${nom}`);
+    } else if (tipo === 'eliminar_todo') {
+      E.personas = {};
+      E.historial.push('TODOS los registros de todos los clientes fueron eliminados');
     } else if (tipo === 'eliminar_producto_catalogo') {
       delete E.catalogoProductos[norm(a.producto)];
       E.historial.push(`Producto eliminado del catálogo: ${a.producto}`);
@@ -1257,9 +1271,24 @@ function ejecutarDirecta(acciones) {
   });
 }
 
+function describirAccionDestructiva(a) {
+  switch (a.tipo) {
+    case 'eliminar': return `el último ítem${a.producto ? ` ("${a.producto}")` : ''} de ${cap(a.persona||'')}`;
+    case 'eliminar_persona': return `todos los registros de ${cap(a.persona||'')}`;
+    case 'eliminar_todo': return 'TODOS los registros de todos los clientes';
+    case 'eliminar_producto_catalogo': return `el producto "${cap(a.producto||'')}" del catálogo`;
+    case 'eliminar_cliente_catalogo': return `el cliente "${cap(a.persona||'')}" del catálogo`;
+    case 'fusionar_producto': return `fusionar "${cap(a.eliminar||'')}" dentro de "${cap(a.mantener||'')}"`;
+    default: return 'esta acción';
+  }
+}
+
 // Devuelve { mensajeExtra } — puede dejar E.pendienteAccion listo para la siguiente respuesta del usuario
 function ejecutar(acciones) {
   const resultado = { mensajeExtra: '' };
+  const destructivas = [];
+  let productoAmbiguo = null;
+
   for (const a of (acciones||[])) {
     const tipo = a.tipo;
     if (tipo === 'noop') continue;
@@ -1276,23 +1305,21 @@ function ejecutar(acciones) {
       continue;
     }
 
-    // ── Acciones destructivas: requieren contraseña ──
-    if (['eliminar','eliminar_producto_catalogo','eliminar_cliente_catalogo','fusionar_producto'].includes(tipo)) {
-      E.pendienteAccion = { tipo: 'password', acciones: [a] };
-      resultado.mensajeExtra = '🔒 Para confirmar la eliminación escribe: "Yo soy Petra"';
-      break;
+    // ── Acciones destructivas: se acumulan, requieren UNA sola confirmación con contraseña ──
+    if (['eliminar','eliminar_persona','eliminar_todo','eliminar_producto_catalogo','eliminar_cliente_catalogo','fusionar_producto'].includes(tipo)) {
+      destructivas.push(a);
+      continue;
     }
 
     if (tipo === 'registrar_producto') {
       if (!a.producto) continue;
       const nlow = norm(a.producto);
       const exacto = E.catalogoProductos[nlow];
-      if (!exacto) {
+      if (!exacto && !productoAmbiguo) {
         const parecido = buscarProductoParecido(a.producto);
         if (parecido && parecido.sim >= 0.6 && parecido.sim < 0.95) {
-          E.pendienteAccion = { tipo:'confirmarProducto', accionOriginal: { tipo:'registrar_producto', producto:a.producto, precio:a.precio }, candidato: parecido };
-          resultado.mensajeExtra = `¿"${cap(a.producto)}" es lo mismo que "${cap(parecido.nombre)}" (ya en catálogo) o es un producto diferente?`;
-          break;
+          productoAmbiguo = { accionOriginal: { tipo:'registrar_producto', producto:a.producto, precio:a.precio }, candidato: parecido };
+          continue;
         }
       }
       const precioR = Number(a.precio);
@@ -1307,14 +1334,13 @@ function ejecutar(acciones) {
 
     if (tipo === 'agregar') {
       const nombreProd = a.producto;
-      if (nombreProd) {
+      if (nombreProd && !productoAmbiguo) {
         const nlow = norm(nombreProd);
         if (!E.catalogoProductos[nlow]) {
           const parecido = buscarProductoParecido(nombreProd);
           if (parecido && parecido.sim >= 0.6 && parecido.sim < 0.95) {
-            E.pendienteAccion = { tipo:'confirmarProducto', accionOriginal: a, candidato: parecido };
-            resultado.mensajeExtra = `¿"${cap(nombreProd)}" es lo mismo que "${cap(parecido.nombre)}" (ya en catálogo) o es un producto diferente?`;
-            break;
+            productoAmbiguo = { accionOriginal: a, candidato: parecido };
+            continue;
           }
         }
       }
@@ -1355,6 +1381,20 @@ function ejecutar(acciones) {
       }
     }
   }
+
+  // Si hubo producto ambiguo, tiene prioridad (se resuelve antes de cualquier otra cosa)
+  if (productoAmbiguo) {
+    E.pendienteAccion = { tipo:'confirmarProducto', accionOriginal: productoAmbiguo.accionOriginal, candidato: productoAmbiguo.candidato };
+    resultado.mensajeExtra = `¿"${cap(productoAmbiguo.accionOriginal.producto)}" es lo mismo que "${cap(productoAmbiguo.candidato.nombre)}" (ya en catálogo) o es un producto diferente?`;
+    return resultado;
+  }
+
+  if (destructivas.length) {
+    E.pendienteAccion = { tipo: 'password', acciones: destructivas };
+    const lista = destructivas.map(describirAccionDestructiva).join('; ');
+    resultado.mensajeExtra = `Se eliminará: ${lista}.\n🔒 Para confirmar, dime la contraseña (puedes usar el micrófono 🎤). No la escribiré aquí por seguridad.`;
+  }
+
   return resultado;
 }
 
@@ -1412,7 +1452,7 @@ function manejarPendiente(msgRaw) {
 function actualizarBannerPendiente() {
   const banner = document.getElementById('pendiente-banner');
   if (E.pendienteAccion) {
-    banner.textContent = E.pendienteAccion.tipo === 'password' ? '🔒 Escribe "Yo soy Petra" para confirmar, o cualquier otra cosa para cancelar' : '❓ Responde si es el mismo producto o uno diferente';
+    banner.textContent = E.pendienteAccion.tipo === 'password' ? '🔒 Esperando confirmación (dila por voz o texto)' : '❓ Responde si es el mismo producto o uno diferente';
     banner.classList.add('show');
   } else {
     banner.classList.remove('show');
@@ -1606,7 +1646,7 @@ function renderCatalogo() {
 }
 
 function eliminarProductoUI(nlow) {
-  const pass = window.prompt('Escribe "Yo soy Petra" para confirmar la eliminación del producto:');
+  const pass = window.prompt('Confirma con la contraseña para eliminar este producto del catálogo:');
   if (pass && norm(pass).includes(PASSWORD_NORM)) {
     delete E.catalogoProductos[nlow];
     E.historial.push(`Producto eliminado del catálogo: ${nlow}`);
@@ -1619,7 +1659,7 @@ function eliminarProductoUI(nlow) {
 }
 
 function eliminarClienteUI(nlow) {
-  const pass = window.prompt('Escribe "Yo soy Petra" para confirmar la eliminación del cliente:');
+  const pass = window.prompt('Confirma con la contraseña para eliminar este cliente del catálogo:');
   if (pass && norm(pass).includes(PASSWORD_NORM)) {
     delete E.catalogoClientes[nlow];
     E.historial.push(`Cliente eliminado del catálogo: ${nlow}`);
