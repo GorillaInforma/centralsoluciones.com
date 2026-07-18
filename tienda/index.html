@@ -105,23 +105,64 @@ body {
 .btn-pdf-top:hover { background: var(--surface3); color: var(--txt); border-color: var(--border2); }
 .btn-pdf-top svg { flex-shrink: 0; }
 
-/* ── LAYOUT ── */
+/* ── LAYOUT (mobile: una sola vista a la vez, controlada por pestañas) ── */
 .layout {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 320px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   min-height: 0;
 }
+
+/* ── TABS MÓVIL ── */
+.tabs-mobile {
+  display: flex;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--txt2);
+  cursor: pointer;
+}
+
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.tab-badge {
+  background: var(--red);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 1px 6px;
+  border-radius: 10px;
+  display: none;
+}
+.tab-badge.show { display: inline-block; }
 
 /* ── PANEL CHAT ── */
 .panel-chat {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid var(--border);
   min-height: 0;
+  flex: 1;
 }
+
+.layout.show-cuentas .panel-chat { display: none; }
 
 .chat-feed {
   flex: 1;
@@ -316,18 +357,30 @@ body {
 
 /* ── PANEL CUENTAS ── */
 .panel-cuentas {
-  display: flex;
+  display: none;
   flex-direction: column;
   overflow: hidden;
   background: var(--surface);
   min-height: 0;
+  flex: 1;
 }
+
+.layout.show-cuentas .panel-cuentas { display: flex; }
 
 .cuentas-header {
   padding: 14px 16px 12px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
+
+.cuentas-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cuentas-header-top .cuentas-title { margin-bottom: 0; }
 
 .cuentas-title {
   font-size: 0.78rem;
@@ -516,16 +569,16 @@ body {
     </div>
   </div>
   <div class="semana-chip" id="semana-chip">—</div>
-  <div class="topbar-right">
-    <button class="btn-pdf-top" id="btn-pdf" title="Exportar reporte PDF">
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 9h6M5 11.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Reporte PDF
-    </button>
-  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-mobile">
+  <button class="tab-btn active" id="tab-chat" data-tab="chat">💬 Chat</button>
+  <button class="tab-btn" id="tab-cuentas" data-tab="cuentas">📊 Resumen <span class="tab-badge" id="tab-badge">0</span></button>
 </div>
 
 <!-- LAYOUT -->
-<div class="layout">
+<div class="layout" id="layout">
 
   <!-- CHAT -->
   <div class="panel-chat">
@@ -547,14 +600,20 @@ body {
           </button>
         </div>
       </div>
-      <div class="mic-hint" id="mic-hint">🔴 Escuchando... habla ahora</div>
+      <div class="mic-hint" id="mic-hint">🔴 Grabando...</div>
     </div>
   </div>
 
   <!-- CUENTAS -->
   <div class="panel-cuentas">
     <div class="cuentas-header">
-      <div class="cuentas-title">Resumen Semana</div>
+      <div class="cuentas-header-top">
+        <div class="cuentas-title">Resumen Semana</div>
+        <button class="btn-pdf-top" id="btn-pdf" title="Exportar reporte PDF">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 9h6M5 11.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          PDF
+        </button>
+      </div>
       <div class="kpi-strip">
         <div class="kpi">
           <div class="kpi-label">Total fiado</div>
@@ -834,6 +893,10 @@ function renderCuentas() {
   document.getElementById('kpi-pagaron').textContent = pag.length;
   document.getElementById('kpi-adeudan').textContent = noPag.length;
 
+  const badge = document.getElementById('tab-badge');
+  if (noPag.length > 0) { badge.textContent = noPag.length; badge.classList.add('show'); }
+  else { badge.classList.remove('show'); }
+
   if (!personas.length) { empty.style.display = 'flex'; return; }
   empty.style.display = 'none';
 
@@ -919,94 +982,142 @@ function hablar(txt) {
   speechSynthesis.speak(u);
 }
 
-// ════════════ MICRÓFONO ════════════
-let SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-let recog = null;
-let escuchando = false;
+// ════════════ MICRÓFONO (grabación + Whisper vía Groq) ════════════
+// El reconocimiento de voz del navegador (Web Speech API) es muy impreciso en español,
+// sobre todo con nombres propios y precios. En su lugar grabamos audio real y lo
+// transcribimos con whisper-large-v3 (mucho más preciso), usando las mismas keys con rotación.
+let mediaRecorder = null;
+let micStream = null;
+let audioChunks = [];
+let grabandoAudio = false;
 
-function toggleMic() {
-  if (!SpeechRec) {
-    toast('Tu navegador no soporta reconocimiento de voz');
-    return;
+function mimeSoportado() {
+  const candidatos = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+  for (const t of candidatos) {
+    if (window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t;
   }
+  return '';
+}
 
-  if (escuchando) {
-    recog?.stop();
-    return;
-  }
+async function toggleMic() {
+  if (grabandoAudio) { detenerGrabacion(); return; }
 
   if (!window.isSecureContext) {
-    toast('El micrófono requiere HTTPS (o localhost). Abre la app desde tu link de Vercel, no como archivo local.');
+    toast('El micrófono requiere HTTPS. Abre la app desde tu link de Vercel, no como archivo local.');
+    return;
+  }
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    toast('Este navegador no soporta grabación de audio.');
     return;
   }
 
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    // Sin API de mediaDevices disponible: intentamos igual con el reconocimiento,
-    // que en Chrome/Android suele disparar su propio diálogo de permiso.
-    iniciarRecognition();
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    console.warn('Mic permission denied:', err);
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      toast('Bloqueaste el micrófono. Actívalo en los ajustes del sitio (ícono junto a la URL).');
+    } else if (err.name === 'NotFoundError') {
+      toast('No se detectó ningún micrófono en este dispositivo.');
+    } else {
+      toast('No se pudo acceder al micrófono: ' + err.message);
+    }
     return;
   }
 
-  // Pedir permiso explícitamente primero (esto es lo que abre el diálogo del navegador)
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
-      stream.getTracks().forEach(t => t.stop()); // no necesitamos el stream, solo el permiso
-      iniciarRecognition();
-    })
-    .catch(err => {
-      console.warn('Mic permission denied:', err);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        toast('Bloqueaste el micrófono. Actívalo en los ajustes del sitio (ícono de candado en la barra de direcciones).');
-      } else if (err.name === 'NotFoundError') {
-        toast('No se detectó ningún micrófono en este dispositivo.');
-      } else {
-        toast('No se pudo acceder al micrófono: ' + err.message);
-      }
-    });
+  const mimeType = mimeSoportado();
+  audioChunks = [];
+  try {
+    mediaRecorder = mimeType ? new MediaRecorder(micStream, { mimeType }) : new MediaRecorder(micStream);
+  } catch (e) {
+    toast('No se pudo iniciar la grabación');
+    micStream.getTracks().forEach(t => t.stop());
+    return;
+  }
+
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = procesarAudio;
+  mediaRecorder.start();
+
+  grabandoAudio = true;
+  document.getElementById('btn-mic').classList.add('grabando');
+  const hint = document.getElementById('mic-hint');
+  hint.textContent = '🔴 Grabando... toca el micrófono otra vez para detener';
+  hint.classList.add('visible');
 }
 
-function iniciarRecognition() {
-  recog = new SpeechRec();
-  recog.lang = 'es-MX';
-  recog.continuous = false;
-  recog.interimResults = false;
-  recog.maxAlternatives = 1;
-
-  recog.onstart = () => {
-    escuchando = true;
-    document.getElementById('btn-mic').classList.add('grabando');
-    document.getElementById('mic-hint').classList.add('visible');
-  };
-
-  recog.onresult = e => {
-    const txt = e.results[0][0].transcript;
-    document.getElementById('chat-input').value = txt;
-    enviar();
-  };
-
-  recog.onerror = e => {
-    console.warn('SpeechRec error:', e.error);
-    const msgs = {
-      'not-allowed': 'Permiso de micrófono denegado',
-      'no-speech': 'No detecté voz, intenta de nuevo',
-      'network': 'Error de red en reconocimiento de voz',
-      'aborted': null
-    };
-    if (msgs[e.error]) toast(msgs[e.error]);
-    resetMic();
-  };
-
-  recog.onend = () => resetMic();
-
-  try { recog.start(); }
-  catch(e) { console.error(e); resetMic(); }
-}
-
-function resetMic() {
-  escuchando = false;
+function detenerGrabacion() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  grabandoAudio = false;
   document.getElementById('btn-mic').classList.remove('grabando');
-  document.getElementById('mic-hint').classList.remove('visible');
 }
+
+async function procesarAudio() {
+  micStream?.getTracks().forEach(t => t.stop());
+  const hint = document.getElementById('mic-hint');
+  hint.textContent = '⏳ Transcribiendo...';
+
+  const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+  audioChunks = [];
+
+  if (blob.size < 800) {
+    hint.classList.remove('visible');
+    toast('No se detectó audio, intenta de nuevo');
+    return;
+  }
+
+  try {
+    const texto = (await groqTranscribe(blob)).trim();
+    hint.classList.remove('visible');
+    if (!texto) { toast('No entendí, intenta de nuevo'); return; }
+    const inp = document.getElementById('chat-input');
+    inp.value = texto;
+    inp.dispatchEvent(new Event('input'));
+    inp.focus();
+    inp.setSelectionRange(inp.value.length, inp.value.length);
+    toast('Revisa el texto y toca enviar ✓');
+  } catch (e) {
+    hint.classList.remove('visible');
+    toast('Error al transcribir, intenta de nuevo');
+    console.error(e);
+  }
+}
+
+async function groqTranscribe(blob) {
+  const ext = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm';
+  let lastErr = null;
+  for (let i = 0; i < GROQ_KEYS.length; i++) {
+    const key = GROQ_KEYS[(groqKeyIdx + i) % GROQ_KEYS.length];
+    try {
+      const fd = new FormData();
+      fd.append('file', blob, `audio.${ext}`);
+      fd.append('model', 'whisper-large-v3');
+      fd.append('language', 'es');
+      fd.append('temperature', '0');
+      fd.append('response_format', 'json');
+      // El prompt ayuda a Whisper a sesgarse hacia el vocabulario del negocio
+      fd.append('prompt', 'Tienda de fiado semanal. Nombres de clientes, productos y precios en pesos mexicanos.');
+
+      const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}` },
+        body: fd
+      });
+      if (res.status === 401 || res.status === 429 || res.status >= 500) {
+        lastErr = new Error(`Groq key #${i+1} falló (${res.status})`);
+        continue;
+      }
+      if (!res.ok) { lastErr = new Error(`Groq error ${res.status}`); continue; }
+      groqKeyIdx = (groqKeyIdx + i) % GROQ_KEYS.length;
+      const data = await res.json();
+      return data.text || '';
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('Todas las keys de Groq fallaron');
+}
+
 
 // ════════════ FLUJO PRINCIPAL ════════════
 let busy = false;
@@ -1118,6 +1229,14 @@ document.getElementById('btn-send').addEventListener('click', enviar);
 document.getElementById('btn-mic').addEventListener('click', toggleMic);
 document.getElementById('btn-pdf').addEventListener('click', generarPDF);
 
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('layout').classList.toggle('show-cuentas', btn.dataset.tab === 'cuentas');
+  });
+});
+
 document.getElementById('chat-input').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); }
 });
@@ -1143,3 +1262,4 @@ setTimeout(() => {
 </script>
 </body>
 </html>
+
