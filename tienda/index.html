@@ -135,7 +135,7 @@ body {
 .btn-pdf-top:hover { background: var(--surface3); color: var(--txt); border-color: var(--border2); }
 .btn-pdf-top svg { flex-shrink: 0; }
 
-/* ── LAYOUT (mobile: una sola vista a la vez, controlada por pestañas) ── */
+/* ── LAYOUT ── */
 .layout {
   flex: 1;
   display: flex;
@@ -193,6 +193,7 @@ body {
 }
 
 .layout.show-cuentas .panel-chat { display: none; }
+.layout.show-catalogo .panel-chat { display: none; }
 
 .chat-feed {
   flex: 1;
@@ -236,6 +237,7 @@ body {
   font-size: 0.88rem;
   line-height: 1.6;
   max-width: 100%;
+  white-space: pre-wrap;
 }
 
 .msg-row.ia .msg-bubble {
@@ -250,6 +252,24 @@ body {
   color: white;
   border-top-right-radius: 4px;
 }
+
+/* Confirmación inline */
+.confirm-actions {
+  display: flex; gap: 8px; margin-top: 10px;
+}
+.confirm-btn {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--bg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.confirm-btn.si { color: var(--accent); border-color: var(--accent); }
+.confirm-btn.no { color: var(--txt2); }
 
 /* Tabla embebida */
 .inline-table {
@@ -306,6 +326,20 @@ body {
   padding: 14px 16px;
   flex-shrink: 0;
 }
+
+.pendiente-banner {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: var(--amber-bg);
+  color: var(--amber);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.pendiente-banner.show { display: flex; }
 
 .input-box {
   display: flex;
@@ -481,6 +515,7 @@ body {
 }
 .card-persona:hover { border-color: var(--border2); }
 .card-persona.pagado { border-left: 3px solid var(--green); }
+.card-persona.abono { border-left: 3px solid var(--amber); }
 .card-persona.adeuda { border-left: 3px solid var(--red); }
 
 .card-head {
@@ -517,12 +552,19 @@ body {
 }
 .badge-estado.pago { background: var(--green-bg); color: var(--green); }
 .badge-estado.deuda { background: var(--red-bg); color: var(--red); }
+.badge-estado.abono { background: var(--amber-bg); color: var(--amber); }
 
+.card-total-wrap { display: flex; flex-direction: column; align-items: flex-end; }
 .card-total {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--txt2);
+}
+.card-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--txt3);
 }
 
 .chevron {
@@ -540,7 +582,7 @@ body {
 }
 
 .card-body.open {
-  max-height: 400px;
+  max-height: 500px;
   border-top-width: 1px;
 }
 
@@ -568,6 +610,7 @@ body {
 .item-line:last-child { border-bottom: none; }
 .item-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .item-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-nombre.traslado { font-style: italic; color: var(--amber); }
 .item-hora {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.62rem;
@@ -575,6 +618,12 @@ body {
   letter-spacing: 0.02em;
 }
 .item-precio { font-family: 'JetBrains Mono', monospace; color: var(--txt); font-size: 0.78rem; flex-shrink: 0; }
+
+.abono-bloque { padding: 8px 12px; border-top: 1px dashed var(--border2); }
+.abono-line {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.8rem; color: var(--green); padding: 3px 0;
+}
 
 /* Toast / notificación */
 .toast {
@@ -595,6 +644,67 @@ body {
   white-space: nowrap;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── PANEL CATÁLOGO ── */
+.panel-catalogo {
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--surface);
+  min-height: 0;
+  flex: 1;
+}
+.layout.show-catalogo .panel-catalogo { display: flex; }
+
+.cat-add-row {
+  display: flex; gap: 6px; margin-top: 4px;
+}
+.cat-add-row input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-width: 0;
+}
+.cat-add-row input.nombre { flex: 2; }
+.cat-add-row input.precio { flex: 1; }
+.cat-add-row button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cat-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.cat-item-nombre { text-transform: capitalize; color: var(--txt); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-item-precio { font-family: 'JetBrains Mono', monospace; color: var(--txt2); flex-shrink: 0; }
+.cat-item-del {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--bg);
+  color: var(--red);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  display: flex; align-items: center; justify-content: center;
+}
 </style>
 </head>
 <body>
@@ -620,6 +730,7 @@ body {
 <div class="tabs-mobile">
   <button class="tab-btn active" id="tab-chat" data-tab="chat">💬 Chat</button>
   <button class="tab-btn" id="tab-cuentas" data-tab="cuentas">📊 Resumen <span class="tab-badge" id="tab-badge">0</span></button>
+  <button class="tab-btn" id="tab-catalogo" data-tab="catalogo">📦 Catálogo</button>
 </div>
 
 <!-- LAYOUT -->
@@ -630,6 +741,7 @@ body {
     <div class="chat-feed" id="chat-feed"></div>
 
     <div class="chat-input-wrap">
+      <div class="pendiente-banner" id="pendiente-banner">🔒 Esperando confirmación...</div>
       <div class="input-box">
         <textarea
           id="chat-input"
@@ -686,6 +798,27 @@ body {
     </div>
   </div>
 
+  <!-- CATÁLOGO -->
+  <div class="panel-catalogo" id="panel-catalogo">
+    <div class="cuentas-header">
+      <div class="cuentas-title">Productos registrados</div>
+      <div class="cat-add-row">
+        <input type="text" id="cat-prod-nombre" class="nombre" placeholder="Producto">
+        <input type="number" id="cat-prod-precio" class="precio" placeholder="$">
+        <button id="cat-prod-add">+</button>
+      </div>
+    </div>
+    <div id="catalogo-productos-list"></div>
+    <div class="cuentas-header" style="border-top:1px solid var(--border); margin-top:6px;">
+      <div class="cuentas-title">Clientes registrados</div>
+      <div class="cat-add-row">
+        <input type="text" id="cat-cli-nombre" class="nombre" placeholder="Nombre del cliente" style="flex:1;">
+        <button id="cat-cli-add">+</button>
+      </div>
+    </div>
+    <div id="catalogo-clientes-list"></div>
+  </div>
+
 </div>
 
 <!-- Toast -->
@@ -694,7 +827,7 @@ body {
 <script>
 // ════════════ ESTADO ════════════
 const DIAS = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
-const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const PASSWORD_NORM = 'yo soy petra';
 
 function lunesDeHoy() {
   const hoy = new Date();
@@ -713,6 +846,8 @@ function lunesDeFecha(dateObj) {
   return lun;
 }
 
+function claveDeSemana(lunes) { return lunes.toISOString().slice(0,10); }
+
 function formatSemana(lunes) {
   const dom = new Date(lunes); dom.setDate(lunes.getDate() + 6);
   const f = dt => dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short'}).toUpperCase();
@@ -720,21 +855,50 @@ function formatSemana(lunes) {
 }
 
 const E = {
-  personas: {},
+  personas: {},          // { nombre: { periodos: { 'YYYY-MM-DD': {items:[], abonos:[], pagado:bool, trasladado:bool} } } }
+  catalogoProductos: {}, // { nombreNormalizado: {nombre, precio} }
+  catalogoClientes: {},  // { nombreNormalizado: {nombre} }
   semanaLunes: lunesDeHoy(),
-  historial: []
+  historial: [],
+  pendienteAccion: null  // { tipo: 'password'|'confirmarProducto', ... }
 };
 
-// E.semana siempre refleja el rango actual, se recalcula cuando cambia semanaLunes
 Object.defineProperty(E, 'semana', { get() { return formatSemana(this.semanaLunes); } });
+Object.defineProperty(E, 'clave', { get() { return claveDeSemana(this.semanaLunes); } });
+
+// ════════════ UTILIDADES DE TEXTO ════════════
+function norm(s) {
+  return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+function distanciaLevenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, (_,i) => [i, ...Array(n).fill(0)]);
+  for (let j=0;j<=n;j++) dp[0][j] = j;
+  for (let i=1;i<=m;i++) {
+    for (let j=1;j<=n;j++) {
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+function similitud(a, b) {
+  const na = norm(a), nb = norm(b);
+  if (!na.length && !nb.length) return 1;
+  const dist = distanciaLevenshtein(na, nb);
+  return 1 - dist / Math.max(na.length, nb.length, 1);
+}
 
 // ════════════ PERSISTENCIA LOCAL ════════════
-const STORAGE_KEY = 'fiadoapp_estado_v1';
+const STORAGE_KEY = 'fiadoapp_estado_v2';
 
 function guardarEstado() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       personas: E.personas,
+      catalogoProductos: E.catalogoProductos,
+      catalogoClientes: E.catalogoClientes,
       historial: E.historial,
       semanaLunes: E.semanaLunes.toISOString()
     }));
@@ -747,9 +911,15 @@ function guardarEstado() {
 function cargarEstado() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
+    if (!raw) {
+      // Intentar migrar de una versión anterior (v1) si existe
+      migrarV1();
+      return;
+    }
     const data = JSON.parse(raw);
     if (data.personas && typeof data.personas === 'object') E.personas = data.personas;
+    if (data.catalogoProductos) E.catalogoProductos = data.catalogoProductos;
+    if (data.catalogoClientes) E.catalogoClientes = data.catalogoClientes;
     if (Array.isArray(data.historial)) E.historial = data.historial;
     if (data.semanaLunes) {
       const f = new Date(data.semanaLunes);
@@ -758,6 +928,21 @@ function cargarEstado() {
   } catch (e) {
     console.warn('No se pudo cargar el estado guardado:', e);
   }
+}
+
+function migrarV1() {
+  try {
+    const raw = localStorage.getItem('fiadoapp_estado_v1');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data.personas) return;
+    const clave = claveDeSemana(lunesDeHoy());
+    Object.entries(data.personas).forEach(([nom, p]) => {
+      E.personas[nom] = { periodos: { [clave]: { items: p.items||[], abonos: [], pagado: !!p.pagado, trasladado:false } } };
+    });
+    if (Array.isArray(data.historial)) E.historial = data.historial;
+    guardarEstado();
+  } catch(e) { console.warn('Migración v1 falló', e); }
 }
 
 cargarEstado();
@@ -780,22 +965,93 @@ function diaHoy() {
   return DIAS[d === 0 ? 6 : d - 1];
 }
 
-function totalP(p) {
-  return (p.items || []).reduce((s,i) => s + i.precio * (i.qty || 1), 0);
+// ════════════ HELPERS DE PERIODO ════════════
+function getPeriodo(persona, clave) {
+  if (!persona.periodos) persona.periodos = {};
+  if (!persona.periodos[clave]) persona.periodos[clave] = { items: [], abonos: [], pagado: false, trasladado: false };
+  return persona.periodos[clave];
 }
+function leerPeriodo(persona, clave) { return persona.periodos ? persona.periodos[clave] : undefined; }
 
-function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+function totalItems(per) { return (per.items||[]).reduce((s,i)=>s+i.precio*(i.qty||1),0); }
+function totalAbonos(per) { return (per.abonos||[]).reduce((s,ab)=>s+ab.monto,0); }
+function saldoPeriodo(per) { return totalItems(per) - totalAbonos(per); }
+function estaPagado(per) { return per.pagado || saldoPeriodo(per) <= 0.5; }
 
 function formatHora(fecha) {
   const d = fecha instanceof Date ? fecha : new Date(fecha);
   if (isNaN(d)) return '';
   return d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 }
-
 function formatFechaCorta(fecha) {
   const d = fecha instanceof Date ? fecha : new Date(fecha);
   if (isNaN(d)) return '';
   return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }).toUpperCase();
+}
+
+// ════════════ TRASLADO AUTOMÁTICO DE SALDOS ════════════
+function siguienteClave(clave) {
+  const f = new Date(clave + 'T00:00:00');
+  f.setDate(f.getDate() + 7);
+  return claveDeSemana(f);
+}
+
+function aplicarTrasladosUnaVez() {
+  const hoyClave = claveDeSemana(lunesDeHoy());
+  let cambio = false;
+  Object.values(E.personas).forEach(p => {
+    if (!p.periodos) return;
+    Object.keys(p.periodos).sort().forEach(clave => {
+      if (clave >= hoyClave) return; // solo periodos ya pasados respecto a la fecha real
+      const per = p.periodos[clave];
+      if (per.trasladado) return;
+      const saldo = saldoPeriodo(per);
+      if (saldo > 0.5) {
+        const claveSig = siguienteClave(clave);
+        const perSig = getPeriodo(p, claveSig);
+        perSig.items.push({ dia:'lunes', producto:'Saldo semana anterior', precio: Math.round(saldo*100)/100, qty:1, fecha: new Date().toISOString(), traslado:true });
+        per.trasladado = true;
+        cambio = true;
+      } else {
+        per.trasladado = true;
+      }
+    });
+  });
+  return cambio;
+}
+
+function ejecutarTraslados() {
+  let vueltas = 0;
+  while (aplicarTrasladosUnaVez() && vueltas < 30) vueltas++;
+}
+
+function trasladarManual(nombre, montoOpcional) {
+  const nom = norm(nombre);
+  if (!E.personas[nom]) return false;
+  const per = getPeriodo(E.personas[nom], E.clave);
+  const saldo = saldoPeriodo(per);
+  const monto = (montoOpcional && montoOpcional > 0) ? Math.min(montoOpcional, Math.max(saldo,0)) : saldo;
+  if (monto <= 0) return false;
+  const claveSig = siguienteClave(E.clave);
+  const perSig = getPeriodo(E.personas[nom], claveSig);
+  perSig.items.push({ dia:'lunes', producto:'Saldo trasladado', precio: Math.round(monto*100)/100, qty:1, fecha:new Date().toISOString(), traslado:true });
+  // Se registra un abono "virtual" en el periodo actual por el monto trasladado, para no duplicar el saldo
+  per.abonos.push({ monto, fecha: new Date().toISOString(), esTraslado:true });
+  per.trasladado = true;
+  E.historial.push(`Traslado: ${nom} $${monto} → semana siguiente`);
+  return true;
+}
+
+// ════════════ CATÁLOGO — FUZZY MATCH ════════════
+function buscarProductoParecido(nombre) {
+  const nlow = norm(nombre);
+  let mejor = null;
+  Object.values(E.catalogoProductos).forEach(prod => {
+    if (norm(prod.nombre) === nlow) return;
+    const s = similitud(prod.nombre, nombre);
+    if (!mejor || s > mejor.sim) mejor = { ...prod, sim: s };
+  });
+  return mejor;
 }
 
 // ════════════ IA ════════════
@@ -803,12 +1059,23 @@ const histChat = [];
 
 function buildSystem() {
   const hoyReal = new Date().toLocaleDateString('es-MX',{weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  const personasResumen = {};
+  Object.entries(E.personas).forEach(([nom, p]) => {
+    const per = leerPeriodo(p, E.clave);
+    if (per) personasResumen[nom] = { items: per.items, abonos: per.abonos, pagado: estaPagado(per), saldo: saldoPeriodo(per) };
+  });
+  const catalogoProdTxt = Object.values(E.catalogoProductos).map(p => `${p.nombre}: $${p.precio}`).join(', ') || '(vacío)';
+  const catalogoCliTxt = Object.values(E.catalogoClientes).map(c => c.nombre).join(', ') || '(vacío)';
+
   return `Eres el asistente de "FiadoApp", sistema de crédito semanal de una tienda mexicana. TODOS los precios son en PESOS MEXICANOS (MXN), nunca dólares.
 Hablas español mexicano informal y conciso. Eres rápido, práctico y amigable.
 Fecha real de hoy: ${hoyReal} (${diaHoy()}). Periodo mostrado actualmente en la app: ${E.semana}.
 
-ESTADO ACTUAL:
-${JSON.stringify(E.personas, null, 2)}
+ESTADO ACTUAL DE LA SEMANA MOSTRADA:
+${JSON.stringify(personasResumen, null, 2)}
+
+CATÁLOGO DE PRODUCTOS CONOCIDOS (nombre: precio): ${catalogoProdTxt}
+CLIENTES CONOCIDOS: ${catalogoCliTxt}
 
 HISTORIAL RECIENTE:
 ${E.historial.slice(-15).join('\n') || '(vacío)'}
@@ -817,15 +1084,18 @@ Responde SOLO con JSON sin markdown ni texto extra:
 {
   "acciones": [
     {
-      "tipo": "agregar"|"precio"|"pago"|"nopago"|"eliminar"|"corregir"|"periodo"|"noop",
+      "tipo": "agregar"|"precio"|"pago"|"pago_parcial"|"nopago"|"eliminar"|"corregir"|"periodo"|"trasladar"|"registrar_producto"|"registrar_cliente"|"eliminar_producto_catalogo"|"eliminar_cliente_catalogo"|"fusionar_producto"|"noop",
       "persona": "nombre_minusculas",
       "dia": "lunes|...|domingo",
       "producto": "...",
       "precio": número,
+      "monto": número,
       "qty": número,
       "idx": número_índice_opcional,
       "periodo_direccion": "anterior"|"siguiente"|"actual",
-      "periodo_fecha": "YYYY-MM-DD (fecha dentro de la semana deseada, si el usuario da una fecha o mes específico)"
+      "periodo_fecha": "YYYY-MM-DD",
+      "mantener": "nombre_producto_que_se_queda",
+      "eliminar": "nombre_producto_que_se_va"
     }
   ],
   "respuesta": "texto amigable al usuario",
@@ -838,23 +1108,30 @@ Responde SOLO con JSON sin markdown ni texto extra:
 REGLAS DE INTERPRETACIÓN:
 - "ponle / agrega / apúntale X a Y" → agregar
 - "cámbialo / era / me confundí / corrígelo" → corregir (último ítem relevante)
-- "ya pagó / pagó" → pago
+- "ya pagó / pagó todo / liquidó" → pago
+- "abonó / dio a cuenta / pagó una parte / pagó $X de lo que debía / dejó $X" → pago_parcial con "monto"
 - "no pagó / quedó de pagar" → nopago
-- "¿cuánto lleva / debe / tiene?" → noop + respuesta con detalle
+- "bórralo / elimínalo / quítaselo" → eliminar (el sistema pedirá contraseña automáticamente, tú solo confirma qué se eliminaría en tu respuesta, NO pidas tú la contraseña)
+- "pásalo / trasládalo / que lo pague la próxima semana / anótaselo para después" → trasladar (con "monto" si especifica cuánto, si no se traslada todo el saldo pendiente)
+- "registra el producto X a $Y" → registrar_producto
+- "registra a Y como cliente" → registrar_cliente
+- "elimina/quita el producto X del catálogo" → eliminar_producto_catalogo (requiere contraseña, no la pidas tú)
+- "elimina el cliente Y del catálogo" → eliminar_cliente_catalogo (requiere contraseña, no la pidas tú)
+- "X y Z son el mismo producto, quédate con Z" → fusionar_producto {mantener:"Z", eliminar:"X"} (requiere contraseña)
+- "¿cuánto lleva / debe / tiene?" → noop + respuesta con detalle (menciona si abonó algo)
 - "reporte / todo / resumen" → noop + tabla tipo semana
 - "¿quién pagó? / ¿cuántos pagaron?" → noop + tabla tipo pagos
 - "¿cuánto cobro / debo cobrar?" → noop + total adeudado
 - "cambia/muéstrame la semana pasada/anterior" → periodo con periodo_direccion:"anterior"
 - "semana siguiente/que sigue/próxima" → periodo con periodo_direccion:"siguiente"
 - "semana actual/de hoy/regresa a hoy" → periodo con periodo_direccion:"actual"
-- "pon/cambia el periodo al/a la semana del/de [fecha o mes]" → periodo con periodo_fecha:"YYYY-MM-DD" (usa el año actual si no lo dan, y calcula la fecha exacta a la que se refieren)
+- "pon/cambia el periodo al/a la semana del/de [fecha o mes]" → periodo con periodo_fecha:"YYYY-MM-DD"
 
-REGLA CRÍTICA — PRECIO FALTANTE (evita duplicados):
-- Si el usuario menciona un producto SIN precio (ej: "apúntale una fresca a Chuy"), NO generes ninguna acción "agregar" en ese turno. Deja "acciones": [] y en "respuesta" pregunta el precio dejando claro que AÚN NO está registrado (ej: "¿Cuánto cuesta la fresca? En cuanto me digas, se la agrego a Chuy."). Nunca digas "apuntado" o "listo" si todavía no tienes el precio.
-- Cuando el usuario responda con el precio (ej: "25 pesos", "cuesta 25", o solo "25"), usa el contexto de los mensajes anteriores para saber qué producto y persona corresponden, y genera UNA SOLA acción "agregar" con ese precio. No repitas ni agregues el mismo producto dos veces.
-- El campo "precio" de una acción "agregar" siempre debe ser un número mayor a 0; si no lo tienes, no incluyas la acción.
-- Si falta precio, pregunta gentilmente
-- Siempre responde los montos en pesos, ejemplo: "$50 pesos" o "$50"`;
+REGLA DE PRECIOS Y CATÁLOGO:
+- Si el producto ya aparece en el catálogo de productos conocidos y el usuario NO da precio, genera la acción "agregar" SIN precio (el sistema completará el precio automáticamente desde el catálogo). No preguntes el precio en ese caso.
+- Si el producto NO está en el catálogo y el usuario no da precio, NO generes ninguna acción "agregar". Deja "acciones": [] y en "respuesta" pregunta el precio (ej: "¿Cuánto cuesta la fresca? En cuanto me digas, se la agrego a Chuy."). Nunca digas "apuntado" o "listo" si todavía no hay precio.
+- Cuando el usuario responda con el precio, genera UNA SOLA acción "agregar" con ese precio, usando el contexto de los mensajes anteriores para persona y producto.
+- Siempre responde los montos en pesos, ejemplo: "$50" (el sistema agrega la palabra "pesos" al hablarlo, tú NO escribas la palabra "pesos" después del signo $ para evitar redundancia).`;
 }
 
 // ════════════ GROQ (5 keys con rotación automática) ════════════
@@ -882,13 +1159,13 @@ async function groqFetch(payload) {
       });
       if (res.status === 401 || res.status === 429 || res.status >= 500) {
         lastErr = new Error(`Groq key #${i+1} falló (${res.status})`);
-        continue; // probar siguiente key
+        continue;
       }
       if (!res.ok) {
         lastErr = new Error(`Groq error ${res.status}`);
         continue;
       }
-      groqKeyIdx = (groqKeyIdx + i) % GROQ_KEYS.length; // recordar la key que funcionó
+      groqKeyIdx = (groqKeyIdx + i) % GROQ_KEYS.length;
       return await res.json();
     } catch (e) {
       lastErr = e;
@@ -915,11 +1192,77 @@ async function callIA(msg) {
   return JSON.parse(clean);
 }
 
-// ════════════ ACCIONES ════════════
-function ejecutar(acciones) {
-  (acciones||[]).forEach(a => {
+// ════════════ EJECUCIÓN DE ACCIONES ════════════
+function buscarItem(per, nombre) {
+  if (!nombre) return per.items.length - 1;
+  const n = norm(nombre);
+  for (let i = per.items.length-1; i >= 0; i--) {
+    if (norm(per.items[i].producto||'').includes(n)) return i;
+  }
+  return -1;
+}
+
+function aplicarAgregar(a, precioForzado, nombreForzado) {
+  if (!a.persona) return;
+  const nom = norm(a.persona);
+  const nombreProd = nombreForzado || a.producto;
+  if (!nombreProd) return;
+  const nlow = norm(nombreProd);
+  let precioNum = Number(precioForzado !== undefined ? precioForzado : a.precio);
+  if (!precioNum || isNaN(precioNum) || precioNum <= 0) {
+    const cat = E.catalogoProductos[nlow];
+    if (cat && cat.precio > 0) precioNum = cat.precio;
+    else return; // sin precio disponible, no se agrega
+  } else if (!E.catalogoProductos[nlow]) {
+    E.catalogoProductos[nlow] = { nombre: nombreProd, precio: precioNum };
+  }
+  if (!E.catalogoClientes[nom]) E.catalogoClientes[nom] = { nombre: a.persona };
+  if (!E.personas[nom]) E.personas[nom] = { periodos: {} };
+  const per = getPeriodo(E.personas[nom], E.clave);
+  const dia = a.dia || diaHoy();
+  const ahora = new Date();
+  per.items.push({ dia, producto: nombreProd, precio: precioNum, qty: Number(a.qty)||1, fecha: ahora.toISOString() });
+  E.historial.push(`+${nombreProd} $${precioNum} → ${nom} [${dia} ${formatHora(ahora)}]`);
+}
+
+// Acciones destructivas ejecutadas SOLO tras confirmar contraseña
+function ejecutarDirecta(acciones) {
+  acciones.forEach(a => {
     const tipo = a.tipo;
-    if (tipo === 'noop') return;
+    if (tipo === 'eliminar') {
+      const nom = a.persona ? norm(a.persona) : null;
+      if (!nom || !E.personas[nom]) return;
+      const per = getPeriodo(E.personas[nom], E.clave);
+      const idx = a.idx !== undefined ? a.idx : per.items.length - 1;
+      if (per.items[idx]) { const el = per.items.splice(idx,1)[0]; E.historial.push(`Eliminado: ${el.producto} de ${nom}`); }
+    } else if (tipo === 'eliminar_producto_catalogo') {
+      delete E.catalogoProductos[norm(a.producto)];
+      E.historial.push(`Producto eliminado del catálogo: ${a.producto}`);
+    } else if (tipo === 'eliminar_cliente_catalogo') {
+      delete E.catalogoClientes[norm(a.persona)];
+      E.historial.push(`Cliente eliminado del catálogo: ${a.persona}`);
+    } else if (tipo === 'fusionar_producto') {
+      const nlowElim = norm(a.eliminar);
+      const nlowMant = norm(a.mantener);
+      const mant = E.catalogoProductos[nlowMant];
+      const nombreFinal = mant ? mant.nombre : a.mantener;
+      delete E.catalogoProductos[nlowElim];
+      Object.values(E.personas).forEach(p => {
+        Object.values(p.periodos||{}).forEach(per => {
+          (per.items||[]).forEach(it => { if (norm(it.producto) === nlowElim) it.producto = nombreFinal; });
+        });
+      });
+      E.historial.push(`Productos fusionados: "${a.eliminar}" → "${nombreFinal}"`);
+    }
+  });
+}
+
+// Devuelve { mensajeExtra } — puede dejar E.pendienteAccion listo para la siguiente respuesta del usuario
+function ejecutar(acciones) {
+  const resultado = { mensajeExtra: '' };
+  for (const a of (acciones||[])) {
+    const tipo = a.tipo;
+    if (tipo === 'noop') continue;
 
     if (tipo === 'periodo') {
       if (a.periodo_direccion === 'anterior') moverSemana(-1);
@@ -930,62 +1273,153 @@ function ejecutar(acciones) {
         if (!isNaN(f)) setSemana(f);
       }
       E.historial.push(`Periodo cambiado a: ${E.semana}`);
-      return;
+      continue;
     }
 
-    if (!a.persona) return;
-    const nom = a.persona.toLowerCase().trim();
-
-    // Blindaje: si es "agregar" pero el precio no es válido (falta, es 0, o no es número),
-    // NO se crea nada. Esto evita ítems rotos y evita que se dupliquen productos cuando
-    // la IA pregunta el precio en un turno y lo agrega en el siguiente.
-    if (tipo === 'agregar') {
-      const precioNum = Number(a.precio);
-      if (!a.precio || isNaN(precioNum) || precioNum <= 0) return;
+    // ── Acciones destructivas: requieren contraseña ──
+    if (['eliminar','eliminar_producto_catalogo','eliminar_cliente_catalogo','fusionar_producto'].includes(tipo)) {
+      E.pendienteAccion = { tipo: 'password', acciones: [a] };
+      resultado.mensajeExtra = '🔒 Para confirmar la eliminación escribe: "Yo soy Petra"';
+      break;
     }
 
-    if (!E.personas[nom]) E.personas[nom] = { items:[], pagado:false };
-    const p = E.personas[nom];
-    const dia = a.dia || diaHoy();
+    if (tipo === 'registrar_producto') {
+      if (!a.producto) continue;
+      const nlow = norm(a.producto);
+      const exacto = E.catalogoProductos[nlow];
+      if (!exacto) {
+        const parecido = buscarProductoParecido(a.producto);
+        if (parecido && parecido.sim >= 0.6 && parecido.sim < 0.95) {
+          E.pendienteAccion = { tipo:'confirmarProducto', accionOriginal: { tipo:'registrar_producto', producto:a.producto, precio:a.precio }, candidato: parecido };
+          resultado.mensajeExtra = `¿"${cap(a.producto)}" es lo mismo que "${cap(parecido.nombre)}" (ya en catálogo) o es un producto diferente?`;
+          break;
+        }
+      }
+      const precioR = Number(a.precio);
+      if (precioR > 0) E.catalogoProductos[nlow] = { nombre: a.producto, precio: precioR };
+      continue;
+    }
+
+    if (tipo === 'registrar_cliente') {
+      if (a.persona) E.catalogoClientes[norm(a.persona)] = { nombre: a.persona };
+      continue;
+    }
 
     if (tipo === 'agregar') {
-      const precioNum = Number(a.precio);
-      const ahora = new Date();
-      p.items.push({ dia, producto: a.producto, precio: precioNum, qty: Number(a.qty)||1, fecha: ahora.toISOString() });
-      E.historial.push(`+${a.producto} $${precioNum} → ${nom} [${dia} ${formatHora(ahora)}]`);
-    } else if (tipo === 'precio') {
-      const idx = a.idx !== undefined ? a.idx : buscarItem(p, a.producto);
-      if (idx >= 0) { const v = p.items[idx].precio; p.items[idx].precio = Number(a.precio); E.historial.push(`Precio ${p.items[idx].producto}/${nom}: $${v}→$${a.precio}`); }
+      const nombreProd = a.producto;
+      if (nombreProd) {
+        const nlow = norm(nombreProd);
+        if (!E.catalogoProductos[nlow]) {
+          const parecido = buscarProductoParecido(nombreProd);
+          if (parecido && parecido.sim >= 0.6 && parecido.sim < 0.95) {
+            E.pendienteAccion = { tipo:'confirmarProducto', accionOriginal: a, candidato: parecido };
+            resultado.mensajeExtra = `¿"${cap(nombreProd)}" es lo mismo que "${cap(parecido.nombre)}" (ya en catálogo) o es un producto diferente?`;
+            break;
+          }
+        }
+      }
+      aplicarAgregar(a);
+      continue;
+    }
+
+    if (!a.persona) continue;
+    const nom = norm(a.persona);
+    if (!E.personas[nom]) E.personas[nom] = { periodos: {} };
+    const per = getPeriodo(E.personas[nom], E.clave);
+
+    if (tipo === 'precio') {
+      const idx = a.idx !== undefined ? a.idx : buscarItem(per, a.producto);
+      if (idx >= 0) { const v = per.items[idx].precio; per.items[idx].precio = Number(a.precio); E.historial.push(`Precio ${per.items[idx].producto}/${nom}: $${v}→$${a.precio}`); }
     } else if (tipo === 'pago') {
-      p.pagado = true; E.historial.push(`✓ ${nom} PAGÓ`);
+      per.pagado = true; E.historial.push(`✓ ${nom} PAGÓ`);
+    } else if (tipo === 'pago_parcial') {
+      const monto = Number(a.monto);
+      if (monto > 0) {
+        per.abonos.push({ monto, fecha: new Date().toISOString() });
+        if (saldoPeriodo(per) <= 0.5) per.pagado = true;
+        E.historial.push(`Abono de $${monto} → ${nom}`);
+      }
     } else if (tipo === 'nopago') {
-      p.pagado = false; E.historial.push(`✗ ${nom} no pagó`);
-    } else if (tipo === 'eliminar') {
-      const idx = a.idx !== undefined ? a.idx : p.items.length - 1;
-      if (p.items[idx]) { const el = p.items.splice(idx,1)[0]; E.historial.push(`Eliminado: ${el.producto} de ${nom}`); }
+      per.pagado = false; E.historial.push(`✗ ${nom} no pagó`);
+    } else if (tipo === 'trasladar') {
+      const ok = trasladarManual(nom, Number(a.monto) || null);
+      if (!ok) resultado.mensajeExtra = 'No hay saldo pendiente para trasladar.';
     } else if (tipo === 'corregir') {
-      const idx = a.idx !== undefined ? a.idx : buscarItem(p, a.producto) >= 0 ? buscarItem(p, a.producto) : p.items.length-1;
-      if (p.items[idx]) {
-        const old = {...p.items[idx]};
-        if (a.producto) p.items[idx].producto = a.producto;
-        if (a.precio) p.items[idx].precio = Number(a.precio);
-        if (a.qty) p.items[idx].qty = Number(a.qty);
-        E.historial.push(`Corregido ${nom}: ${old.producto}→${p.items[idx].producto}`);
+      const idx = a.idx !== undefined ? a.idx : (buscarItem(per, a.producto) >= 0 ? buscarItem(per, a.producto) : per.items.length-1);
+      if (per.items[idx]) {
+        const old = {...per.items[idx]};
+        if (a.producto) per.items[idx].producto = a.producto;
+        if (a.precio) per.items[idx].precio = Number(a.precio);
+        if (a.qty) per.items[idx].qty = Number(a.qty);
+        E.historial.push(`Corregido ${nom}: ${old.producto}→${per.items[idx].producto}`);
       }
     }
-  });
-}
-
-function buscarItem(p, nombre) {
-  if (!nombre) return p.items.length - 1;
-  const n = nombre.toLowerCase();
-  for (let i = p.items.length-1; i >= 0; i--) {
-    if (p.items[i].producto?.toLowerCase().includes(n)) return i;
   }
-  return -1;
+  return resultado;
 }
 
-// ════════════ UI ════════════
+// ════════════ MANEJO DE CONFIRMACIONES PENDIENTES (sin llamar a la IA) ════════════
+function manejarPendiente(msgRaw) {
+  const pend = E.pendienteAccion;
+  E.pendienteAccion = null;
+  addMsg('user', msgRaw);
+  const msg = norm(msgRaw);
+
+  if (pend.tipo === 'password') {
+    if (msg.includes(PASSWORD_NORM)) {
+      ejecutarDirecta(pend.acciones);
+      renderCuentas();
+      renderCatalogo();
+      const r = 'Listo, se realizó la eliminación.';
+      addMsg('ia', r); hablar(r);
+    } else {
+      const r = 'Contraseña incorrecta. No se eliminó nada.';
+      addMsg('ia', r); hablar(r);
+    }
+    actualizarBannerPendiente();
+    return;
+  }
+
+  if (pend.tipo === 'confirmarProducto') {
+    const a = pend.accionOriginal;
+    const esMismo = /mismo|igual|^si\b|^s[ií]$/.test(msg);
+    if (esMismo) {
+      if (a.tipo === 'registrar_producto') {
+        // no crear nuevo, ya existe con ese nombre
+        const r = `Listo, "${cap(a.producto)}" queda igual que "${cap(pend.candidato.nombre)}".`;
+        addMsg('ia', r); hablar(r);
+      } else {
+        aplicarAgregar(a, a.precio || pend.candidato.precio, pend.candidato.nombre);
+        renderCuentas();
+        const r = `Listo, agregado como "${cap(pend.candidato.nombre)}".`;
+        addMsg('ia', r); hablar(r);
+      }
+    } else {
+      if (Number(a.precio) > 0) E.catalogoProductos[norm(a.producto)] = { nombre: a.producto, precio: Number(a.precio) };
+      if (a.tipo === 'agregar') {
+        aplicarAgregar(a);
+        renderCuentas();
+      }
+      const r = `Listo, registrado "${cap(a.producto)}" como producto nuevo.`;
+      addMsg('ia', r); hablar(r);
+    }
+    renderCatalogo();
+    actualizarBannerPendiente();
+    return;
+  }
+}
+
+function actualizarBannerPendiente() {
+  const banner = document.getElementById('pendiente-banner');
+  if (E.pendienteAccion) {
+    banner.textContent = E.pendienteAccion.tipo === 'password' ? '🔒 Escribe "Yo soy Petra" para confirmar, o cualquier otra cosa para cancelar' : '❓ Responde si es el mismo producto o uno diferente';
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+// ════════════ UI — CHAT ════════════
 function addMsg(who, texto, tabla) {
   const feed = document.getElementById('chat-feed');
   const row = document.createElement('div');
@@ -999,7 +1433,6 @@ function addMsg(who, texto, tabla) {
   bubble.className = 'msg-bubble';
   bubble.textContent = texto;
 
-  // Tabla opcional
   if (who === 'ia' && tabla?.filas?.length) {
     const tbl = document.createElement('div');
     tbl.className = 'inline-table';
@@ -1036,64 +1469,77 @@ function showTyping() {
 }
 function hideTyping() { typingEl?.remove(); typingEl = null; }
 
+// ════════════ UI — RESUMEN ════════════
 function renderCuentas() {
+  ejecutarTraslados();
   guardarEstado();
-  const personas = Object.entries(E.personas);
+  const personas = Object.entries(E.personas).filter(([,d]) => leerPeriodo(d, E.clave));
   const list = document.getElementById('personas-list');
   const empty = document.getElementById('empty-state');
 
-  // KPIs
-  const total = personas.reduce((s,[,d]) => s+totalP(d), 0);
-  const noPag = personas.filter(([,d]) => !d.pagado);
-  const pag = personas.filter(([,d]) => d.pagado);
-  const cobrar = noPag.reduce((s,[,d]) => s+totalP(d), 0);
+  let total = 0, cobrar = 0, pagCount = 0, noPagCount = 0;
+  personas.forEach(([,d]) => {
+    const per = leerPeriodo(d, E.clave);
+    total += totalItems(per);
+    const saldo = saldoPeriodo(per);
+    if (saldo > 0) cobrar += saldo;
+    if (estaPagado(per)) pagCount++; else noPagCount++;
+  });
+
   document.getElementById('kpi-total').textContent = `$${total.toFixed(0)}`;
   document.getElementById('kpi-cobrar').textContent = `$${cobrar.toFixed(0)}`;
-  document.getElementById('kpi-pagaron').textContent = pag.length;
-  document.getElementById('kpi-adeudan').textContent = noPag.length;
+  document.getElementById('kpi-pagaron').textContent = pagCount;
+  document.getElementById('kpi-adeudan').textContent = noPagCount;
 
   const badge = document.getElementById('tab-badge');
-  if (noPag.length > 0) { badge.textContent = noPag.length; badge.classList.add('show'); }
+  if (noPagCount > 0) { badge.textContent = noPagCount; badge.classList.add('show'); }
   else { badge.classList.remove('show'); }
 
-  if (!personas.length) { empty.style.display = 'flex'; return; }
+  if (!personas.length) {
+    list.querySelectorAll('.card-persona').forEach(c => c.remove());
+    empty.style.display = 'flex';
+    return;
+  }
   empty.style.display = 'none';
 
-  // Cards
+  // Quitar tarjetas de personas que ya no están en este periodo
+  const nombresActuales = new Set(personas.map(([n])=>n));
+  list.querySelectorAll('.card-persona').forEach(c => { if (!nombresActuales.has(c.getAttribute('data-n'))) c.remove(); });
+
   personas.forEach(([nom, data]) => {
+    const per = leerPeriodo(data, E.clave);
     let card = list.querySelector(`[data-n="${nom}"]`);
-    const tot = totalP(data);
+    const tot = totalItems(per);
+    const abonado = totalAbonos(per);
+    const saldo = saldoPeriodo(per);
+    const pagado = estaPagado(per);
 
     if (!card) {
       card = document.createElement('div');
       card.setAttribute('data-n', nom);
       card.className = 'card-persona';
       list.appendChild(card);
-
-      // Toggle
-      card.addEventListener('click', e => {
-        if (e.target.closest('.card-head')) {
-          const body = card.querySelector('.card-body');
-          const ch = card.querySelector('.chevron');
-          body.classList.toggle('open');
-          ch.textContent = body.classList.contains('open') ? '▲' : '▼';
-        }
-      });
     }
 
-    // Agrupar por día
     const porDia = {};
-    (data.items||[]).forEach(it => { (porDia[it.dia] = porDia[it.dia]||[]).push(it); });
+    (per.items||[]).forEach(it => { (porDia[it.dia] = porDia[it.dia]||[]).push(it); });
 
     const bodyOpen = card.querySelector('.card-body')?.classList.contains('open');
 
-    card.className = `card-persona ${data.pagado ? 'pagado' : 'adeuda'}`;
+    let estadoClase = 'adeuda', badgeClase = 'deuda', badgeTxt = 'Adeuda';
+    if (pagado) { estadoClase = 'pagado'; badgeClase = 'pago'; badgeTxt = '✓ Pagó'; }
+    else if (abonado > 0) { estadoClase = 'abono'; badgeClase = 'abono'; badgeTxt = 'Abonó'; }
+
+    card.className = `card-persona ${estadoClase}`;
     card.innerHTML = `
       <div class="card-head">
         <div class="card-nombre">${cap(nom)}</div>
         <div class="card-right">
-          <span class="badge-estado ${data.pagado ? 'pago' : 'deuda'}">${data.pagado ? '✓ Pagó' : 'Adeuda'}</span>
-          <span class="card-total">$${tot.toFixed(0)}</span>
+          <span class="badge-estado ${badgeClase}">${badgeTxt}</span>
+          <div class="card-total-wrap">
+            <span class="card-total">$${(pagado ? tot : saldo).toFixed(0)}</span>
+            ${(!pagado && abonado > 0) ? `<span class="card-sub">de $${tot.toFixed(0)}</span>` : ''}
+          </div>
           <span class="chevron">${bodyOpen ? '▲' : '▼'}</span>
         </div>
       </div>
@@ -1104,7 +1550,7 @@ function renderCuentas() {
             ${porDia[dia].map(it => `
               <div class="item-line">
                 <div class="item-info">
-                  <span class="item-nombre">${it.qty > 1 ? it.qty+'× ' : ''}${it.producto}</span>
+                  <span class="item-nombre${it.traslado ? ' traslado' : ''}">${it.qty > 1 ? it.qty+'× ' : ''}${it.producto}</span>
                   ${it.fecha ? `<span class="item-hora">${formatHora(it.fecha)}</span>` : ''}
                 </div>
                 <span class="item-precio">$${(it.precio*(it.qty||1)).toFixed(0)}</span>
@@ -1112,10 +1558,15 @@ function renderCuentas() {
             `).join('')}
           </div>
         `).join('')}
+        ${(per.abonos||[]).length ? `
+          <div class="abono-bloque">
+            <div class="dia-label">Abonos</div>
+            ${per.abonos.map(ab => `<div class="abono-line"><span>${ab.esTraslado?'Trasladado':'Abono'} · ${formatFechaCorta(ab.fecha)}</span><span>-$${ab.monto.toFixed(0)}</span></div>`).join('')}
+          </div>
+        ` : ''}
       </div>
     `;
 
-    // Re-attach toggle (innerHTML reemplaza listeners)
     card.querySelector('.card-head').addEventListener('click', () => {
       const body = card.querySelector('.card-body');
       body.classList.toggle('open');
@@ -1123,6 +1574,86 @@ function renderCuentas() {
     });
   });
 }
+
+// ════════════ UI — CATÁLOGO ════════════
+function renderCatalogo() {
+  const listProd = document.getElementById('catalogo-productos-list');
+  const listCli = document.getElementById('catalogo-clientes-list');
+
+  const productos = Object.entries(E.catalogoProductos);
+  listProd.innerHTML = productos.length ? productos.map(([nlow, p]) => `
+    <div class="cat-item-row">
+      <span class="cat-item-nombre">${cap(p.nombre)}</span>
+      <span class="cat-item-precio">$${p.precio}</span>
+      <button class="cat-item-del" data-prod="${nlow}" title="Eliminar">✕</button>
+    </div>
+  `).join('') : `<div class="empty-state" style="padding:20px;"><div class="empty-icon">📦</div><div>Sin productos registrados aún</div></div>`;
+
+  const clientes = Object.entries(E.catalogoClientes);
+  listCli.innerHTML = clientes.length ? clientes.map(([nlow, c]) => `
+    <div class="cat-item-row">
+      <span class="cat-item-nombre">${cap(c.nombre)}</span>
+      <button class="cat-item-del" data-cli="${nlow}" title="Eliminar">✕</button>
+    </div>
+  `).join('') : `<div class="empty-state" style="padding:20px;"><div class="empty-icon">👤</div><div>Sin clientes registrados aún</div></div>`;
+
+  listProd.querySelectorAll('[data-prod]').forEach(btn => {
+    btn.addEventListener('click', () => eliminarProductoUI(btn.getAttribute('data-prod')));
+  });
+  listCli.querySelectorAll('[data-cli]').forEach(btn => {
+    btn.addEventListener('click', () => eliminarClienteUI(btn.getAttribute('data-cli')));
+  });
+}
+
+function eliminarProductoUI(nlow) {
+  const pass = window.prompt('Escribe "Yo soy Petra" para confirmar la eliminación del producto:');
+  if (pass && norm(pass).includes(PASSWORD_NORM)) {
+    delete E.catalogoProductos[nlow];
+    E.historial.push(`Producto eliminado del catálogo: ${nlow}`);
+    guardarEstado();
+    renderCatalogo();
+    toast('Producto eliminado del catálogo');
+  } else if (pass !== null) {
+    toast('Contraseña incorrecta, no se eliminó');
+  }
+}
+
+function eliminarClienteUI(nlow) {
+  const pass = window.prompt('Escribe "Yo soy Petra" para confirmar la eliminación del cliente:');
+  if (pass && norm(pass).includes(PASSWORD_NORM)) {
+    delete E.catalogoClientes[nlow];
+    E.historial.push(`Cliente eliminado del catálogo: ${nlow}`);
+    guardarEstado();
+    renderCatalogo();
+    toast('Cliente eliminado del catálogo');
+  } else if (pass !== null) {
+    toast('Contraseña incorrecta, no se eliminó');
+  }
+}
+
+document.getElementById('cat-prod-add').addEventListener('click', () => {
+  const inNom = document.getElementById('cat-prod-nombre');
+  const inPre = document.getElementById('cat-prod-precio');
+  const nombre = inNom.value.trim();
+  const precio = Number(inPre.value);
+  if (!nombre || !precio || precio <= 0) { toast('Escribe nombre y precio válidos'); return; }
+  E.catalogoProductos[norm(nombre)] = { nombre, precio };
+  inNom.value = ''; inPre.value = '';
+  guardarEstado();
+  renderCatalogo();
+  toast('Producto registrado');
+});
+
+document.getElementById('cat-cli-add').addEventListener('click', () => {
+  const inNom = document.getElementById('cat-cli-nombre');
+  const nombre = inNom.value.trim();
+  if (!nombre) { toast('Escribe un nombre'); return; }
+  E.catalogoClientes[norm(nombre)] = { nombre };
+  inNom.value = '';
+  guardarEstado();
+  renderCatalogo();
+  toast('Cliente registrado');
+});
 
 // Toast
 function toast(msg, dur = 2500) {
@@ -1134,7 +1665,6 @@ function toast(msg, dur = 2500) {
 
 // ════════════ VOZ SÍNTESIS ════════════
 function elegirVoz(vs) {
-  // Prioriza voces más naturales (Google / Neural / Online) en español mexicano/latino
   const prioridades = [
     v => /Google/i.test(v.name) && /es[-_](MX|419)/i.test(v.lang),
     v => /Natural|Online|Neural|Wavenet/i.test(v.name) && /es[-_](MX|419)/i.test(v.lang),
@@ -1153,8 +1683,8 @@ function elegirVoz(vs) {
 function hablar(txt) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  // Los precios se dicen en pesos mexicanos, no dólares: "$50" → "50 pesos"
-  const limpio = txt.replace(/\$\s?(\d+(?:[.,]\d+)?)/g, '$1 pesos');
+  // Convierte "$50" o "$50 pesos" en "50 pesos" (evita duplicar "pesos pesos")
+  const limpio = txt.replace(/\$\s?(\d+(?:[.,]\d+)?)(\s*pesos)?/gi, '$1 pesos');
   const u = new SpeechSynthesisUtterance(limpio);
   u.rate = 1.03;
   u.pitch = 1;
@@ -1165,9 +1695,6 @@ function hablar(txt) {
 }
 
 // ════════════ MICRÓFONO (grabación + Whisper vía Groq) ════════════
-// El reconocimiento de voz del navegador (Web Speech API) es muy impreciso en español,
-// sobre todo con nombres propios y precios. En su lugar grabamos audio real y lo
-// transcribimos con whisper-large-v3 (mucho más preciso), usando las mismas keys con rotación.
 let mediaRecorder = null;
 let micStream = null;
 let audioChunks = [];
@@ -1255,7 +1782,7 @@ async function procesarAudio() {
     const inp = document.getElementById('chat-input');
     inp.value = texto;
     inp.dispatchEvent(new Event('input'));
-    enviar(); // se envía automáticamente al terminar de transcribir
+    enviar();
   } catch (e) {
     hint.classList.remove('visible');
     toast('Error al transcribir, intenta de nuevo');
@@ -1275,7 +1802,6 @@ async function groqTranscribe(blob) {
       fd.append('language', 'es');
       fd.append('temperature', '0');
       fd.append('response_format', 'json');
-      // El prompt ayuda a Whisper a sesgarse hacia el vocabulario del negocio
       fd.append('prompt', 'Tienda de fiado semanal. Nombres de clientes, productos y precios en pesos mexicanos.');
 
       const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
@@ -1298,7 +1824,6 @@ async function groqTranscribe(blob) {
   throw lastErr || new Error('Todas las keys de Groq fallaron');
 }
 
-
 // ════════════ FLUJO PRINCIPAL ════════════
 let busy = false;
 
@@ -1310,15 +1835,29 @@ async function enviar() {
   inp.value = ''; inp.style.height = 'auto';
   busy = true;
 
+  if (E.pendienteAccion) {
+    manejarPendiente(msg);
+    busy = false;
+    return;
+  }
+
   addMsg('user', msg);
   showTyping();
 
   try {
     const r = await callIA(msg);
     hideTyping();
-    if (r.acciones?.length) { ejecutar(r.acciones); renderCuentas(); }
-    addMsg('ia', r.respuesta || '...', r.tabla);
-    hablar(r.respuesta || '');
+    let extra = '';
+    if (r.acciones?.length) {
+      const resultado = ejecutar(r.acciones);
+      renderCuentas();
+      renderCatalogo();
+      extra = resultado.mensajeExtra;
+    }
+    const textoFinal = extra ? `${r.respuesta || '...'}\n\n${extra}` : (r.respuesta || '...');
+    addMsg('ia', textoFinal, r.tabla);
+    hablar(r.respuesta || extra || '');
+    actualizarBannerPendiente();
   } catch(e) {
     hideTyping();
     const err = 'Hubo un error al procesar. Intenta de nuevo.';
@@ -1332,13 +1871,10 @@ async function enviar() {
 
 // ════════════ PDF ════════════
 function generarPDF() {
-  const prs = Object.entries(E.personas);
+  const prs = Object.entries(E.personas).filter(([,d]) => leerPeriodo(d, E.clave));
   if (!prs.length) { toast('No hay registros para exportar'); return; }
 
-  const total = prs.reduce((s,[,d]) => s+totalP(d), 0);
-  const pag = prs.filter(([,d]) => d.pagado);
-  const noPag = prs.filter(([,d]) => !d.pagado);
-  const cobrar = noPag.reduce((s,[,d]) => s+totalP(d), 0);
+  let total = 0, cobrar = 0, pagCount = 0, noPagCount = 0;
   const hoy = new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte Semanal</title><style>
@@ -1348,7 +1884,7 @@ function generarPDF() {
   h1{font-size:20px;font-weight:700;letter-spacing:-.02em}
   .meta{color:#666;font-size:11px;margin-top:4px}
   .badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600}
-  .verde{background:#D1FAE5;color:#065F46}.rojo{background:#FEE2E2;color:#991B1B}
+  .verde{background:#D1FAE5;color:#065F46}.rojo{background:#FEE2E2;color:#991B1B}.amber{background:#FEF3C7;color:#92400E}
   .card{border:1px solid #E5E7EB;border-radius:8px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid}
   .card-h{background:#0D0F14;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
   .card-h .nm{font-weight:600;font-size:14px}
@@ -1358,6 +1894,7 @@ function generarPDF() {
   td:last-child{text-align:right;font-family:monospace}
   .dia-row td{background:#F9FAFB;color:#9CA3AF;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
   .total-row td{background:#EFF6FF;font-weight:700;color:#1D4ED8}
+  .abono-row td{background:#ECFDF5;color:#065F46}
   .resumen{background:#0D0F14;color:#E8EAF0;border-radius:8px;padding:20px;margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .kpi{background:rgba(255,255,255,.06);border-radius:6px;padding:12px}
   .kpi-l{font-size:10px;color:#8B91A8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
@@ -1371,29 +1908,36 @@ function generarPDF() {
     </div>
   </div>
   ${prs.map(([nom,data])=>{
-    const tot=totalP(data);
+    const per = leerPeriodo(data, E.clave);
+    const tot = totalItems(per);
+    const abonado = totalAbonos(per);
+    const saldo = saldoPeriodo(per);
+    const pagado = estaPagado(per);
+    total += tot; if (saldo>0) cobrar += saldo; if (pagado) pagCount++; else noPagCount++;
     const pd={};
-    data.items.forEach(i=>{(pd[i.dia]=pd[i.dia]||[]).push(i);});
+    per.items.forEach(i=>{(pd[i.dia]=pd[i.dia]||[]).push(i);});
+    const estadoBadge = pagado ? `<span class="badge verde">✓ Pagó</span>` : (abonado>0 ? `<span class="badge amber">Abonó $${abonado.toFixed(0)}</span>` : `<span class="badge rojo">Adeuda</span>`);
     return `<div class="card">
       <div class="card-h">
         <span class="nm">${cap(nom)}</span>
         <div style="display:flex;gap:10px;align-items:center">
-          <span class="badge ${data.pagado?'verde':'rojo'}">${data.pagado?'✓ Pagó':'Adeuda'}</span>
-          <span class="tot">$${tot.toFixed(0)}</span>
+          ${estadoBadge}
+          <span class="tot">$${(pagado?tot:saldo).toFixed(0)}</span>
         </div>
       </div>
       <table>${DIAS.filter(d=>pd[d]).map(dia=>`
         <tr class="dia-row"><td colspan="2">${dia}</td></tr>
         ${pd[dia].map(i=>`<tr><td>${i.qty>1?i.qty+'× ':''}${i.producto}${i.fecha?` <span style="color:#9CA3AF;font-size:10px">(${formatHora(i.fecha)})</span>`:''}</td><td>$${(i.precio*(i.qty||1)).toFixed(0)}</td></tr>`).join('')}
       `).join('')}
-      <tr class="total-row"><td>Total ${cap(nom)}</td><td>$${tot.toFixed(0)}</td></tr>
+      ${(per.abonos||[]).map(ab=>`<tr class="abono-row"><td>${ab.esTraslado?'Trasladado':'Abono'} (${formatFechaCorta(ab.fecha)})</td><td>-$${ab.monto.toFixed(0)}</td></tr>`).join('')}
+      <tr class="total-row"><td>Saldo ${cap(nom)}</td><td>$${(pagado?0:saldo).toFixed(0)}</td></tr>
       </table></div>`;
   }).join('')}
   <div class="resumen">
     <div class="kpi"><div class="kpi-l">Total fiado</div><div class="kpi-v kv-amber">$${total.toFixed(0)}</div></div>
     <div class="kpi"><div class="kpi-l">Por cobrar</div><div class="kpi-v kv-red">$${cobrar.toFixed(0)}</div></div>
-    <div class="kpi"><div class="kpi-l">Pagaron</div><div class="kpi-v kv-green">${pag.length} clientes</div></div>
-    <div class="kpi"><div class="kpi-l">Adeudan</div><div class="kpi-v kv-red">${noPag.length} clientes</div></div>
+    <div class="kpi"><div class="kpi-l">Pagaron</div><div class="kpi-v kv-green">${pagCount} clientes</div></div>
+    <div class="kpi"><div class="kpi-l">Adeudan</div><div class="kpi-v kv-red">${noPagCount} clientes</div></div>
   </div>
   <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script>
   </body></html>`;
@@ -1413,7 +1957,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('layout').classList.toggle('show-cuentas', btn.dataset.tab === 'cuentas');
+    const layout = document.getElementById('layout');
+    layout.classList.remove('show-cuentas','show-catalogo');
+    if (btn.dataset.tab === 'cuentas') layout.classList.add('show-cuentas');
+    else if (btn.dataset.tab === 'catalogo') { layout.classList.add('show-catalogo'); renderCatalogo(); }
   });
 });
 
@@ -1448,8 +1995,9 @@ speechSynthesis?.addEventListener?.('voiceschanged', () => speechSynthesis.getVo
 // Init
 document.getElementById('semana-chip').textContent = E.semana;
 renderCuentas();
+renderCatalogo();
 
-// ════════════ SALUDO PERSONALIZADO ════════════
+// ════════════ SALUDO PERSONALIZADO (corto) ════════════
 const NOMBRE_DUENA = 'Petra';
 
 function saludoPorHora() {
@@ -1460,15 +2008,13 @@ function saludoPorHora() {
 }
 
 function mostrarSaludo() {
-  const msg = `¡Hola ${NOMBRE_DUENA}! ${saludoPorHora()}. Dime qué hacer: "Agrega leche $22 a Rosa", "Pedro ya pagó", "¿Cuánto lleva María?", "Reporte de la semana". También puedes hablar con el micrófono 🎤`;
+  const msg = `¡Hola ${NOMBRE_DUENA}! ${saludoPorHora()}.`;
   addMsg('ia', msg);
   setTimeout(() => hablar(msg), 600);
 }
 
 setTimeout(mostrarSaludo, 200);
 
-// Vuelve a saludar cada vez que regresas a la app (aunque no cierres la pestaña),
-// siempre que hayas estado fuera más de 30 segundos.
 let ultimaVezOculto = null;
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
@@ -1480,7 +2026,6 @@ document.addEventListener('visibilitychange', () => {
     ultimaVezOculto = null;
   }
 });
-
 </script>
 </body>
 </html>
