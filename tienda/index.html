@@ -719,6 +719,40 @@ const E = {
 // E.semana siempre refleja el rango actual, se recalcula cuando cambia semanaLunes
 Object.defineProperty(E, 'semana', { get() { return formatSemana(this.semanaLunes); } });
 
+// ════════════ PERSISTENCIA LOCAL ════════════
+const STORAGE_KEY = 'fiadoapp_estado_v1';
+
+function guardarEstado() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      personas: E.personas,
+      historial: E.historial,
+      semanaLunes: E.semanaLunes.toISOString()
+    }));
+  } catch (e) {
+    console.warn('No se pudo guardar en local:', e);
+    if (e.name === 'QuotaExceededError') toast('⚠️ Espacio local lleno, no se pudo guardar');
+  }
+}
+
+function cargarEstado() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.personas && typeof data.personas === 'object') E.personas = data.personas;
+    if (Array.isArray(data.historial)) E.historial = data.historial;
+    if (data.semanaLunes) {
+      const f = new Date(data.semanaLunes);
+      if (!isNaN(f)) E.semanaLunes = f;
+    }
+  } catch (e) {
+    console.warn('No se pudo cargar el estado guardado:', e);
+  }
+}
+
+cargarEstado();
+
 function setSemana(nuevoLunes) {
   E.semanaLunes = lunesDeFecha(nuevoLunes);
   document.getElementById('semana-chip').textContent = E.semana;
@@ -793,6 +827,11 @@ REGLAS DE INTERPRETACIÓN:
 - "semana siguiente/que sigue/próxima" → periodo con periodo_direccion:"siguiente"
 - "semana actual/de hoy/regresa a hoy" → periodo con periodo_direccion:"actual"
 - "pon/cambia el periodo al/a la semana del/de [fecha o mes]" → periodo con periodo_fecha:"YYYY-MM-DD" (usa el año actual si no lo dan, y calcula la fecha exacta a la que se refieren)
+
+REGLA CRÍTICA — PRECIO FALTANTE (evita duplicados):
+- Si el usuario menciona un producto SIN precio (ej: "apúntale una fresca a Chuy"), NO generes ninguna acción "agregar" en ese turno. Deja "acciones": [] y en "respuesta" pregunta el precio dejando claro que AÚN NO está registrado (ej: "¿Cuánto cuesta la fresca? En cuanto me digas, se la agrego a Chuy."). Nunca digas "apuntado" o "listo" si todavía no tienes el precio.
+- Cuando el usuario responda con el precio (ej: "25 pesos", "cuesta 25", o solo "25"), usa el contexto de los mensajes anteriores para saber qué producto y persona corresponden, y genera UNA SOLA acción "agregar" con ese precio. No repitas ni agregues el mismo producto dos veces.
+- El campo "precio" de una acción "agregar" siempre debe ser un número mayor a 0; si no lo tienes, no incluyas la acción.
 - Si falta precio, pregunta gentilmente
 - Siempre responde los montos en pesos, ejemplo: "$50 pesos" o "$50"`;
 }
@@ -875,13 +914,23 @@ function ejecutar(acciones) {
 
     if (!a.persona) return;
     const nom = a.persona.toLowerCase().trim();
+
+    // Blindaje: si es "agregar" pero el precio no es válido (falta, es 0, o no es número),
+    // NO se crea nada. Esto evita ítems rotos y evita que se dupliquen productos cuando
+    // la IA pregunta el precio en un turno y lo agrega en el siguiente.
+    if (tipo === 'agregar') {
+      const precioNum = Number(a.precio);
+      if (!a.precio || isNaN(precioNum) || precioNum <= 0) return;
+    }
+
     if (!E.personas[nom]) E.personas[nom] = { items:[], pagado:false };
     const p = E.personas[nom];
     const dia = a.dia || diaHoy();
 
     if (tipo === 'agregar') {
-      p.items.push({ dia, producto: a.producto, precio: Number(a.precio), qty: Number(a.qty)||1 });
-      E.historial.push(`+${a.producto} $${a.precio} → ${nom} [${dia}]`);
+      const precioNum = Number(a.precio);
+      p.items.push({ dia, producto: a.producto, precio: precioNum, qty: Number(a.qty)||1 });
+      E.historial.push(`+${a.producto} $${precioNum} → ${nom} [${dia}]`);
     } else if (tipo === 'precio') {
       const idx = a.idx !== undefined ? a.idx : buscarItem(p, a.producto);
       if (idx >= 0) { const v = p.items[idx].precio; p.items[idx].precio = Number(a.precio); E.historial.push(`Precio ${p.items[idx].producto}/${nom}: $${v}→$${a.precio}`); }
@@ -966,6 +1015,7 @@ function showTyping() {
 function hideTyping() { typingEl?.remove(); typingEl = null; }
 
 function renderCuentas() {
+  guardarEstado();
   const personas = Object.entries(E.personas);
   const list = document.getElementById('personas-list');
   const empty = document.getElementById('empty-state');
@@ -1382,4 +1432,3 @@ setTimeout(() => {
 </script>
 </body>
 </html>
-
