@@ -74,6 +74,27 @@ body {
 
 .logo-sub { font-size: 0.72rem; color: var(--txt3); font-weight: 400; margin-top: 1px; }
 
+.semana-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.semana-arrow {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--txt2);
+  font-size: 1rem;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.semana-arrow:active { background: var(--surface3); }
+
 .semana-chip {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -84,6 +105,15 @@ body {
   color: var(--txt2);
   letter-spacing: 0.04em;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.semana-date-input {
+  position: absolute;
+  opacity: 0;
+  width: 1px; height: 1px;
+  pointer-events: none;
+  bottom: 0; left: 50%;
 }
 
 .topbar-right { display: flex; align-items: center; gap: 8px; }
@@ -279,12 +309,12 @@ body {
 
 .input-box {
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px 8px 8px 14px;
+  border-radius: 20px;
+  padding: 8px 8px 8px 16px;
   transition: border-color 0.2s;
 }
 
@@ -306,29 +336,30 @@ body {
 
 #chat-input::placeholder { color: var(--txt3); }
 
-.input-actions { display: flex; gap: 6px; align-items: flex-end; }
+.input-actions { display: flex; gap: 8px; align-items: center; }
 
 .btn-mic {
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border2);
-  background: var(--surface3);
-  color: var(--txt2);
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: white;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.15s;
   flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(79,127,255,0.35);
 }
-.btn-mic:hover { background: var(--border); color: var(--txt); }
+.btn-mic svg { width: 26px; height: 26px; }
+.btn-mic:hover { background: var(--accent2); border-color: var(--accent2); }
 .btn-mic.grabando {
-  background: rgba(239,68,68,0.2);
+  background: var(--red);
   border-color: var(--red);
-  color: var(--red);
   animation: mic-pulse 1.2s ease-in-out infinite;
 }
 @keyframes mic-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+  50% { box-shadow: 0 0 0 14px rgba(239,68,68,0); }
 }
 
 .btn-send {
@@ -568,7 +599,12 @@ body {
       <div class="logo-sub">Control semanal de crédito</div>
     </div>
   </div>
-  <div class="semana-chip" id="semana-chip">—</div>
+  <div class="semana-nav">
+    <button class="semana-arrow" id="semana-prev" title="Semana anterior">‹</button>
+    <div class="semana-chip" id="semana-chip">—</div>
+    <button class="semana-arrow" id="semana-next" title="Semana siguiente">›</button>
+    <input type="date" id="semana-date-input" class="semana-date-input">
+  </div>
 </div>
 
 <!-- TABS -->
@@ -649,21 +685,51 @@ body {
 <script>
 // ════════════ ESTADO ════════════
 const DIAS = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
-const E = {
-  personas: {},
-  semana: calcSemana(),
-  historial: []
-};
-
-function calcSemana() {
+function lunesDeHoy() {
   const hoy = new Date();
   const d = hoy.getDay();
   const diff = d === 0 ? -6 : 1 - d;
   const lun = new Date(hoy); lun.setDate(hoy.getDate() + diff);
-  const dom = new Date(lun); dom.setDate(lun.getDate() + 6);
+  lun.setHours(0,0,0,0);
+  return lun;
+}
+
+function lunesDeFecha(dateObj) {
+  const d = dateObj.getDay();
+  const diff = d === 0 ? -6 : 1 - d;
+  const lun = new Date(dateObj); lun.setDate(dateObj.getDate() + diff);
+  lun.setHours(0,0,0,0);
+  return lun;
+}
+
+function formatSemana(lunes) {
+  const dom = new Date(lunes); dom.setDate(lunes.getDate() + 6);
   const f = dt => dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short'}).toUpperCase();
-  return `${f(lun)} – ${f(dom)}`;
+  return `${f(lunes)} – ${f(dom)}`;
+}
+
+const E = {
+  personas: {},
+  semanaLunes: lunesDeHoy(),
+  historial: []
+};
+
+// E.semana siempre refleja el rango actual, se recalcula cuando cambia semanaLunes
+Object.defineProperty(E, 'semana', { get() { return formatSemana(this.semanaLunes); } });
+
+function setSemana(nuevoLunes) {
+  E.semanaLunes = lunesDeFecha(nuevoLunes);
+  document.getElementById('semana-chip').textContent = E.semana;
+  renderCuentas();
+}
+
+function moverSemana(pasos) {
+  const nueva = new Date(E.semanaLunes);
+  nueva.setDate(nueva.getDate() + pasos * 7);
+  setSemana(nueva);
+  toast(pasos > 0 ? 'Semana siguiente' : 'Semana anterior');
 }
 
 function diaHoy() {
@@ -681,9 +747,10 @@ function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 const histChat = [];
 
 function buildSystem() {
-  return `Eres el asistente de "FiadoApp", sistema de crédito semanal de una tienda.
+  const hoyReal = new Date().toLocaleDateString('es-MX',{weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  return `Eres el asistente de "FiadoApp", sistema de crédito semanal de una tienda mexicana. TODOS los precios son en PESOS MEXICANOS (MXN), nunca dólares.
 Hablas español mexicano informal y conciso. Eres rápido, práctico y amigable.
-Día actual: ${diaHoy()}. Semana: ${E.semana}.
+Fecha real de hoy: ${hoyReal} (${diaHoy()}). Periodo mostrado actualmente en la app: ${E.semana}.
 
 ESTADO ACTUAL:
 ${JSON.stringify(E.personas, null, 2)}
@@ -695,13 +762,15 @@ Responde SOLO con JSON sin markdown ni texto extra:
 {
   "acciones": [
     {
-      "tipo": "agregar"|"precio"|"pago"|"nopago"|"eliminar"|"corregir"|"noop",
+      "tipo": "agregar"|"precio"|"pago"|"nopago"|"eliminar"|"corregir"|"periodo"|"noop",
       "persona": "nombre_minusculas",
       "dia": "lunes|...|domingo",
       "producto": "...",
       "precio": número,
       "qty": número,
-      "idx": número_índice_opcional
+      "idx": número_índice_opcional,
+      "periodo_direccion": "anterior"|"siguiente"|"actual",
+      "periodo_fecha": "YYYY-MM-DD (fecha dentro de la semana deseada, si el usuario da una fecha o mes específico)"
     }
   ],
   "respuesta": "texto amigable al usuario",
@@ -720,8 +789,12 @@ REGLAS DE INTERPRETACIÓN:
 - "reporte / todo / resumen" → noop + tabla tipo semana
 - "¿quién pagó? / ¿cuántos pagaron?" → noop + tabla tipo pagos
 - "¿cuánto cobro / debo cobrar?" → noop + total adeudado
+- "cambia/muéstrame la semana pasada/anterior" → periodo con periodo_direccion:"anterior"
+- "semana siguiente/que sigue/próxima" → periodo con periodo_direccion:"siguiente"
+- "semana actual/de hoy/regresa a hoy" → periodo con periodo_direccion:"actual"
+- "pon/cambia el periodo al/a la semana del/de [fecha o mes]" → periodo con periodo_fecha:"YYYY-MM-DD" (usa el año actual si no lo dan, y calcula la fecha exacta a la que se refieren)
 - Si falta precio, pregunta gentilmente
-- Siempre responde con $`;
+- Siempre responde los montos en pesos, ejemplo: "$50 pesos" o "$50"`;
 }
 
 // ════════════ GROQ (5 keys con rotación automática) ════════════
@@ -786,7 +859,21 @@ async function callIA(msg) {
 function ejecutar(acciones) {
   (acciones||[]).forEach(a => {
     const tipo = a.tipo;
-    if (tipo === 'noop' || !a.persona) return;
+    if (tipo === 'noop') return;
+
+    if (tipo === 'periodo') {
+      if (a.periodo_direccion === 'anterior') moverSemana(-1);
+      else if (a.periodo_direccion === 'siguiente') moverSemana(1);
+      else if (a.periodo_direccion === 'actual') setSemana(lunesDeHoy());
+      else if (a.periodo_fecha) {
+        const f = new Date(a.periodo_fecha + 'T00:00:00');
+        if (!isNaN(f)) setSemana(f);
+      }
+      E.historial.push(`Periodo cambiado a: ${E.semana}`);
+      return;
+    }
+
+    if (!a.persona) return;
     const nom = a.persona.toLowerCase().trim();
     if (!E.personas[nom]) E.personas[nom] = { items:[], pagado:false };
     const p = E.personas[nom];
@@ -971,14 +1058,34 @@ function toast(msg, dur = 2500) {
 }
 
 // ════════════ VOZ SÍNTESIS ════════════
+function elegirVoz(vs) {
+  // Prioriza voces más naturales (Google / Neural / Online) en español mexicano/latino
+  const prioridades = [
+    v => /Google/i.test(v.name) && /es[-_](MX|419)/i.test(v.lang),
+    v => /Natural|Online|Neural|Wavenet/i.test(v.name) && /es[-_](MX|419)/i.test(v.lang),
+    v => /Google/i.test(v.name) && /^es/i.test(v.lang),
+    v => /Natural|Online|Neural|Wavenet/i.test(v.name) && /^es/i.test(v.lang),
+    v => /es[-_](MX|419)/i.test(v.lang),
+    v => /^es/i.test(v.lang)
+  ];
+  for (const test of prioridades) {
+    const found = vs.find(test);
+    if (found) return found;
+  }
+  return null;
+}
+
 function hablar(txt) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(txt);
-  u.lang = 'es-MX'; u.rate = 1.05;
+  // Los precios se dicen en pesos mexicanos, no dólares: "$50" → "50 pesos"
+  const limpio = txt.replace(/\$\s?(\d+(?:[.,]\d+)?)/g, '$1 pesos');
+  const u = new SpeechSynthesisUtterance(limpio);
+  u.rate = 1.03;
+  u.pitch = 1;
   const vs = speechSynthesis.getVoices();
-  const v = vs.find(x => /es[-_](MX|419|ES)/i.test(x.lang)) || vs.find(x => /^es/i.test(x.lang));
-  if (v) u.voice = v;
+  const v = elegirVoz(vs);
+  if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'es-MX'; }
   speechSynthesis.speak(u);
 }
 
@@ -1073,9 +1180,7 @@ async function procesarAudio() {
     const inp = document.getElementById('chat-input');
     inp.value = texto;
     inp.dispatchEvent(new Event('input'));
-    inp.focus();
-    inp.setSelectionRange(inp.value.length, inp.value.length);
-    toast('Revisa el texto y toca enviar ✓');
+    enviar(); // se envía automáticamente al terminar de transcribir
   } catch (e) {
     hint.classList.remove('visible');
     toast('Error al transcribir, intenta de nuevo');
@@ -1235,6 +1340,21 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('layout').classList.toggle('show-cuentas', btn.dataset.tab === 'cuentas');
   });
+});
+
+document.getElementById('semana-prev').addEventListener('click', () => moverSemana(-1));
+document.getElementById('semana-next').addEventListener('click', () => moverSemana(1));
+
+document.getElementById('semana-chip').addEventListener('click', () => {
+  const input = document.getElementById('semana-date-input');
+  input.value = E.semanaLunes.toISOString().slice(0,10);
+  if (input.showPicker) input.showPicker();
+  else input.click();
+});
+
+document.getElementById('semana-date-input').addEventListener('change', function() {
+  if (!this.value) return;
+  setSemana(new Date(this.value + 'T00:00:00'));
 });
 
 document.getElementById('chat-input').addEventListener('keydown', e => {
