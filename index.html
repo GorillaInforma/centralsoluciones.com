@@ -1,0 +1,2738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Central Soluciones — Plataforma de Servicios Profesionales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #64748b;
+            --accent: #0ea5e9;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warn: #dc2626;
+            --warn-soft: #fee2e2;
+            --accent-soft: #dbeafe;
+            --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        html {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+            position: relative;
+        }
+
+        /* Icons */
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .icon-lg {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-accent {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            padding: 140px 2rem 80px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            position: relative;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: white;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            color: white;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-description {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            max-width: 540px;
+        }
+
+        /* Mode Selector */
+        .mode-selector {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .mode-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            background: var(--bg-secondary);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .mode-tab:hover:not(.active) {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .form-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .text-input, .category-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--bg-primary);
+        }
+
+        .text-input:focus, .category-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .text-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        textarea.text-input {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Status Panel */
+        .status-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+        }
+
+        .status-dot.live {
+            background: #10b981;
+        }
+
+        .status-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .central-status {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .central-state {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .status-message {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .active-lines {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .lines-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .lines-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* 3D Carousel */
+        .hero-visual {
+            position: relative;
+            height: 650px;
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: rotateCarousel 25s linear infinite;
+        }
+
+        @keyframes rotateCarousel {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .carousel-container:hover {
+            animation-play-state: paused;
+        }
+
+        .service-card {
+            position: absolute;
+            width: 260px;
+            height: 340px;
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-2xl);
+            left: 50%;
+            top: 50%;
+            transform-style: preserve-3d;
+            transition: all 0.3s ease;
+        }
+
+        .service-card:nth-child(1) {
+            transform: translate(-50%, -50%) rotateY(0deg) translateZ(320px);
+        }
+
+        .service-card:nth-child(2) {
+            transform: translate(-50%, -50%) rotateY(72deg) translateZ(320px);
+        }
+
+        .service-card:nth-child(3) {
+            transform: translate(-50%, -50%) rotateY(144deg) translateZ(320px);
+        }
+
+        .service-card:nth-child(4) {
+            transform: translate(-50%, -50%) rotateY(216deg) translateZ(320px);
+        }
+
+        .service-card:nth-child(5) {
+            transform: translate(-50%, -50%) rotateY(288deg) translateZ(320px);
+        }
+
+        .card-image-wrapper {
+            width: 100%;
+            height: 55%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 1.25rem;
+            height: 45%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+            background: white;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .card-description {
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        /* Process Section */
+        .process-section {
+            padding: 6rem 2rem;
+            background: var(--bg-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .process-card {
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .process-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .process-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .step-number {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--primary);
+            opacity: 0.1;
+            line-height: 1;
+        }
+
+        .step-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--primary);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .step-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Services Gallery Section */
+        .services-gallery {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            height: 400px;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover .gallery-image {
+            transform: scale(1.1);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+            padding: 2rem;
+            color: white;
+        }
+
+        .gallery-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .gallery-text {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Dashboard Section */
+        .dashboard-section {
+            padding: 6rem 2rem;
+            background: var(--bg-primary);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--bg-primary);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .dashboard-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .client-card { border-top: 4px solid var(--primary); }
+        .provider-card { border-top: 4px solid var(--accent); }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .provider-card .header-icon {
+            background: var(--accent);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-subtitle {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-card {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .provider-card .btn-card {
+            background: var(--accent);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text-primary);
+            color: white;
+            padding: 3rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-brand .logo-text {
+            color: white;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 2rem;
+        }
+
+        @media (max-width: 640px) {
+            .footer-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+
+            .footer-links {
+                gap: 0.75rem 1.25rem;
+            }
+        }
+
+        .footer-link {
+            color: var(--text-tertiary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-text {
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .btn-nav {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Dynamic Form Fields */
+        .dynamic-fields {
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 0.75rem;
+            border: 2px dashed var(--border);
+            display: none;
+        }
+
+        .dynamic-fields.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .field-group {
+            margin-bottom: 1rem;
+        }
+
+        .field-group:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .hero-visual {
+                height: 500px;
+                order: -1;
+            }
+
+            .service-card {
+                width: 200px;
+                height: 280px;
+            }
+
+            .service-card:nth-child(1) {
+                transform: translate(-50%, -50%) rotateY(0deg) translateZ(240px);
+            }
+
+            .service-card:nth-child(2) {
+                transform: translate(-50%, -50%) rotateY(72deg) translateZ(240px);
+            }
+
+            .service-card:nth-child(3) {
+                transform: translate(-50%, -50%) rotateY(144deg) translateZ(240px);
+            }
+
+            .service-card:nth-child(4) {
+                transform: translate(-50%, -50%) rotateY(216deg) translateZ(240px);
+            }
+
+            .service-card:nth-child(5) {
+                transform: translate(-50%, -50%) rotateY(288deg) translateZ(240px);
+            }
+
+            .hero-title {
+                font-size: 2.25rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.875rem;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .mode-tabs {
+                flex-direction: column;
+            }
+
+            .nav-content {
+                padding: 1rem;
+            }
+
+            .hero {
+                padding: 120px 1rem 60px;
+            }
+
+            .process-section,
+            .dashboard-section,
+            .services-gallery {
+                padding: 4rem 1rem;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .process-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-card {
+                width: 160px;
+                height: 240px;
+            }
+
+            .service-card:nth-child(1) {
+                transform: translate(-50%, -50%) rotateY(0deg) translateZ(180px);
+            }
+
+            .service-card:nth-child(2) {
+                transform: translate(-50%, -50%) rotateY(72deg) translateZ(180px);
+            }
+
+            .service-card:nth-child(3) {
+                transform: translate(-50%, -50%) rotateY(144deg) translateZ(180px);
+            }
+
+            .service-card:nth-child(4) {
+                transform: translate(-50%, -50%) rotateY(216deg) translateZ(180px);
+            }
+
+            .service-card:nth-child(5) {
+                transform: translate(-50%, -50%) rotateY(288deg) translateZ(180px);
+            }
+
+            .card-title {
+                font-size: 1rem;
+            }
+
+            .service-card .card-description {
+                font-size: 0.7rem;
+                line-height: 1.3;
+                margin-bottom: 0.4rem;
+            }
+
+            .service-card .card-content {
+                padding: 0.85rem;
+            }
+
+            .service-card .card-category {
+                font-size: 0.65rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .service-card {
+                width: 150px;
+                height: 250px;
+            }
+
+            .service-card:nth-child(1) { transform: translate(-50%, -50%) rotateY(0deg) translateZ(170px); }
+            .service-card:nth-child(2) { transform: translate(-50%, -50%) rotateY(72deg) translateZ(170px); }
+            .service-card:nth-child(3) { transform: translate(-50%, -50%) rotateY(144deg) translateZ(170px); }
+            .service-card:nth-child(4) { transform: translate(-50%, -50%) rotateY(216deg) translateZ(170px); }
+            .service-card:nth-child(5) { transform: translate(-50%, -50%) rotateY(288deg) translateZ(170px); }
+
+            .service-card .card-image-wrapper {
+                height: 48%;
+            }
+
+            .service-card .card-content {
+                height: 52%;
+            }
+
+            .service-card .card-description {
+                font-size: 0.65rem;
+                line-height: 1.25;
+            }
+        }
+
+        /* Smooth transitions */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+  /* ============ RESULT TICKET ============ */
+  #result-section{
+    background:var(--bg-tertiary);padding:0;
+    max-height:0;overflow:hidden;
+    transition:max-height .5s ease;
+  }
+  #result-section.open{max-height:4200px;}
+  .ticket{
+    max-width:620px;margin:0 auto;padding:64px 28px 88px;
+  }
+  .ticket-head{
+    display:none;
+  }
+  .ticket-code{
+    font-family:'SF Mono','Fira Code',monospace;background:var(--text-primary);color:#fff;
+    padding:6px 12px;font-size:12px;letter-spacing:0.05em;border-radius:999px;font-weight:600;
+  }
+  .ticket-conf{font-family:'SF Mono','Fira Code',monospace;font-size:11px;color:var(--text-tertiary);}
+  .ticket h2{font-size:32px;margin:16px 0 4px;}
+  .ticket p.desc{color:var(--text-secondary);font-size:14.5px;margin-bottom:28px;line-height:1.6;}
+
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;font-family:'SF Mono','Fira Code',monospace;font-size:10.5px;
+    letter-spacing:0.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;border:2px solid var(--border);background:#fff;
+    padding:13px 14px;font-size:14.5px;border-radius:0.75rem;
+    color:var(--text-primary);font-family:inherit;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .field textarea{resize:vertical;min-height:80px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .checkbox-field{display:flex;align-items:center;gap:8px;}
+  .checkbox-field input{width:auto;}
+  .checkbox-field label{margin:0;text-transform:none;font-size:13.5px;color:var(--text-primary);letter-spacing:0;}
+  .radio-group{display:flex;flex-wrap:wrap;gap:10px 18px;}
+  .radio-opt{
+    display:flex;align-items:center;gap:6px;
+    font-size:13.5px;text-transform:none;letter-spacing:0;color:var(--text-primary);
+    margin:0;cursor:pointer;
+  }
+  .radio-opt input{width:auto;accent-color:var(--primary);}
+
+  /* clarifying sub-question bubble under a field (Línea Validadora) */
+  .subq-box{
+    margin-top:8px;border-left:3px solid var(--primary);background:var(--accent-soft);
+    padding:12px 14px;border-radius:0.5rem;display:none;
+  }
+  .subq-box.show{display:block;}
+  .subq-box .subq-tag{font-family:'SF Mono','Fira Code',monospace;font-size:9.5px;color:var(--primary-dark);letter-spacing:0.08em;text-transform:uppercase;font-weight:600;}
+  .subq-box .subq-text{font-size:13px;color:var(--text-primary);margin:5px 0 8px;line-height:1.4;}
+  .subq-box input{
+    width:100%;border:1px solid var(--border);background:#fff;padding:9px 11px;
+    font-size:13px;border-radius:0.5rem;color:var(--text-primary);
+  }
+  .subq-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .subq-chip{
+    border:1px solid var(--primary);background:#fff;color:var(--primary-dark);
+    font-size:12.5px;font-weight:600;padding:7px 12px;
+    border-radius:999px;cursor:pointer;transition:background .15s,color .15s;
+  }
+  .subq-chip:hover{background:var(--primary);color:#fff;}
+  .field-status{font-family:'SF Mono','Fira Code',monospace;font-size:9.5px;letter-spacing:0.05em;margin-top:5px;display:none;align-items:center;gap:5px;}
+  .field-status.checking{display:flex;color:var(--text-tertiary);}
+  .field-status.ok{display:flex;color:var(--success);}
+
+  .submit-ticket{
+    margin-top:8px;width:100%;background:var(--primary);color:#fff;border:none;
+    padding:16px;font-weight:700;font-size:14.5px;box-shadow:var(--shadow-md);
+    cursor:pointer;border-radius:0.75rem;transition:all .2s;
+  }
+  .submit-ticket:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+  .submit-ticket:disabled{opacity:0.5;cursor:not-allowed;}
+
+  .confirm-box{
+    display:none;border:1px solid var(--success);background:#EAF7F1;
+    padding:22px;margin-top:18px;border-radius:0.75rem;
+  }
+  .confirm-box.show{display:block;}
+  .confirm-box .code{font-family:'SF Mono','Fira Code',monospace;color:var(--success);font-size:12px;font-weight:600;letter-spacing:0.05em;}
+  .confirm-box p{margin:8px 0 0;font-size:14px;color:var(--text-secondary);}
+
+  .summary-card-box{margin-top:18px;text-align:center;}
+  .summary-card-img{
+    max-width:100%;width:340px;border-radius:0.85rem;box-shadow:var(--shadow-xl);
+    border:1px solid var(--border);display:block;margin:0 auto;
+  }
+  .summary-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+  .summary-btn{
+    display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;
+    padding:0.7rem 1.1rem;border-radius:0.65rem;font-weight:600;font-size:13.5px;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .summary-btn:hover{transform:translateY(-2px);}
+  .summary-btn.whatsapp{background:#25D366;color:#fff;box-shadow:0 4px 12px rgba(37,211,102,.35);}
+  .summary-btn.download{background:var(--text-primary);color:#fff;}
+
+  /* ---- Panel Regulador (auditoría de la ficha completa) ---- */
+  .audit-panel{
+    margin-top:22px;border:1px solid var(--border);background:#fff;
+    border-radius:0.75rem;padding:20px;
+  }
+  .audit-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+  .audit-tag{font-family:'SF Mono','Fira Code',monospace;font-size:11px;color:var(--text-tertiary);letter-spacing:0.08em;text-transform:uppercase;}
+  .audit-score{font-family:'SF Mono','Fira Code',monospace;font-size:12px;color:var(--text-primary);font-weight:600;}
+  .audit-score.ok{color:var(--success);}
+  .audit-score.warn{color:var(--warn);}
+  .audit-btn{
+    background:#fff;border:2px solid var(--border);color:var(--text-primary);
+    font-weight:600;font-size:12.5px;padding:10px 14px;
+    border-radius:0.75rem;cursor:pointer;width:100%;transition:all .2s;
+  }
+  .audit-btn:hover{border-color:var(--primary);color:var(--primary);}
+  .audit-list{list-style:none;margin:12px 0 0;padding:0;display:none;}
+  .audit-list.show{display:block;}
+  .audit-list li{
+    font-size:12.5px;color:var(--text-secondary);padding:9px 0;border-top:1px solid var(--border);
+    display:flex;gap:8px;align-items:flex-start;
+  }
+  .audit-list li .flag{color:var(--warn);flex-shrink:0;}
+  .audit-list li.pass .flag{color:var(--success);}
+
+  /* ---- Panel de sugerencias de servicios relacionados ---- */
+  .suggest-panel{margin-top:28px;}
+  .suggest-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px;}
+  .suggest-tag{font-family:'SF Mono','Fira Code',monospace;font-size:11px;color:var(--text-tertiary);letter-spacing:0.08em;text-transform:uppercase;}
+  .suggest-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+  .suggest-card{
+    border:1px solid var(--border);background:#fff;border-radius:0.75rem;
+    padding:18px;cursor:pointer;transition:border-color .2s, transform .2s, box-shadow .2s;
+  }
+  .suggest-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow-md);}
+  .suggest-card .sc-code{font-family:'SF Mono','Fira Code',monospace;font-size:10.5px;color:var(--text-tertiary);}
+  .suggest-card h4{font-size:17px;margin:8px 0 4px;font-weight:700;letter-spacing:-0.01em;}
+  .suggest-card p{font-size:13px;color:var(--text-secondary);margin:0 0 8px;line-height:1.45;}
+  .suggest-card .sc-specs{display:flex;flex-wrap:wrap;gap:6px;}
+  .suggest-card .sc-specs span{
+    font-family:'SF Mono','Fira Code',monospace;font-size:10px;background:var(--bg-tertiary);
+    padding:4px 8px;border-radius:999px;color:var(--text-tertiary);
+  }
+
+  /* ---- Panel de negocios cercanos ---- */
+  .photo-panel{margin-top:28px;}
+  .biz-locate-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  .biz-locate-row input{
+    flex:1;min-width:180px;border:2px solid var(--border);background:#fff;
+    padding:12px 14px;font-size:14px;border-radius:0.75rem;color:var(--text-primary);
+  }
+  .biz-locate-row button{
+    background:var(--primary);color:#fff;border:none;padding:0 18px;
+    font-weight:600;font-size:12.5px;box-shadow:var(--shadow-md);
+    border-radius:0.75rem;cursor:pointer;white-space:nowrap;transition:all .2s;
+  }
+  .biz-locate-row button:hover{background:var(--primary-dark);}
+  .biz-detected{
+    font-family:'SF Mono','Fira Code',monospace;font-size:11.5px;color:var(--primary-dark);
+    margin-bottom:12px;display:none;align-items:center;gap:6px;
+  }
+  .biz-detected.show{display:flex;}
+  .biz-list{display:flex;flex-direction:column;gap:8px;}
+  .biz-card{
+    display:block;text-decoration:none;border:1px solid var(--border);background:#fff;
+    border-radius:0.5rem;padding:13px 15px;transition:border-color .15s, transform .15s;
+  }
+  .biz-card:hover{border-color:var(--primary);transform:translateY(-2px);}
+  .biz-card .bc-name{font-size:14.5px;font-weight:700;color:var(--text-primary);}
+  .biz-card .bc-addr{font-size:12.5px;color:var(--text-tertiary);margin-top:3px;}
+  .biz-empty{font-size:13px;color:var(--text-tertiary);}
+  .biz-empty a{color:var(--primary);}
+
+  .loading-row{font-family:'SF Mono','Fira Code',monospace;font-size:11.5px;color:var(--text-tertiary);display:flex;align-items:center;gap:8px;padding:8px 0;}
+
+
+  /* ============ CATEGORY DIRECTORY (grid dentro de la sección .services-gallery) ============ */
+  .dir-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:3rem;
+  }
+  .dir-row{
+    position:relative;overflow:hidden;
+    display:flex;flex-direction:column;justify-content:flex-end;gap:6px;
+    padding:26px 22px;min-height:132px;
+    background:linear-gradient(155deg,#ffffff 0%,var(--bg-secondary) 100%);
+    border:1px solid var(--border);border-radius:1.1rem;
+    cursor:pointer;
+    box-shadow:var(--shadow-sm);
+    transition:transform .25s ease, box-shadow .25s ease, border-color .2s ease, background .25s ease;
+  }
+  .dir-row::before{
+    content:"";position:absolute;top:0;left:0;height:100%;width:4px;
+    background:linear-gradient(180deg,var(--accent),var(--primary));
+    transform:scaleY(0);transform-origin:bottom;
+    transition:transform .3s ease;
+  }
+  .dir-row::after{
+    content:attr(data-num);position:absolute;top:-6px;right:12px;
+    font-size:54px;font-weight:900;
+    color:var(--accent-soft);line-height:1;pointer-events:none;
+    transition:color .25s ease;
+  }
+  .dir-row:hover{transform:translateY(-6px);box-shadow:var(--shadow-xl);border-color:var(--primary);background:#fff;}
+  .dir-row:hover::before{transform:scaleY(1);}
+  .dir-row:hover::after{color:var(--accent-soft);}
+  .dir-row:hover .dir-name{color:var(--primary);}
+  .dir-code{display:none;}
+  .dir-name{font-size:17px;font-weight:700;transition:color .15s;position:relative;z-index:1;}
+  .dir-desc{font-size:12.5px;color:var(--text-tertiary);position:relative;z-index:1;}
+  @media(max-width:860px){.dir-grid{grid-template-columns:repeat(2,1fr);}}
+
+
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <span class="logo-text">Central<span class="logo-accent">·</span>Soluciones</span>
+            </div>
+            <div class="nav-links">
+                <a href="#directorio" class="nav-link">Categorías</a>
+                <a href="#como-funciona" class="nav-link">Cómo funciona</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    <span class="badge-text">Conmutador de servicios</span>
+                </div>
+                <h1 class="hero-title">
+                    Tú describes lo que necesitas.<br>
+                    Nosotros hacemos la conexión.
+                </h1>
+                <p class="hero-description">
+                    Una sola central para cualquier servicio: hogar, diseño, legal, salud, eventos, tecnología y más.
+                    Escribe con tus propias palabras — nuestro operador automático identifica el servicio y arma la ficha
+                    exacta que hace falta, ya sea para contratar o para ofrecer.
+                </p>
+
+                <!-- Mode + Real Search (motor real de Central Soluciones) -->
+                <div class="mode-selector">
+                    <div class="mode-tabs" id="mode-toggle">
+                        <button type="button" class="mode-tab active" data-mode="hire">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+                            <span class="tab-text">Necesito un servicio</span>
+                        </button>
+                        <button type="button" class="mode-tab" data-mode="offer">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                            <span class="tab-text">Quiero ofrecerlo</span>
+                        </button>
+                    </div>
+
+                    <form class="form-container" id="search-form">
+                        <div class="input-group">
+                            <label class="input-label">¿Qué necesitas o qué ofreces?</label>
+                            <textarea class="text-input" id="search-input" placeholder="Ej: se me tapó el fregadero de la cocina, necesito alguien hoy mismo..." autocomplete="off"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" id="search-btn">
+                            <span class="btn-label">Conectar</span>
+                            <svg class="icon" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                        </button>
+                    </form>
+                    <div class="hint-line mono" id="hint-line" style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-tertiary);min-height:1.1em;font-family:'SF Mono','Fira Code',monospace;"></div>
+                </div>
+
+                <!-- Status Panel (motor real: refleja la solicitud enrutada) -->
+                <div class="status-panel" style="display:none;">
+                    <div class="status-indicator">
+                        <span class="status-dot live"></span>
+                        <span class="status-text">Estado en vivo</span>
+                    </div>
+                    <div class="central-status">
+                        <span class="central-state" id="device-code">CENTRAL/idle</span>
+                    </div>
+                    <p class="status-message" id="device-line">Esperando una solicitud…</p>
+                    <div class="active-lines">
+                        <span class="lines-count" id="linesCount">14</span>
+                        <span class="lines-label">LÍNEAS ACTIVAS · CONMUTADOR AUTOMÁTICO</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Carousel (decorativo) -->
+            <div class="hero-visual">
+                <div class="carousel-container">
+                    <div class="service-card">
+                        <div class="card-image-wrapper">
+                            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop" alt="Servicios del Hogar" class="card-image">
+                        </div>
+                        <div class="card-content">
+                            <div>
+                                <h3 class="card-title">Servicios del Hogar</h3>
+                                <p class="card-description">Electricistas, plomeros, pintores y más</p>
+                            </div>
+                            <span class="card-category">
+                                <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                                Hogar
+                            </span>
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="card-image-wrapper">
+                            <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=300&fit=crop" alt="Servicios Legales" class="card-image">
+                        </div>
+                        <div class="card-content">
+                            <div>
+                                <h3 class="card-title">Asesoría Legal</h3>
+                                <p class="card-description">Abogados especializados</p>
+                            </div>
+                            <span class="card-category">
+                                <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                Legal
+                            </span>
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="card-image-wrapper">
+                            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=300&fit=crop" alt="Tecnología" class="card-image">
+                        </div>
+                        <div class="card-content">
+                            <div>
+                                <h3 class="card-title">Tecnología</h3>
+                                <p class="card-description">Desarrollo web, apps, soporte IT</p>
+                            </div>
+                            <span class="card-category">
+                                <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
+                                Tech
+                            </span>
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="card-image-wrapper">
+                            <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop" alt="Diseño" class="card-image">
+                        </div>
+                        <div class="card-content">
+                            <div>
+                                <h3 class="card-title">Diseño Creativo</h3>
+                                <p class="card-description">Diseñadores gráficos, UX/UI</p>
+                            </div>
+                            <span class="card-category">
+                                <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                                Diseño
+                            </span>
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="card-image-wrapper">
+                            <img src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=400&h=300&fit=crop" alt="Salud" class="card-image">
+                        </div>
+                        <div class="card-content">
+                            <div>
+                                <h3 class="card-title">Salud y Bienestar</h3>
+                                <p class="card-description">Médicos, terapeutas, nutricionistas</p>
+                            </div>
+                            <span class="card-category">
+                                <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
+                                Salud
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ticket resultante (motor real: se llena dinámicamente al enviar el buscador) -->
+    <section id="result-section">
+        <div class="ticket" id="ticket"></div>
+    </section>
+
+    <!-- Services Gallery Section (directorio real y dinámico) -->
+    <section class="services-gallery" id="directorio">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">
+                    <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S9.17 2.5 10 2.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                    El tablero
+                </span>
+                <h2 class="section-title">Un servicio para cada línea.</h2>
+            </div>
+
+            <div class="dir-grid" id="dir-grid"></div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section id="como-funciona" class="process-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">
+                    <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                    El proceso
+                </span>
+                <h2 class="section-title">Como una central telefónica, pero para cualquier oficio.</h2>
+            </div>
+            
+            <div class="process-grid">
+                <div class="process-card" data-step="1">
+                    <div class="step-number">
+                        <span>01</span>
+                    </div>
+                    <div class="step-icon">
+                        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3 class="step-title">Describe el servicio</h3>
+                        <p class="step-description">
+                            Sin formularios largos ni menús interminables. Escribe lo que necesitas o lo que ofreces, 
+                            como se lo dirías a una persona.
+                        </p>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=300&fit=crop" alt="Describir" class="step-image">
+                </div>
+
+                <div class="process-card" data-step="2">
+                    <div class="step-number">
+                        <span>02</span>
+                    </div>
+                    <div class="step-icon">
+                        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3 class="step-title">La central identifica el servicio</h3>
+                        <p class="step-description">
+                            El sistema reconoce la categoría exacta —de más de una docena— y arma al instante 
+                            la ficha con los campos que ese oficio necesita.
+                        </p>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=400&h=300&fit=crop" alt="Procesamiento" class="step-image">
+                </div>
+
+                <div class="process-card" data-step="3">
+                    <div class="step-number">
+                        <span>03</span>
+                    </div>
+                    <div class="step-icon">
+                        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3 class="step-title">Se completa la ficha</h3>
+                        <p class="step-description">
+                            Confirmas los datos y tu solicitud queda lista para conectar con quien contrata 
+                            o quien ofrece el servicio.
+                        </p>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=400&h=300&fit=crop" alt="Completar" class="step-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">
+                    <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                    El tablero
+                </span>
+                <h2 class="section-title">Un servicio para cada línea.</h2>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- For Clients -->
+                <div class="dashboard-card client-card">
+                    <div class="card-header">
+                        <div class="header-icon">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                        </div>
+                        <h3 class="card-title">Para quien contrata</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-subtitle">¿Necesitas resolver algo ya?</h4>
+                        <p class="card-description">
+                            Describe el problema una vez y recibe una ficha lista para enviar a profesionales 
+                            de esa categoría, sin buscar entre decenas de perfiles.
+                        </p>
+                        <button class="btn-card" onclick="scrollToForm('need')">
+                            <span>Buscar un servicio</span>
+                            <svg class="icon" viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- For Providers -->
+                <div class="dashboard-card provider-card">
+                    <div class="card-header">
+                        <div class="header-icon">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        </div>
+                        <h3 class="card-title">Para quien ofrece</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-subtitle">¿Vives de tu oficio?</h4>
+                        <p class="card-description">
+                            Registra tu especialidad, tu zona de cobertura y tu experiencia. 
+                            La central te enruta las solicitudes de tu categoría.
+                        </p>
+                        <button class="btn-card" onclick="scrollToForm('offer')">
+                            <span>Ofrecer mi servicio</span>
+                            <svg class="icon" viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo-text">Central<span class="logo-accent">·</span>Soluciones</span>
+            </div>
+            <div class="footer-links">
+                <a href="#directorio" class="footer-link">Categorías</a>
+                <a href="#como-funciona" class="footer-link">Cómo funciona</a>
+                <a href="#" class="footer-link">Términos</a>
+                <a href="#" class="footer-link">Privacidad</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-text">
+                CENTRALSOLUCIONES.COM — CONMUTADOR DE SERVICIOS, LÍNEA ABIERTA 24/7
+            </p>
+        </div>
+    </footer>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <button class="btn-nav" onclick="scrollSection('up')" title="Arriba">
+            <svg class="icon" viewBox="0 0 24 24" style="width: 24px; height: 24px;"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+        </button>
+        <button class="btn-nav" onclick="scrollSection('down')" title="Abajo">
+            <svg class="icon" viewBox="0 0 24 24" style="width: 24px; height: 24px;"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+        </button>
+    </div>
+
+    <script>
+        /* ============ MOTOR DE SONIDO (sintetizado vía Web Audio API, sin archivos externos) ============ */
+        const SoundFX = (() => {
+            let ctx;
+            function getCtx(){
+                if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if(ctx.state === 'suspended') ctx.resume();
+                return ctx;
+            }
+            function tone(freq, start, dur, type, peak){
+                const c = getCtx();
+                const osc = c.createOscillator();
+                const gain = c.createGain();
+                osc.type = type || 'sine';
+                osc.frequency.setValueAtTime(freq, c.currentTime + start);
+                gain.gain.setValueAtTime(0.0001, c.currentTime + start);
+                gain.gain.exponentialRampToValueAtTime(peak || 0.06, c.currentTime + start + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + start + dur);
+                osc.connect(gain).connect(c.destination);
+                osc.start(c.currentTime + start);
+                osc.stop(c.currentTime + start + dur + 0.03);
+            }
+            function sweep(freqFrom, freqTo, start, dur, type, peak){
+                const c = getCtx();
+                const osc = c.createOscillator();
+                const gain = c.createGain();
+                osc.type = type || 'sine';
+                osc.frequency.setValueAtTime(freqFrom, c.currentTime + start);
+                osc.frequency.exponentialRampToValueAtTime(freqTo, c.currentTime + start + dur);
+                gain.gain.setValueAtTime(0.0001, c.currentTime + start);
+                gain.gain.exponentialRampToValueAtTime(peak || 0.07, c.currentTime + start + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + start + dur);
+                osc.connect(gain).connect(c.destination);
+                osc.start(c.currentTime + start);
+                osc.stop(c.currentTime + start + dur + 0.03);
+            }
+            let lastHover = 0;
+            return {
+                prime(){ try{ getCtx(); }catch(e){} },
+                click(){ try{ tone(880, 0, 0.05, 'square', 0.045); tone(1320, 0.03, 0.05, 'square', 0.025); }catch(e){} },
+                hover(){
+                    const now = Date.now();
+                    if(now - lastHover < 90) return; // evita saturar con hover rápido
+                    lastHover = now;
+                    try{ tone(1600, 0, 0.035, 'sine', 0.018); }catch(e){}
+                },
+                toggle(){ try{ tone(700, 0, 0.05, 'triangle', 0.04); tone(950, 0.05, 0.06, 'triangle', 0.04); }catch(e){} },
+                connect(){
+                    try{
+                        sweep(320, 900, 0, 0.16, 'sawtooth', 0.05);
+                        tone(1200, 0.14, 0.1, 'square', 0.03);
+                        tone(1600, 0.2, 0.14, 'square', 0.03);
+                    }catch(e){}
+                },
+                success(){
+                    try{
+                        tone(523.25, 0, 0.11, 'triangle', 0.05);
+                        tone(659.25, 0.09, 0.11, 'triangle', 0.05);
+                        tone(783.99, 0.18, 0.14, 'triangle', 0.055);
+                        tone(1046.5, 0.3, 0.24, 'triangle', 0.06);
+                    }catch(e){}
+                },
+                whatsapp(){
+                    try{
+                        tone(600, 0, 0.06, 'sine', 0.05);
+                        tone(900, 0.07, 0.09, 'sine', 0.05);
+                        tone(1300, 0.15, 0.16, 'sine', 0.05);
+                    }catch(e){}
+                },
+                error(){ try{ tone(220, 0, 0.12, 'sawtooth', 0.045); tone(160, 0.1, 0.18, 'sawtooth', 0.045); }catch(e){} }
+            };
+        })();
+        ['pointerdown','keydown'].forEach(evt => document.addEventListener(evt, () => SoundFX.prime(), { once:true, passive:true }));
+
+        // Sonido genérico para botones, enlaces y tarjetas de categoría (delegado)
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('a.nav-link, a.footer-link, .dir-row, .audit-btn, #biz-search-btn, .suggestion-chip, .sfx-click, .card-suggest');
+            if(el) SoundFX.click();
+        });
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('.dir-row, .service-card');
+            if(el && !el.dataset.sfxHovering){
+                el.dataset.sfxHovering = '1';
+                SoundFX.hover();
+            }
+        });
+        document.addEventListener('mouseout', (e) => {
+            const el = e.target.closest('.dir-row, .service-card');
+            if(el) delete el.dataset.sfxHovering;
+        });
+
+        // Navbar scroll shadow
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            navbar.style.boxShadow = window.pageYOffset > 100 ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none';
+        });
+
+        // Reveal de tarjetas de proceso / dashboard al hacer scroll
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -100px 0px' };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('visible'), index * 150);
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.process-card, .dashboard-card').forEach(card => observer.observe(card));
+
+        // Contador decorativo de líneas activas
+        const linesCountEl = document.getElementById('linesCount');
+        let currentLines = 14;
+        setInterval(() => {
+            currentLines = Math.max(10, Math.min(18, currentLines + Math.floor(Math.random() * 5) - 2));
+            if (linesCountEl) {
+                linesCountEl.textContent = currentLines;
+                linesCountEl.style.transform = 'scale(1.2)';
+                setTimeout(() => { linesCountEl.style.transform = 'scale(1)'; }, 200);
+            }
+        }, 5000);
+
+        // Botones del dashboard: cambian de modo y llevan al buscador real
+        function scrollToForm(mode){
+            setMode(mode === 'need' ? 'hire' : 'offer');
+            document.querySelector('.hero').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => { const el = document.getElementById('search-input'); if (el) el.focus(); }, 500);
+        }
+
+        // Botones flotantes de scroll
+        function scrollSection(direction) {
+            const windowHeight = window.innerHeight;
+            const currentScroll = window.pageYOffset;
+            if (direction === 'down') {
+                window.scrollTo({ top: currentScroll < windowHeight ? windowHeight : windowHeight * 2, behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Scroll suave para anclas de navegación
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        console.log('%cCentral Soluciones', 'font-size: 24px; font-weight: bold; color: #1e40af;');
+        console.log('%cPlataforma Profesional de Servicios', 'font-size: 14px; color: #64748b;');
+
+        /* ============================================================
+           MOTOR REAL — portado tal cual de la versión funcional:
+           catálogo de categorías, las 5 líneas de Groq (enrutadora,
+           validadora, sugeridora, negocios cercanos y reguladora),
+           construcción dinámica de la ficha y su auditoría en vivo.
+           ============================================================ */
+const CATEGORIES = [
+  {code:"HOG-01", name:"Hogar y reparaciones", desc:"Plomería, electricidad, carpintería", keywords:["fuga","tubería","fregadero","electric","enchufe","carpint","mueble","cerrajer","gotera","pintura de pared"],
+    fields:[
+      {key:"tipo_problema", label:"Tipo de problema", type:"select", options:["Plomería","Electricidad","Carpintería","Pintura","Cerrajería","Otro"]},
+      {key:"visita", label:"¿Requiere visita a domicilio?", type:"checkbox"}
+    ]},
+  {code:"LIM-02", name:"Limpieza", desc:"Hogar, oficina, profunda", keywords:["limpieza","limpiar","aseo","post obra"],
+    fields:[
+      {key:"tipo_limpieza", label:"Tipo de limpieza", type:"select", options:["Hogar","Oficina","Post-obra","Limpieza profunda"]},
+      {key:"frecuencia", label:"Frecuencia", type:"select", options:["Única vez","Semanal","Quincenal","Mensual"]}
+    ]},
+  {code:"BEL-03", name:"Belleza y bienestar", desc:"Corte, color, masajes", keywords:["corte de pelo","peluquer","manicure","masaje","maquillaje","spa","uñas"],
+    fields:[
+      {key:"servicio_bel", label:"Servicio", type:"select", options:["Corte","Color","Manicure/Pedicure","Masaje","Maquillaje","Otro"]},
+      {key:"lugar_bel", label:"¿En tu domicilio o en salón?", type:"select", options:["A domicilio","En salón","Cualquiera"]}
+    ]},
+  {code:"DIS-04", name:"Diseño y creatividad", desc:"Gráfico, web, foto, video", keywords:["logo","diseño","página web","sitio web","video","fotograf","branding","ilustra"],
+    fields:[
+      {key:"tipo_proyecto", label:"Tipo de proyecto", type:"select", options:["Logo / Branding","Sitio web","Video","Fotografía","Ilustración","Otro"]},
+      {key:"entrega", label:"Formato de entrega esperado", type:"text"}
+    ]},
+  {code:"TEC-05", name:"Tecnología y soporte", desc:"Desarrollo, reparación, redes", keywords:["computadora","laptop","software","app","desarrollo","programa","red wifi","celular"],
+    fields:[
+      {key:"tipo_soporte", label:"Tipo de soporte", type:"select", options:["Desarrollo de software","Reparación de equipos","Redes","Soporte remoto","Otro"]},
+      {key:"dispositivo", label:"Dispositivo o plataforma", type:"text"}
+    ]},
+  {code:"LEG-06", name:"Legal y trámites", desc:"Contratos, notarial, migratorio", keywords:["abogado","contrato","legal","notari","trámite migratorio","demanda"],
+    fields:[
+      {key:"tipo_tramite", label:"Tipo de trámite", type:"select", options:["Contrato","Constitución de empresa","Migratorio","Notarial","Otro"]},
+      {key:"docs_listos", label:"¿Ya tienes los documentos listos?", type:"checkbox"}
+    ]},
+  {code:"FIN-07", name:"Contabilidad y finanzas", desc:"Impuestos, nómina, auditoría", keywords:["contad","impuesto","nómina","factura","auditor"],
+    fields:[
+      {key:"servicio_fin", label:"Servicio", type:"select", options:["Declaración de impuestos","Nómina","Auditoría","Asesoría financiera","Otro"]},
+      {key:"tamano_negocio", label:"Tamaño del negocio", type:"select", options:["Persona natural","Pequeño negocio","Empresa mediana o grande"]}
+    ]},
+  {code:"EDU-08", name:"Educación y clases", desc:"Clases particulares, idiomas", keywords:["clases","tutor","profesor particular","idioma","matemática","enseñar"],
+    fields:[
+      {key:"materia", label:"Materia o habilidad", type:"text"},
+      {key:"modalidad_edu", label:"Modalidad", type:"select", options:["Presencial","Virtual","Cualquiera"]}
+    ]},
+  {code:"EVE-09", name:"Eventos y catering", desc:"Fiestas, banquetes, catering", keywords:["evento","fiesta","boda","catering","banquete","cumpleaños"],
+    fields:[
+      {key:"tipo_evento", label:"Tipo de evento", type:"text"},
+      {key:"invitados", label:"Número aproximado de invitados", type:"number"}
+    ]},
+  {code:"TRA-10", name:"Transporte y mudanzas", desc:"Mudanzas, envíos, carga", keywords:["mudanza","transporte","envío","flete","carga"],
+    fields:[
+      {key:"origen", label:"Origen", type:"text"},
+      {key:"destino", label:"Destino", type:"text"},
+      {key:"tipo_carga", label:"Tipo de carga", type:"text"}
+    ]},
+  {code:"CON-11", name:"Construcción y remodelación", desc:"Obra nueva, remodelación", keywords:["construc","remodela","albañil","obra","reforma"],
+    fields:[
+      {key:"tipo_obra", label:"Tipo de obra", type:"select", options:["Remodelación","Construcción nueva","Reparación estructural"]},
+      {key:"metros", label:"Metros cuadrados aproximados", type:"number"}
+    ]},
+  {code:"SAL-12", name:"Salud y cuidado", desc:"Consultas, cuidado, terapia", keywords:["médico","salud","enfermer","terapia","cuidador","psicólog"],
+    fields:[
+      {key:"tipo_consulta", label:"Tipo de consulta o cuidado", type:"text"},
+      {key:"modalidad_sal", label:"Modalidad", type:"select", options:["Presencial","Telemedicina"]}
+    ]},
+  {code:"MKT-13", name:"Marketing y negocios", desc:"Redes, publicidad, estrategia", keywords:["marketing","redes sociales","publicidad","ventas","estrategia de negocio"],
+    fields:[
+      {key:"objetivo_mkt", label:"Objetivo principal", type:"select", options:["Redes sociales","Publicidad paga","Estrategia de marca","Ventas"]},
+      {key:"presupuesto_mkt", label:"Presupuesto mensual aproximado", type:"text"}
+    ]},
+  {code:"GEN-14", name:"Otro / General", desc:"Cualquier otro servicio", keywords:[],
+    fields:[
+      {key:"detalle_general", label:"Cuéntanos con más detalle qué necesitas", type:"textarea"}
+    ]}
+];
+
+const COMMON_FIELDS_HIRE = [
+  {key:"nombre", label:"Nombre", type:"text"},
+  {key:"contacto", label:"Teléfono o correo", type:"text"},
+  {key:"ciudad", label:"Ciudad / zona", type:"text"},
+  {key:"urgencia", label:"Urgencia", type:"select", options:["Hoy","Esta semana","Flexible"]},
+  {key:"presupuesto", label:"Presupuesto estimado", type:"text"},
+];
+const COMMON_FIELDS_OFFER = [
+  {key:"nombre_prof", label:"Nombre o empresa", type:"text"},
+  {key:"contacto_prof", label:"Teléfono o correo", type:"text"},
+  {key:"zona_cobertura", label:"Zona de cobertura", type:"text"},
+  {key:"experiencia", label:"Años de experiencia", type:"number"},
+  {key:"tarifa", label:"Tarifa aproximada", type:"text"},
+  {key:"portafolio", label:"Enlace a portafolio o referencias (opcional)", type:"text"},
+];
+
+let currentMode = "hire"; // "hire" | "offer"
+
+/* Si prefieres no usar el panel "Claves API" cada vez, pega tus claves
+   reales aquí ABAJO en tu propia copia del archivo (en tu computadora).
+   No compartas ni subas el archivo a ningún lado después de hacerlo. */
+const HARDCODED_GROQ_KEY           = "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"; // ① enrutador
+const HARDCODED_GROQ_KEY_VALIDATOR = "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"; // ② validadora
+const HARDCODED_GROQ_KEY_SUGGEST   = "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"; // ③ sugeridora
+const HARDCODED_GROQ_KEY_PHOTOS    = "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"; // ④ visual
+const HARDCODED_GROQ_KEY_REGULATOR = "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"; // ⑤ reguladora
+
+let groqApiKey          = HARDCODED_GROQ_KEY;
+let groqApiKeyValidator = HARDCODED_GROQ_KEY_VALIDATOR;
+let groqApiKeySuggest   = HARDCODED_GROQ_KEY_SUGGEST;
+let groqApiKeyPhotos    = HARDCODED_GROQ_KEY_PHOTOS;
+let groqApiKeyRegulator = HARDCODED_GROQ_KEY_REGULATOR;
+
+/* ---------- render directory section (grid dinámico real, sin imágenes de stock) ---------- */
+const dirGrid = document.getElementById('dir-grid');
+dirGrid.innerHTML = CATEGORIES.map((c,i)=>`
+  <div class="dir-row" data-code="${c.code}" data-num="${String(i+1).padStart(2,'0')}">
+    <span class="dir-code mono">${c.code}</span>
+    <span class="dir-name">${c.name}</span>
+    <span class="dir-desc">${c.desc}</span>
+  </div>
+`).join('');
+dirGrid.querySelectorAll('.dir-row').forEach((el)=>{
+  el.addEventListener('click', ()=>{
+    document.getElementById('search-input').value = CATEGORIES.find(c=>c.code===el.dataset.code).name;
+    document.querySelector('.hero').scrollIntoView({behavior:'smooth'});
+    document.getElementById('search-input').focus();
+  });
+});
+
+/* ---------- mode toggle ---------- */
+const toggle = document.getElementById('mode-toggle');
+function setMode(mode){
+  currentMode = mode;
+  SoundFX.toggle();
+  toggle.classList.toggle('mode-offer', mode==='offer');
+  toggle.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
+}
+toggle.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click', ()=>setMode(b.dataset.mode));
+});
+
+
+
+/* ---------- hint line ---------- */
+const hintLine = document.getElementById('hint-line');
+function hint(text, routing){
+  hintLine.classList.toggle('routing', !!routing);
+  hintLine.innerHTML = routing ? `${text}<span class="cursor"></span>` : text;
+}
+
+/* ---------- local fallback classifier (sin IA) ---------- */
+function classifyLocally(text){
+  const t = text.toLowerCase();
+  let best = null, bestScore = 0;
+  for(const cat of CATEGORIES){
+    let score = 0;
+    for(const kw of cat.keywords){ if(t.includes(kw)) score++; }
+    if(score > bestScore){ bestScore = score; best = cat; }
+  }
+  return best || CATEGORIES[CATEGORIES.length-1]; // GEN-14 fallback
+}
+
+function buildLocalSpec(text){
+  const cat = classifyLocally(text);
+  const common = currentMode === 'hire' ? COMMON_FIELDS_HIRE : COMMON_FIELDS_OFFER;
+  return { code: cat.code, name: cat.name, fields: [...common, ...cat.fields], isFullSpec: true };
+}
+
+/* ---------- limpieza de la respuesta de la IA ---------- */
+const ALLOWED_FIELD_TYPES = ['text','textarea','select','number','date','time','tel','checkbox','radio'];
+function sanitizeAiFields(rawFields){
+  const seen = new Set();
+  return (Array.isArray(rawFields) ? rawFields : [])
+    .filter(f => f && f.key && f.label)
+    .slice(0, 10)
+    .map(f => {
+      let type = ALLOWED_FIELD_TYPES.includes(f.type) ? f.type : 'text';
+      let key = String(f.key).toLowerCase().replace(/[^a-z0-9_]/g,'_') || 'campo';
+      while(seen.has(key)){ key = key + '_x'; }
+      seen.add(key);
+      const out = { key, label: String(f.label).slice(0,80), type };
+      if(type === 'select' || type === 'radio'){
+        if(Array.isArray(f.options) && f.options.length){ out.options = f.options.slice(0,8).map(String); }
+        else { out.type = 'text'; }
+      }
+      if(f.placeholder) out.placeholder = String(f.placeholder).slice(0,120);
+      return out;
+    });
+}
+
+/* generic Groq caller shared by all 5 lines */
+async function callGroq(apiKey, systemPrompt, userText, opts){
+  opts = opts || {};
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: opts.model || "openai/gpt-oss-120b",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userText }
+      ],
+      temperature: opts.temperature ?? 0.4,
+      max_tokens: opts.max_tokens || 1000,
+      response_format: opts.json === false ? undefined : { type: "json_object" }
+    })
+  });
+  if(!res.ok) throw new Error("Groq request failed: " + res.status);
+  const data = await res.json();
+  const raw = data.choices?.[0]?.message?.content || (opts.json === false ? "" : "{}");
+  return opts.json === false ? raw : JSON.parse(raw);
+}
+
+/* ---------- generación de formulario con Groq (Línea ① — Central) ----------
+   Llama al endpoint de chat completions de Groq (compatible con OpenAI)
+   pidiendo un JSON con el servicio detectado Y los campos de formulario
+   exactos para ese servicio puntual — no una categoría fija, sino un
+   formulario a medida para cualquier caso: "quiero una pizza", "necesito
+   un abogado de tránsito", "doy clases de guitarra", lo que sea.
+   Nota: esta llamada se hace directo desde el navegador con la clave
+   pegada en el panel o en HARDCODED_GROQ_KEY — válido para probar el
+   flujo. Para producción, esa llamada debe hacerse desde un backend/
+   proxy propio para no exponer la clave de API en el cliente.
+------------------------------------------------------------------ */
+async function generateFormWithGroq(text, mode){
+  const modeText = mode === 'hire'
+    ? 'El usuario está buscando CONTRATAR este servicio (es el cliente que lo necesita).'
+    : 'El usuario está OFRECIENDO este servicio (es el profesional o negocio que lo presta).';
+
+  const systemPrompt = `Eres el generador de formularios de "Central Soluciones", una central que conecta cualquier tipo de servicio: desde reparar un grifo hasta pedir una pizza, diseñar un logo, contratar un abogado o dar clases de guitarra.
+
+${modeText}
+
+A partir del texto del usuario:
+1. Identifica con precisión el servicio específico, no una categoría genérica (si dice "quiero una pizza", el servicio es "Pedido de pizza", no "Comida").
+2. Inventa un código corto de central telefónica: 3 letras + guión + 2 dígitos (ej: "PIZ-01", "PLO-04").
+3. Genera entre 6 y 10 campos de formulario en español, precisos y útiles para ese servicio y ese modo, como lo armaría un experto en ese oficio. Ejemplos de criterio: para una pizza pide tamaño, sabor/ingredientes, cantidad, dirección de entrega, método de pago, hora deseada y notas; para un plomero pide tipo de problema, urgencia, dirección y disponibilidad; para ofrecer clases de guitarra pide nivel que enseña, modalidad, tarifa por hora y zona. Adapta siempre el criterio al servicio real, sin usar una plantilla genérica.
+4. Usa el tipo de campo más adecuado: "text", "textarea", "select" (con "options"), "number", "date", "time", "tel", "checkbox", "radio" (con "options").
+5. Incluye siempre algún campo de contacto y de ubicación/dirección cuando tenga sentido para ese servicio.
+
+Responde ÚNICAMENTE con un JSON válido, sin texto adicional, con este formato exacto:
+{"code":"XXX-00","name":"Nombre específico del servicio detectado","fields":[{"key":"snake_case_unico","label":"Etiqueta en español","type":"text|textarea|select|number|date|time|tel|checkbox|radio","options":["solo si type es select o radio"],"placeholder":"opcional"}]}`;
+
+  const parsed = await callGroq(groqApiKey, systemPrompt, text);
+  const fields = sanitizeAiFields(parsed.fields);
+  if(!fields.length) throw new Error("La IA no devolvió campos válidos");
+  return {
+    code: /^[A-Za-z]{2,4}-\d{2}$/.test(parsed.code || '') ? parsed.code.toUpperCase() : 'GEN-14',
+    name: parsed.name ? String(parsed.name).slice(0,80) : text,
+    fields,
+    isFullSpec: false
+  };
+}
+
+/* ---------- Línea ② Validadora: subpreguntas por campo ----------
+   Cuando el usuario completa un campo del ticket, esta línea evalúa si
+   la respuesta es suficientemente clara y específica para ese servicio.
+   Si detecta ambigüedad, devuelve una subpregunta puntual para afinarla.
+------------------------------------------------------------------ */
+async function validateFieldWithGroq(serviceName, fieldLabel, fieldValue){
+  const systemPrompt = `Eres la línea validadora de "Central Soluciones". Tu trabajo es revisar EN VIVO, apenas el usuario termina de escribir, UNA respuesta de un campo de un formulario para el servicio "${serviceName}", y exigir precisión 100% antes de darla por buena. No te conformas con "suena bien": si un profesional no podría actuar sobre esa respuesta sin adivinar nada, no está completa.
+
+Presta atención especial a datos de ubicación/dirección: si la respuesta es solo una colonia, barrio, o nombre de lugar suelto (ej. "Rosario", "por el centro", "cerca del oxxo") sin ciudad, estado o código postal, NO la des por clara. En ese caso pide primero el código postal (es el dato que más precisión aporta de una sola vez, porque de ahí se deduce colonia/ciudad/estado); si el usuario no lo tiene, entonces pide ciudad y estado.
+
+Cuando exista más de una interpretación razonable o completions típicas para ese dato, incluye en "options" de 2 a 5 opciones concretas y cortas que el usuario podría elegir con un clic en vez de escribir (ej. para una colonia común en varias ciudades, sugiere "Rosario, León, Guanajuato" y "Rosario, Culiacán, Sinaloa"; para una urgencia vaga sugiere franjas horarias típicas). Si no aplican opciones claras, deja "options" vacío.
+
+Si la respuesta ya es 100% clara, específica y suficiente, responde que está completa con "clear": true.
+Si es vaga, incompleta, ambigua, o le falta un dato clave, responde "clear": false y genera UNA sola subpregunta corta y concreta en español para pedir justo el dato que falta (prioriza pedir código postal para direcciones incompletas).
+
+Responde ÚNICAMENTE con un JSON con este formato exacto:
+{"clear": true|false, "subquestion": "pregunta corta en español o cadena vacía si clear es true", "options": ["opción corta 1","opción corta 2"]}`;
+
+  const userText = `Campo: "${fieldLabel}"\nRespuesta del usuario: "${fieldValue}"`;
+  const parsed = await callGroq(groqApiKeyValidator, systemPrompt, userText, {temperature:0.2, max_tokens:280});
+  return {
+    clear: !!parsed.clear,
+    subquestion: parsed.subquestion ? String(parsed.subquestion).slice(0,160) : '',
+    options: (Array.isArray(parsed.options) ? parsed.options : []).slice(0,5).map(o=>String(o).slice(0,60))
+  };
+}
+
+/* ---------- Línea ③ Sugeridora: servicios relacionados con specs ----------
+   A partir del servicio ya detectado, sugiere 2-4 servicios complementarios
+   o relacionados que el usuario podría necesitar, cada uno con sus propias
+   especificaciones resumidas (para que se entienda de un vistazo qué incluye).
+------------------------------------------------------------------ */
+async function suggestRelatedServicesWithGroq(serviceName, mode){
+  const modeText = mode === 'hire' ? 'que está contratando' : 'que está ofreciendo';
+  const systemPrompt = `Eres la línea de sugerencias de "Central Soluciones". El usuario ${modeText} el servicio "${serviceName}". Sugiere entre 2 y 4 servicios relacionados o complementarios que probablemente también le interesen (ej: si contrata un electricista, sugiere revisión de instalación completa o un pintor para después de la obra; si ofrece clases de guitarra, sugiere clases de canto o venta de partituras).
+
+Para cada sugerencia inventa un código de central (3 letras + guión + 2 dígitos), un nombre específico, una descripción de una frase, y 3 a 5 especificaciones cortas (2-4 palabras cada una) que resuman lo que ese servicio típicamente cubre.
+
+Responde ÚNICAMENTE con un JSON con este formato exacto:
+{"suggestions":[{"code":"XXX-00","name":"Nombre del servicio","description":"una frase","specs":["especificación corta","especificación corta"]}]}`;
+
+  const parsed = await callGroq(groqApiKeySuggest, systemPrompt, serviceName, {temperature:0.6, max_tokens:700});
+  return (Array.isArray(parsed.suggestions) ? parsed.suggestions : []).slice(0,4).map(s=>({
+    code: /^[A-Za-z]{2,4}-\d{2}$/.test(s.code||'') ? s.code.toUpperCase() : 'GEN-14',
+    name: String(s.name||'Servicio relacionado').slice(0,60),
+    description: String(s.description||'').slice(0,140),
+    specs: (Array.isArray(s.specs)?s.specs:[]).slice(0,5).map(x=>String(x).slice(0,30))
+  }));
+}
+
+/* ---------- Línea ④ Visual → ahora "Negocios cercanos" ----------
+   En vez de fotos genéricas sin relación real con el servicio, esta línea:
+   1) toma la ciudad que escribe el usuario y la geocodifica (detecta país,
+      estado/provincia y localidad exactos) vía Nominatim/OpenStreetMap —
+      gratis, sin clave;
+   2) le pide a Groq un término de búsqueda de negocio corto y preciso para
+      el servicio detectado (ej. "plomero", "cerrajero", "clases de guitarra");
+   3) busca negocios reales cercanos a esas coordenadas con ese término,
+      también vía Nominatim, y los muestra con su dirección y enlace real
+      a Google Maps.
+------------------------------------------------------------------ */
+async function geocodeCity(cityText){
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=1&q=${encodeURIComponent(cityText)}`;
+  const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+  if(!res.ok) throw new Error('geocode failed');
+  const data = await res.json();
+  if(!data.length) return null;
+  const r = data[0];
+  const a = r.address || {};
+  return {
+    lat: parseFloat(r.lat),
+    lon: parseFloat(r.lon),
+    city: a.city || a.town || a.village || a.municipality || a.county || cityText,
+    state: a.state || a.region || '',
+    country: a.country || ''
+  };
+}
+
+async function getBusinessSearchTermWithGroq(serviceName){
+  const systemPrompt = `Eres la línea de negocios cercanos de "Central Soluciones". A partir del nombre de un servicio, devuelve el término de búsqueda MÁS corto y natural que alguien escribiría en un buscador de mapas para encontrar un negocio que preste justo ese servicio cerca de su ubicación (ej. "Fuga de agua en cocina" → "plomero"; "Pedido de pizza" → "pizzería"; "Clases de guitarra" → "escuela de música"; "Logo / Branding" → "agencia de diseño gráfico"). Responde en español.
+
+Responde ÚNICAMENTE con un JSON con este formato exacto:
+{"term":"término corto en español"}`;
+  const parsed = await callGroq(groqApiKeyPhotos, systemPrompt, serviceName, {temperature:0.3, max_tokens:60});
+  return parsed.term ? String(parsed.term).slice(0,60) : serviceName;
+}
+
+async function searchNearbyBusinesses(lat, lon, term){
+  const delta = 0.12; // ~ radio amplio alrededor de la ciudad detectada
+  const viewbox = `${lon-delta},${lat+delta},${lon+delta},${lat-delta}`;
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6`
+    + `&bounded=1&viewbox=${viewbox}&q=${encodeURIComponent(term)}`;
+  const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+  if(!res.ok) throw new Error('business search failed');
+  const data = await res.json();
+  return data.map(r => {
+    const parts = String(r.display_name || '').split(',').map(s=>s.trim());
+    return {
+      name: parts[0] || term,
+      address: parts.slice(1, 4).join(', '),
+      mapUrl: `https://www.google.com/maps/search/?api=1&query=${r.lat},${r.lon}`
+    };
+  });
+}
+
+function buildBusinessCards(businesses){
+  return businesses.map(b => `
+    <a class="biz-card" href="${b.mapUrl}" target="_blank" rel="noopener">
+      <div class="bc-name">${b.name}</div>
+      <div class="bc-addr">${b.address}</div>
+    </a>`).join('');
+}
+
+/* ---------- Línea ⑤ Reguladora: audita la ficha completa ----------
+   Antes de enviar, revisa el conjunto de respuestas en busca de huecos,
+   contradicciones o datos poco creíbles, y da un veredicto general.
+------------------------------------------------------------------ */
+async function auditTicketWithGroq(serviceName, mode, answers){
+  const modeText = mode === 'hire' ? 'una solicitud para contratar' : 'un registro para ofrecer';
+  const systemPrompt = `Eres la línea reguladora de "Central Soluciones". Audita ${modeText} el servicio "${serviceName}" antes de que se envíe. Recibirás todos los campos y respuestas del formulario como JSON.
+
+Revisa: huecos evidentes (campos vacíos que deberían tener contenido), contradicciones entre respuestas, datos poco realistas (ej. presupuesto de $0, fechas imposibles), y datos de contacto con formato inválido.
+
+Responde ÚNICAMENTE con un JSON con este formato exacto:
+{"score": 0-100, "issues":[{"pass": true|false, "text":"observación corta en español"}]}
+Incluye entre 2 y 6 observaciones. Marca "pass": true para lo que sí está bien resuelto, y "pass": false solo para problemas reales.`;
+
+  const parsed = await callGroq(groqApiKeyRegulator, systemPrompt, JSON.stringify(answers), {temperature:0.2, max_tokens:600});
+  return {
+    score: Number.isFinite(parsed.score) ? Math.max(0,Math.min(100,parsed.score)) : 70,
+    issues: (Array.isArray(parsed.issues)?parsed.issues:[]).slice(0,6).map(i=>({
+      pass: !!i.pass,
+      text: String(i.text||'').slice(0,140)
+    }))
+  };
+}
+
+
+/* ---------- dynamic form rendering ---------- */
+function renderField(f){
+  const wrap = document.createElement('div');
+  if(f.type === 'checkbox'){
+    wrap.className = 'field checkbox-field';
+    wrap.innerHTML = `<input type="checkbox" id="f_${f.key}"><label for="f_${f.key}">${f.label}</label>`;
+  } else if(f.type === 'select'){
+    wrap.className = 'field';
+    wrap.innerHTML = `<label for="f_${f.key}">${f.label}</label>
+      <select id="f_${f.key}">${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`;
+  } else if(f.type === 'radio'){
+    wrap.className = 'field';
+    wrap.innerHTML = `<label>${f.label}</label>
+      <div class="radio-group">${f.options.map((o,i)=>`
+        <label class="radio-opt"><input type="radio" name="g_${f.key}" value="${o}" ${i===0?'checked':''}> ${o}</label>
+      `).join('')}</div>`;
+  } else if(f.type === 'textarea'){
+    wrap.className = 'field';
+    wrap.innerHTML = `<label for="f_${f.key}">${f.label}</label><textarea id="f_${f.key}" ${f.placeholder?`placeholder="${f.placeholder}"`:''}></textarea>`;
+  } else {
+    wrap.className = 'field';
+    wrap.innerHTML = `<label for="f_${f.key}">${f.label}</label><input type="${f.type}" id="f_${f.key}" ${f.placeholder?`placeholder="${f.placeholder}"`:''}>`;
+  }
+  /* status line + subquestion slot (Línea ② Validadora), skipped for checkbox */
+  if(f.type !== 'checkbox'){
+    const status = document.createElement('div');
+    status.className = 'field-status mono';
+    status.id = `status_${f.key}`;
+    wrap.appendChild(status);
+    const subq = document.createElement('div');
+    subq.className = 'subq-box';
+    subq.id = `subq_${f.key}`;
+    wrap.appendChild(subq);
+  }
+  return wrap;
+}
+
+/* attaches the Línea ② validator to a rendered field: as soon as the
+   user finishes writing (on blur), it asks Groq whether the answer is
+   100% precise. If not, it shows a follow-up question — plus, when there
+   are several reasonable precisions (e.g. an address missing city/state),
+   clickable option chips so the user resolves it in one tap instead of
+   typing. Every time a field settles, it also silently re-runs the full
+   ticket audit (Línea ⑤) in the background — no button needed. */
+function attachFieldValidator(f, serviceName){
+  if(f.type === 'checkbox'){
+    const cb = document.getElementById(`f_${f.key}`);
+    if(cb) cb.addEventListener('change', triggerAutoAudit);
+    return;
+  }
+  const getEl = () => f.type === 'radio'
+    ? document.querySelector(`input[name="g_${f.key}"]:checked`)
+    : document.getElementById(`f_${f.key}`);
+  const statusEl = document.getElementById(`status_${f.key}`);
+  const subqEl = document.getElementById(`subq_${f.key}`);
+
+  const renderSubq = (result)=>{
+    const chips = result.options.length
+      ? `<div class="subq-chips">${result.options.map(o=>`<button type="button" class="subq-chip" data-value="${o.replace(/"/g,'&quot;')}">${o}</button>`).join('')}</div>`
+      : '';
+    subqEl.innerHTML = `
+      <div class="subq-tag mono">Línea validadora</div>
+      <div class="subq-text">${result.subquestion}</div>
+      ${chips}
+      <input type="text" id="subqi_${f.key}" placeholder="O escribe aquí tu precisión...">
+    `;
+    subqEl.classList.add('show');
+    subqEl.querySelectorAll('.subq-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const target = getEl();
+        if(target){
+          target.value = target.value && !target.value.includes(chip.dataset.value)
+            ? `${target.value}, ${chip.dataset.value}`
+            : chip.dataset.value;
+        }
+        statusEl.className = 'field-status mono ok';
+        statusEl.textContent = '✓ Respuesta clara';
+        subqEl.classList.remove('show');
+        subqEl.innerHTML = '';
+        triggerAutoAudit();
+      });
+    });
+    const freeInput = document.getElementById(`subqi_${f.key}`);
+    freeInput.addEventListener('blur', ()=>{
+      const extra = freeInput.value.trim();
+      if(!extra) return;
+      const target = getEl();
+      if(target){
+        target.value = target.value ? `${target.value}, ${extra}` : extra;
+      }
+      statusEl.className = 'field-status mono ok';
+      statusEl.textContent = '✓ Respuesta clara';
+      subqEl.classList.remove('show');
+      subqEl.innerHTML = '';
+      triggerAutoAudit();
+    });
+  };
+
+  const triggerValidation = async ()=>{
+    const el = getEl();
+    const value = el ? (el.value || '').trim() : '';
+    if(!value || value.length < 2) return;
+    statusEl.className = 'field-status mono checking';
+    statusEl.textContent = 'Validando respuesta…';
+    subqEl.classList.remove('show');
+    try{
+      const result = await validateFieldWithGroq(serviceName, f.label, value);
+      if(result.clear || !result.subquestion){
+        statusEl.className = 'field-status mono ok';
+        statusEl.textContent = '✓ Respuesta clara';
+      } else {
+        statusEl.className = 'field-status mono';
+        statusEl.textContent = '';
+        renderSubq(result);
+      }
+    } catch(err){
+      console.warn('Validación falló, se omite:', err);
+      statusEl.className = 'field-status mono';
+      statusEl.textContent = '';
+    }
+    triggerAutoAudit();
+  };
+  const el = f.type === 'radio'
+    ? null
+    : document.getElementById(`f_${f.key}`);
+  if(el){
+    el.addEventListener('blur', triggerValidation);
+    if(f.type === 'select') el.addEventListener('change', triggerValidation);
+  } else if(f.type === 'radio'){
+    document.querySelectorAll(`input[name="g_${f.key}"]`).forEach(r=>r.addEventListener('change', triggerValidation));
+  }
+}
+
+/* ---------- Línea ③: render suggestion cards ---------- */
+async function renderSuggestions(serviceName, mode, container){
+  container.innerHTML = `<div class="loading-row mono"><span class="dot-loader"><span></span><span></span><span></span></span> Buscando servicios relacionados…</div>`;
+  try{
+    const suggestions = await suggestRelatedServicesWithGroq(serviceName, mode);
+    if(!suggestions.length){ container.innerHTML = ''; return; }
+    container.innerHTML = `
+      <div class="suggest-head">
+        <span class="suggest-tag mono">Línea sugeridora</span>
+      </div>
+      <div class="suggest-grid">
+        ${suggestions.map(s=>`
+          <div class="suggest-card" data-name="${s.name}">
+            <div class="sc-code mono">${s.code}</div>
+            <h4>${s.name}</h4>
+            <p>${s.description}</p>
+            <div class="sc-specs">${s.specs.map(sp=>`<span>${sp}</span>`).join('')}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.querySelectorAll('.suggest-card').forEach(card=>{
+      card.addEventListener('click', ()=>{
+        document.getElementById('search-input').value = card.dataset.name;
+        document.querySelector('.hero').scrollIntoView({behavior:'smooth'});
+        document.getElementById('search-input').focus();
+      });
+    });
+  } catch(err){
+    console.warn('Sugerencias falló:', err);
+    container.innerHTML = '';
+  }
+}
+
+/* ---------- Línea ④: render nearby-businesses panel ----------
+   Primero pide la ciudad (nunca hace nada sin ubicación). Al confirmarla,
+   la geocodifica para detectar país/estado/localidad, y con eso busca
+   negocios reales que ofrezcan ese servicio cerca de esas coordenadas. */
+function renderNearbyBusinesses(serviceName, container, prefillCity){
+  container.innerHTML = `
+    <div class="suggest-head">
+      <span class="suggest-tag mono">Línea de negocios cercanos</span>
+    </div>
+    <div class="biz-locate-row">
+      <input type="text" id="biz-city-input" placeholder="Ciudad (ej: León, Guanajuato)" value="${prefillCity ? prefillCity.replace(/"/g,'&quot;') : ''}">
+      <button type="button" id="biz-search-btn">Buscar cerca de mí</button>
+    </div>
+    <div class="biz-detected mono" id="biz-detected"></div>
+    <div id="biz-results"></div>
+  `;
+
+  const cityInput = document.getElementById('biz-city-input');
+  const searchBtn = document.getElementById('biz-search-btn');
+  const detectedEl = document.getElementById('biz-detected');
+  const resultsEl = document.getElementById('biz-results');
+
+  const runSearch = async ()=>{
+    const cityText = cityInput.value.trim();
+    if(cityText.length < 2){
+      resultsEl.innerHTML = `<p class="biz-empty">Escribe primero una ciudad para buscar negocios cercanos.</p>`;
+      return;
+    }
+    detectedEl.classList.remove('show');
+    resultsEl.innerHTML = `<div class="loading-row mono"><span class="dot-loader"><span></span><span></span><span></span></span> Detectando ubicación…</div>`;
+    try{
+      const loc = await geocodeCity(cityText);
+      if(!loc){
+        resultsEl.innerHTML = `<p class="biz-empty">No pudimos ubicar esa ciudad. Prueba escribiéndola con estado o país (ej: "León, Guanajuato, México").</p>`;
+        return;
+      }
+      detectedEl.innerHTML = `📍 ${[loc.city, loc.state, loc.country].filter(Boolean).join(', ')}`;
+      detectedEl.classList.add('show');
+      resultsEl.innerHTML = `<div class="loading-row mono"><span class="dot-loader"><span></span><span></span><span></span></span> Buscando negocios cercanos…</div>`;
+      const term = await getBusinessSearchTermWithGroq(serviceName);
+      const businesses = await searchNearbyBusinesses(loc.lat, loc.lon, term);
+      if(!businesses.length){
+        const q = encodeURIComponent(`${term} cerca de ${loc.city}`);
+        resultsEl.innerHTML = `<p class="biz-empty">No encontramos negocios de "${term}" registrados cerca de ahí. <a href="https://www.google.com/maps/search/${q}" target="_blank" rel="noopener">Buscar en Google Maps</a>.</p>`;
+        return;
+      }
+      resultsEl.innerHTML = `<div class="biz-list">${buildBusinessCards(businesses)}</div>`;
+    } catch(err){
+      console.warn('Búsqueda de negocios falló:', err);
+      resultsEl.innerHTML = `<p class="biz-empty">No se pudo completar la búsqueda en este momento.</p>`;
+    }
+  };
+
+  searchBtn.addEventListener('click', runSearch);
+  cityInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); runSearch(); } });
+  if(prefillCity && prefillCity.trim().length >= 2) runSearch();
+}
+
+/* ---------- Línea ⑤: auditoría automática, sin botón ----------
+   En cuanto un campo se resuelve (ver attachFieldValidator), se dispara
+   triggerAutoAudit() con un pequeño debounce para no llamar a Groq en
+   cada tecla. El botón queda solo como un "revisar ahora" manual opcional. */
+let auditDebounceTimer = null;
+let auditContext = null; // { spec, allFields }
+
+function collectTicketAnswers(allFields){
+  const answers = {};
+  allFields.forEach(f=>{
+    if(f.type === 'checkbox'){
+      const el = document.getElementById(`f_${f.key}`);
+      answers[f.label] = el ? (el.checked ? 'sí' : 'no') : '';
+    } else if(f.type === 'radio'){
+      const el = document.querySelector(`input[name="g_${f.key}"]:checked`);
+      answers[f.label] = el ? el.value : '';
+    } else {
+      const el = document.getElementById(`f_${f.key}`);
+      answers[f.label] = el ? el.value : '';
+    }
+  });
+  return answers;
+}
+
+/* ---------- folio único (más largo que el código corto de categoría) ---------- */
+function generateFolio(code){
+  const now = new Date();
+  const y = String(now.getFullYear()).slice(-2);
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const d = String(now.getDate()).padStart(2,'0');
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const rand = Math.random().toString(36).slice(2,7).toUpperCase();
+  return `CS-${code}-${y}${m}${d}${hh}${mm}-${rand}`;
+}
+
+/* ---------- genera la tarjeta resumen como imagen (canvas -> PNG) ---------- */
+function buildSummaryCardImage(spec, folio, modeLabel, answers){
+  const canvas = document.createElement('canvas');
+  const W = 680, H = 960;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // fondo
+  const bg = ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#1e3a8a'); bg.addColorStop(1,'#3730a3');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,180);
+  ctx.fillStyle = '#f8fafc'; ctx.fillRect(0,180,W,H-180);
+
+  // marca
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 30px Arial';
+  ctx.fillText('Central', 40, 75);
+  const w1 = ctx.measureText('Central').width;
+  ctx.fillStyle = '#7dd3fc';
+  ctx.fillText('·', 40 + w1, 75);
+  const wDot = ctx.measureText('·').width;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('Soluciones', 40 + w1 + wDot, 75);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '600 13px monospace';
+  ctx.fillText('CONMUTADOR DE SERVICIOS · LÍNEA ABIERTA 24/7', 40, 105);
+
+  // badge folio
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  roundRect(ctx, 40, 125, W-80, 38, 8); ctx.fill();
+  ctx.fillStyle = '#5eead4';
+  ctx.font = '700 15px monospace';
+  ctx.fillText(folio, 54, 150);
+
+  // título del servicio
+  let y = 225;
+  ctx.fillStyle = '#0f172a';
+  ctx.font = '700 26px Arial';
+  wrapText(ctx, `${modeLabel}: ${spec.name}`, 40, y, W-80, 32);
+  y += 60;
+
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(W-40,y); ctx.stroke();
+  y += 36;
+
+  // filas de respuestas
+  ctx.textBaseline = 'alphabetic';
+  const entries = Object.entries(answers).filter(([,v]) => v && String(v).trim() !== '').slice(0,10);
+  entries.forEach(([label, value]) => {
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '600 11px Arial';
+    ctx.fillText(label.toUpperCase(), 40, y);
+    y += 20;
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '500 16px Arial';
+    y = wrapText(ctx, String(value), 40, y, W-80, 22);
+    y += 22;
+  });
+
+  // pie
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.beginPath(); ctx.moveTo(40, H-70); ctx.lineTo(W-40, H-70); ctx.stroke();
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '500 12px Arial';
+  ctx.fillText(`Generado el ${new Date().toLocaleString('es-MX')}`, 40, H-40);
+
+  return canvas.toDataURL('image/png');
+}
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+  const words = text.split(' ');
+  let line = '';
+  for(let i=0;i<words.length;i++){
+    const test = line + words[i] + ' ';
+    if(ctx.measureText(test).width > maxWidth && line !== ''){
+      ctx.fillText(line, x, y);
+      line = words[i] + ' ';
+      y += lineHeight;
+    } else {
+      line = test;
+    }
+  }
+  ctx.fillText(line, x, y);
+  return y + lineHeight;
+}
+
+async function runAudit(){
+  if(!auditContext) return;
+  const { spec, allFields } = auditContext;
+  const auditScore = document.getElementById('audit-score');
+  const auditList = document.getElementById('audit-list');
+  const submitBtn = document.getElementById('ticket-submit');
+  if(!auditScore) return;
+
+  const answers = collectTicketAnswers(allFields);
+  const hasContent = Object.values(answers).some(v => String(v).trim().length > 0);
+  if(!hasContent) return;
+
+  auditScore.textContent = 'auditando…';
+  auditScore.className = 'audit-score';
+  try{
+    const audit = await auditTicketWithGroq(spec.name, currentMode, answers);
+    auditScore.textContent = `${audit.score}/100`;
+    auditScore.className = 'audit-score ' + (audit.score >= 70 ? 'ok' : 'warn');
+    auditList.innerHTML = audit.issues.map(i=>`
+      <li class="${i.pass ? 'pass':''}"><span class="flag">${i.pass ? '✓':'!'}</span>${i.text}</li>
+    `).join('');
+    auditList.classList.add('show');
+    if(submitBtn) submitBtn.disabled = audit.score < 40;
+  } catch(err){
+    console.warn('Auditoría falló:', err);
+    auditScore.textContent = 'sin conexión';
+    auditScore.className = 'audit-score warn';
+  }
+}
+
+function triggerAutoAudit(){
+  clearTimeout(auditDebounceTimer);
+  auditDebounceTimer = setTimeout(runAudit, 900);
+}
+
+function wireAuditPanel(spec, allFields){
+  auditContext = { spec, allFields };
+  const auditBtn = document.getElementById('audit-btn');
+  if(auditBtn){
+    auditBtn.addEventListener('click', ()=>{
+      clearTimeout(auditDebounceTimer);
+      runAudit();
+    });
+  }
+}
+
+function buildTicket(spec, usedAI, originalText){
+  const ticket = document.getElementById('ticket');
+  const baseline = currentMode === 'hire'
+    ? [{key:'nombre', label:'Nombre', type:'text'},{key:'contacto', label:'Teléfono o correo', type:'tel'}]
+    : [{key:'nombre_prof', label:'Nombre o empresa', type:'text'},{key:'contacto_prof', label:'Teléfono o correo', type:'tel'}];
+  const allFields = spec.isFullSpec
+    ? spec.fields
+    : [...baseline, ...spec.fields.filter(f => !baseline.some(b=>b.key===f.key))];
+  const modeLabel = currentMode === 'hire' ? 'Solicitud de servicio' : 'Registro de prestador';
+  const folio = generateFolio(spec.code);
+  spec.folio = folio;
+
+  ticket.innerHTML = '';
+  const head = document.createElement('div');
+  head.innerHTML = `
+    <div class="ticket-head">
+      <span class="ticket-code mono">${folio}</span>
+      <span class="ticket-conf mono">${usedAI ? 'ficha generada con IA' : 'ficha base local'}</span>
+    </div>
+    <h2>${modeLabel}: ${spec.name}</h2>
+    <p class="desc">Detectamos tu solicitud a partir de: "${originalText}". Completa la ficha para conectar la línea. Cada campo se valida en automático al salir de él, buscando precisión total — si algo queda ambiguo, se te ofrecen opciones concretas para resolverlo con un clic.</p>
+  `;
+  ticket.appendChild(head);
+
+  const form = document.createElement('form');
+  form.id = 'ticket-form';
+  allFields.forEach((f, i) => {
+    const el = renderField(f);
+    el.style.animationDelay = (i * 0.06) + 's';
+    form.appendChild(el);
+  });
+
+  /* audit panel (Línea ⑤ — Reguladora) */
+  const auditPanel = document.createElement('div');
+  auditPanel.className = 'audit-panel';
+  auditPanel.innerHTML = `
+    <div class="audit-head">
+      <span class="audit-tag mono">Línea reguladora · revisión automática</span>
+      <span class="audit-score mono" id="audit-score">esperando respuestas…</span>
+    </div>
+    <button type="button" class="audit-btn" id="audit-btn">Revisar ahora</button>
+    <ul class="audit-list" id="audit-list"></ul>
+  `;
+  form.appendChild(auditPanel);
+
+  const submitBtn = document.createElement('button');
+  submitBtn.type = 'submit';
+  submitBtn.id = 'ticket-submit';
+  submitBtn.className = 'submit-ticket';
+  submitBtn.style.marginTop = '18px';
+  submitBtn.textContent = currentMode === 'hire' ? 'Enviar solicitud' : 'Publicar mi servicio';
+  form.appendChild(submitBtn);
+
+  const confirmBox = document.createElement('div');
+  confirmBox.className = 'confirm-box';
+  confirmBox.id = 'confirm-box';
+  confirmBox.innerHTML = `<span class="code mono">LÍNEA CONECTADA</span><p>Tu ficha quedó registrada bajo el folio <strong>${folio}</strong>. Te contactaremos en cuanto encontremos la otra punta de la línea.</p>`;
+  ticket.appendChild(form);
+  ticket.appendChild(confirmBox);
+
+  /* suggestions + photo panels below the ticket */
+  const suggestPanel = document.createElement('div');
+  suggestPanel.className = 'suggest-panel';
+  suggestPanel.id = 'suggest-panel';
+  ticket.appendChild(suggestPanel);
+
+  const photoPanel = document.createElement('div');
+  photoPanel.className = 'photo-panel';
+  photoPanel.id = 'photo-panel';
+  ticket.appendChild(photoPanel);
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    confirmBox.classList.add('show');
+
+    const answers = collectTicketAnswers(allFields);
+    const imgDataUrl = buildSummaryCardImage(spec, folio, modeLabel, answers);
+
+    const summaryBox = document.createElement('div');
+    summaryBox.className = 'summary-card-box';
+    const img = document.createElement('img');
+    img.className = 'summary-card-img';
+    img.src = imgDataUrl;
+    img.alt = `Resumen ${folio}`;
+    summaryBox.appendChild(img);
+
+    const actions = document.createElement('div');
+    actions.className = 'summary-actions';
+
+    const downloadBtn = document.createElement('a');
+    downloadBtn.className = 'summary-btn download sfx-click';
+    downloadBtn.href = imgDataUrl;
+    downloadBtn.download = `central-soluciones-${folio}.png`;
+    downloadBtn.textContent = '⬇ Descargar imagen';
+    actions.appendChild(downloadBtn);
+
+    const waBtn = document.createElement('button');
+    waBtn.type = 'button';
+    waBtn.className = 'summary-btn whatsapp';
+    waBtn.textContent = '✆ Enviar por WhatsApp';
+    waBtn.addEventListener('click', () => {
+      SoundFX.whatsapp();
+      downloadBtn.click(); // descarga la imagen para que se pueda adjuntar en WhatsApp
+      const resumen = Object.entries(answers).filter(([,v]) => v && String(v).trim()!=='')
+        .map(([k,v]) => `${k}: ${v}`).join('\n');
+      const texto = `Central·Soluciones\nFolio: ${folio}\n${modeLabel}: ${spec.name}\n\n${resumen}\n\n(Se descargó una imagen resumen — adjúntala aquí en WhatsApp)`;
+      window.open(`https://wa.me/524771413433?text=${encodeURIComponent(texto)}`, '_blank');
+    });
+    actions.appendChild(waBtn);
+
+    summaryBox.appendChild(actions);
+    confirmBox.appendChild(summaryBox);
+
+    confirmBox.scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+
+  /* wire Línea ② on each rendered field */
+  allFields.forEach(f => attachFieldValidator(f, spec.name));
+  /* wire Línea ⑤ */
+  wireAuditPanel(spec, allFields);
+  /* fire Línea ③ y ④ in parallel, non-blocking */
+  renderSuggestions(spec.name, currentMode, suggestPanel);
+  const locationField = allFields.find(f => /ciudad|zona|ubicaci|direcci|lugar/i.test(f.key + ' ' + f.label));
+  renderNearbyBusinesses(spec.name, photoPanel, '');
+  if(locationField && locationField.type !== 'checkbox' && locationField.type !== 'radio'){
+    const locEl = document.getElementById(`f_${locationField.key}`);
+    if(locEl){
+      locEl.addEventListener('blur', ()=>{
+        const cityInput = document.getElementById('biz-city-input');
+        const searchBtn = document.getElementById('biz-search-btn');
+        if(cityInput && locEl.value.trim().length >= 2 && cityInput.value.trim() !== locEl.value.trim()){
+          cityInput.value = locEl.value.trim();
+          if(searchBtn) searchBtn.click();
+        }
+      });
+    }
+  }
+}
+
+/* ---------- main search flow ---------- */
+const searchForm = document.getElementById('search-form');
+const searchBtn = document.getElementById('search-btn');
+const resultSection = document.getElementById('result-section');
+
+searchForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const text = document.getElementById('search-input').value.trim();
+  if(!text){ hint('Escribe primero qué necesitas o qué ofreces.', false); SoundFX.error(); return; }
+  SoundFX.connect();
+
+  searchBtn.disabled = true;
+  const btnLabel = searchBtn.querySelector('.btn-label');
+  const originalLabel = btnLabel.textContent;
+  btnLabel.innerHTML = 'Enrutando <span class="dot-loader"><span></span><span></span><span></span></span>';
+  hint('Enrutando tu solicitud', true);
+  const deviceCodeEl = document.getElementById('device-code');
+  const deviceLineEl = document.getElementById('device-line');
+  if(deviceCodeEl){ deviceCodeEl.textContent = 'CENTRAL/enrutando…'; }
+  if(deviceLineEl){ deviceLineEl.textContent = text.length > 34 ? text.slice(0,34)+'…' : text; }
+
+  let spec, usedAI = false;
+  try{
+    if(groqApiKey){
+      spec = await generateFormWithGroq(text, currentMode);
+      usedAI = true;
+    } else {
+      spec = buildLocalSpec(text);
+      hint('Sin clave de Groq: usando ficha base local', true);
+    }
+  } catch(err){
+    console.warn('Groq form generation failed, using local fallback:', err);
+    spec = buildLocalSpec(text);
+  }
+
+  setTimeout(()=>{
+    hint(`Línea conectada → ${spec.code} · ${spec.name}`, false);
+    if(deviceCodeEl){ deviceCodeEl.textContent = `CENTRAL/${spec.code}`; }
+    if(deviceLineEl){ deviceLineEl.textContent = `Conectado con ${spec.name}`; }
+    buildTicket(spec, usedAI, text);
+    resultSection.classList.add('open');
+    SoundFX.success();
+    searchBtn.disabled = false;
+    btnLabel.textContent = originalLabel;
+    setTimeout(()=> resultSection.scrollIntoView({behavior:'smooth', block:'start'}), 150);
+  }, 700);
+});
+
+    </script>
+
+</html>
