@@ -561,11 +561,20 @@ body {
   align-items: center;
   font-size: 0.8rem;
   color: var(--txt2);
-  padding: 3px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  gap: 8px;
 }
 .item-line:last-child { border-bottom: none; }
-.item-precio { font-family: 'JetBrains Mono', monospace; color: var(--txt); font-size: 0.78rem; }
+.item-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.item-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-hora {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--txt3);
+  letter-spacing: 0.02em;
+}
+.item-precio { font-family: 'JetBrains Mono', monospace; color: var(--txt); font-size: 0.78rem; flex-shrink: 0; }
 
 /* Toast / notificación */
 .toast {
@@ -777,6 +786,18 @@ function totalP(p) {
 
 function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
+function formatHora(fecha) {
+  const d = fecha instanceof Date ? fecha : new Date(fecha);
+  if (isNaN(d)) return '';
+  return d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatFechaCorta(fecha) {
+  const d = fecha instanceof Date ? fecha : new Date(fecha);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }).toUpperCase();
+}
+
 // ════════════ IA ════════════
 const histChat = [];
 
@@ -929,8 +950,9 @@ function ejecutar(acciones) {
 
     if (tipo === 'agregar') {
       const precioNum = Number(a.precio);
-      p.items.push({ dia, producto: a.producto, precio: precioNum, qty: Number(a.qty)||1 });
-      E.historial.push(`+${a.producto} $${precioNum} → ${nom} [${dia}]`);
+      const ahora = new Date();
+      p.items.push({ dia, producto: a.producto, precio: precioNum, qty: Number(a.qty)||1, fecha: ahora.toISOString() });
+      E.historial.push(`+${a.producto} $${precioNum} → ${nom} [${dia} ${formatHora(ahora)}]`);
     } else if (tipo === 'precio') {
       const idx = a.idx !== undefined ? a.idx : buscarItem(p, a.producto);
       if (idx >= 0) { const v = p.items[idx].precio; p.items[idx].precio = Number(a.precio); E.historial.push(`Precio ${p.items[idx].producto}/${nom}: $${v}→$${a.precio}`); }
@@ -1078,10 +1100,13 @@ function renderCuentas() {
       <div class="card-body${bodyOpen ? ' open' : ''}">
         ${DIAS.filter(d => porDia[d]).map(dia => `
           <div class="dia-bloque">
-            <div class="dia-label">${dia}</div>
+            <div class="dia-label">${dia}${porDia[dia][0]?.fecha ? ' · ' + formatFechaCorta(porDia[dia][0].fecha) : ''}</div>
             ${porDia[dia].map(it => `
               <div class="item-line">
-                <span>${it.qty > 1 ? it.qty+'× ' : ''}${it.producto}</span>
+                <div class="item-info">
+                  <span class="item-nombre">${it.qty > 1 ? it.qty+'× ' : ''}${it.producto}</span>
+                  ${it.fecha ? `<span class="item-hora">${formatHora(it.fecha)}</span>` : ''}
+                </div>
                 <span class="item-precio">$${(it.precio*(it.qty||1)).toFixed(0)}</span>
               </div>
             `).join('')}
@@ -1359,7 +1384,7 @@ function generarPDF() {
       </div>
       <table>${DIAS.filter(d=>pd[d]).map(dia=>`
         <tr class="dia-row"><td colspan="2">${dia}</td></tr>
-        ${pd[dia].map(i=>`<tr><td>${i.qty>1?i.qty+'× ':''}${i.producto}</td><td>$${(i.precio*(i.qty||1)).toFixed(0)}</td></tr>`).join('')}
+        ${pd[dia].map(i=>`<tr><td>${i.qty>1?i.qty+'× ':''}${i.producto}${i.fecha?` <span style="color:#9CA3AF;font-size:10px">(${formatHora(i.fecha)})</span>`:''}</td><td>$${(i.precio*(i.qty||1)).toFixed(0)}</td></tr>`).join('')}
       `).join('')}
       <tr class="total-row"><td>Total ${cap(nom)}</td><td>$${tot.toFixed(0)}</td></tr>
       </table></div>`;
@@ -1424,11 +1449,38 @@ speechSynthesis?.addEventListener?.('voiceschanged', () => speechSynthesis.getVo
 document.getElementById('semana-chip').textContent = E.semana;
 renderCuentas();
 
-setTimeout(() => {
-  const msg = '¡Hola! Soy FiadoApp. Dime qué hacer: "Agrega leche $22 a Rosa", "Pedro ya pagó", "¿Cuánto lleva María?", "Reporte de la semana". También puedes hablar con el micrófono 🎤';
+// ════════════ SALUDO PERSONALIZADO ════════════
+const NOMBRE_DUENA = 'Petra';
+
+function saludoPorHora() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return 'Buenos días';
+  if (h >= 12 && h < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+
+function mostrarSaludo() {
+  const msg = `¡Hola ${NOMBRE_DUENA}! ${saludoPorHora()}. Dime qué hacer: "Agrega leche $22 a Rosa", "Pedro ya pagó", "¿Cuánto lleva María?", "Reporte de la semana". También puedes hablar con el micrófono 🎤`;
   addMsg('ia', msg);
   setTimeout(() => hablar(msg), 600);
-}, 200);
+}
+
+setTimeout(mostrarSaludo, 200);
+
+// Vuelve a saludar cada vez que regresas a la app (aunque no cierres la pestaña),
+// siempre que hayas estado fuera más de 30 segundos.
+let ultimaVezOculto = null;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    ultimaVezOculto = Date.now();
+  } else if (document.visibilityState === 'visible') {
+    if (ultimaVezOculto && (Date.now() - ultimaVezOculto) > 30000) {
+      mostrarSaludo();
+    }
+    ultimaVezOculto = null;
+  }
+});
+
 </script>
 </body>
 </html>
