@@ -1,6 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/cfe", "destination": "https://norvan.org" },
-    { "source": "/cfe/:path*", "destination": "https://norvan.org/:path*" }
-  ]
-}
