@@ -133,6 +133,7 @@
     color:#000;
   }
   .btn.solido:hover { background:#ddd; }
+  .btn:disabled { opacity:.5; cursor:default; }
 
   /* Tarjetas de intro */
   .tarjeta {
@@ -262,7 +263,7 @@
 <body>
 
   <!-- Video de fondo, siempre activo -->
-  <video id="videoFondo" autoplay muted loop playsinline></video>
+  <video id="videoFondo" autoplay muted loop playsinline preload="auto"></video>
   <div id="overlayOscuro"></div>
 
   <!-- Loader inicial -->
@@ -349,8 +350,12 @@
   const pantallaIntros = document.getElementById('pantallaIntros');
   const pantallaApp = document.getElementById('pantallaApp');
   const navPrincipal = document.getElementById('navPrincipal');
+  const iniciarBtn = document.getElementById('iniciarBtn');
 
-  const VIDEO_URL = "https://raw.githubusercontent.com/GorillaInforma/centralsoluciones.com/afd7dcb733481d00f656123f7ace33cbe8b01d9e/vid/Screen_Recording_20260719_130218_Pinterest.mp4";
+  // FIX: raw.githubusercontent.com no soporta bien range-requests para streaming
+  // de video en móvil -> se traba. jsDelivr sí sirve el mismo archivo del repo
+  // pero como CDN con soporte de range-requests, mucho más estable.
+  const VIDEO_URL = "https://cdn.jsdelivr.net/gh/GorillaInforma/centralsoluciones.com@afd7dcb733481d00f656123f7ace33cbe8b01d9e/vid/Screen_Recording_20260719_130218_Pinterest.mp4";
 
   // El video arranca solo, en bucle, sin sonido, y nunca se detiene
   video.src = VIDEO_URL;
@@ -361,15 +366,19 @@
     pantallaInicio.classList.add('visible');
   }
   video.addEventListener('canplay', ocultarLoader, { once:true });
-  // Respaldo por si 'canplay' tarda demasiado
+  // Respaldo por si 'canplay' tarda demasiado (o el video sigue trabado)
   setTimeout(ocultarLoader, 4000);
 
   // ---------- Botón Iniciar -> secuencia de intros ----------
-  document.getElementById('iniciarBtn').addEventListener('click', () => {
+  // FIX: { once:true } evita que un doble-tap (p.ej. mientras la página iba
+  // lenta por el video) dispare secuenciaIntros() dos veces y deje dos
+  // tarjetas "activa" superpuestas permanentemente.
+  iniciarBtn.addEventListener('click', () => {
+    iniciarBtn.disabled = true;
     pantallaInicio.classList.remove('visible');
     pantallaIntros.classList.add('visible');
     secuenciaIntros();
-  });
+  }, { once:true });
 
   function secuenciaIntros() {
     const tarjetas = ['tarjeta1', 'tarjeta2', 'tarjeta3', 'tarjetaContinuar'];
@@ -393,7 +402,7 @@
     pantallaIntros.classList.remove('visible');
     pantallaApp.classList.add('visible');
     navPrincipal.classList.remove('oculto-total');
-  });
+  }, { once:true });
 
   // ---------- Nav principal: mostrar paneles sin tocar el video ----------
   const navBtns = document.querySelectorAll('.navBtn');
