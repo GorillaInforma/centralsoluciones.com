@@ -352,14 +352,17 @@
   const navPrincipal = document.getElementById('navPrincipal');
   const iniciarBtn = document.getElementById('iniciarBtn');
 
-  // FIX: raw.githubusercontent.com no soporta bien range-requests para streaming
-  // de video en móvil -> se traba. jsDelivr sí sirve el mismo archivo del repo
-  // pero como CDN con soporte de range-requests, mucho más estable.
-  const VIDEO_URL = "https://cdn.jsdelivr.net/gh/GorillaInforma/centralsoluciones.com@afd7dcb733481d00f656123f7ace33cbe8b01d9e/vid/Screen_Recording_20260719_130218_Pinterest.mp4";
+  // Ruta relativa al mismo dominio: Vercel ya sirve /vid dentro del propio
+  // deploy de centralsoluciones.com, así que no depende de GitHub ni de
+  // ningún CDN externo -> mismo origen, más rápido, sin límites de tamaño.
+  const VIDEO_URL = "/vid/Screen_Recording_20260719_130218_Pinterest.mp4";
 
   // El video arranca solo, en bucle, sin sonido, y nunca se detiene
   video.src = VIDEO_URL;
   video.play().catch(()=>{});
+  video.addEventListener('error', () => {
+    console.error('No se pudo cargar el video de fondo:', video.error);
+  });
 
   function ocultarLoader() {
     loader.classList.add('oculto');
