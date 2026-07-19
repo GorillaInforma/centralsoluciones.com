@@ -2,311 +2,430 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>App</title>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body, html {
-    height: 100%;
-    width: 100%;
-    background: #111;
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    height:100%; width:100%;
+    background:#000;
     font-family: system-ui, sans-serif;
-    overflow: hidden;
+    overflow:hidden;
+    position:fixed;
+    inset:0;
+    -webkit-text-size-adjust:100%;
+    touch-action:manipulation;
   }
 
-  .pantalla {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    align-items: center;
-    justify-content: center;
+  /* ---------- VIDEO DE FONDO PERMANENTE ---------- */
+  #videoFondo {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    z-index:0;
+    pointer-events:none;
+    filter: grayscale(100%) contrast(1.05);
   }
 
-  .activa {
-    display: flex;
+  #overlayOscuro {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.35);
+    z-index:1;
+    pointer-events:none;
   }
 
-  /* Pantalla inicial */
-  #pantallaInicio {
-    background: #111;
-  }
-
-  #iniciarBtn {
-    padding: 16px 32px;
-    font-size: 18px;
-    background: #e0663d;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-
-  #iniciarBtn:hover {
-    background: #c9552f;
-  }
-
-  /* Pantalla de video */
-  #pantallaVideo {
-    background: #000;
-  }
-
-  #miVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none; /* evita que el usuario pause tocando/clickeando */
-  }
-
-  .controlesVideo {
-    position: absolute;
-    bottom: 30px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    z-index: 10;
-  }
-
-  .btnVideo {
-    padding: 12px 24px;
-    font-size: 15px;
-    border: 2px solid white;
-    border-radius: 30px;
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
-    cursor: pointer;
-    backdrop-filter: blur(4px);
-  }
-
-  .btnVideo:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  .btnVideo.destacado {
-    background: #e0663d;
-    border-color: #e0663d;
-  }
-
-  .btnVideo.destacado:hover {
-    background: #c9552f;
-  }
-
-  /* Spinner de carga */
+  /* ---------- LOADER INICIAL (fondo blanco) ---------- */
   #loader {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    z-index: 5;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    transition:opacity .5s ease;
   }
-
-  #loader.activo {
-    display: flex;
+  #loader.oculto {
+    opacity:0;
+    pointer-events:none;
   }
-
-  .spinner {
-    position: relative;
-    width: 160px;
-    height: 160px;
-  }
-
+  .spinner { position:relative; width:120px; height:120px; }
   .spinner .figura {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 3px solid #e0663d;
+    position:absolute; top:0; left:0;
+    width:100%; height:100%;
+    border:3px solid #000;
     animation: girarPulsar 3s ease-in-out infinite;
   }
-
   .spinner .figura::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border: 3px solid rgba(224, 102, 61, 0.5);
-    transform: rotate(45deg);
+    content:""; position:absolute; inset:0;
+    border:3px solid rgba(0,0,0,0.4);
+    transform:rotate(45deg);
   }
-
-  .spinner .f1 {
-    width: 100%;
-    height: 100%;
-    animation-delay: 0s;
-  }
-
+  .spinner .f1 { animation-delay:0s; }
   .spinner .f2 {
-    width: 70%;
-    height: 70%;
-    top: 15%;
-    left: 15%;
-    border-color: #f2a65a;
-    animation-delay: -0.6s;
-    animation-direction: reverse;
+    width:70%; height:70%; top:15%; left:15%;
+    border-color:#555;
+    animation-delay:-0.6s;
+    animation-direction:reverse;
   }
-
   .spinner .f3 {
-    width: 40%;
-    height: 40%;
-    top: 30%;
-    left: 30%;
-    border-color: #ffffff;
-    animation-delay: -1.2s;
+    width:40%; height:40%; top:30%; left:30%;
+    border-color:#000;
+    animation-delay:-1.2s;
   }
-
   @keyframes girarPulsar {
-    0% {
-      transform: rotate(0deg) scale(1);
-      opacity: 0.4;
-    }
-    50% {
-      transform: rotate(180deg) scale(1.15);
-      opacity: 1;
-    }
-    100% {
-      transform: rotate(360deg) scale(1);
-      opacity: 0.4;
-    }
+    0%   { transform:rotate(0deg) scale(1); opacity:.35; }
+    50%  { transform:rotate(180deg) scale(1.15); opacity:1; }
+    100% { transform:rotate(360deg) scale(1); opacity:.35; }
   }
 
-  /* Pantalla de bienvenida */
-  #pantallaBienvenida {
-    background: #111;
-    color: white;
-    text-align: center;
+  /* ---------- CAPAS SOBRE EL VIDEO ---------- */
+  .capa {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:24px;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom));
+    padding-top:calc(24px + env(safe-area-inset-top));
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .7s ease;
+  }
+  .capa.visible {
+    opacity:1;
+    pointer-events:auto;
   }
 
-  #pantallaBienvenida h1 {
-    font-size: 42px;
-    letter-spacing: 1px;
+  /* Pantalla inicio */
+  #pantallaInicio h1 {
+    color:#fff;
+    font-size:clamp(24px, 8vw, 34px);
+    letter-spacing:1px;
+    margin-bottom:28px;
+    text-shadow:0 2px 10px rgba(0,0,0,0.8);
   }
 
-  /* Pantalla conócenos */
-  #pantallaConocenos {
-    background: #111;
-    color: white;
-    text-align: center;
-    padding: 40px;
+  .btn {
+    padding:15px 30px;
+    font-size:16px;
+    min-height:48px;
+    border:2px solid #fff;
+    border-radius:30px;
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    cursor:pointer;
+    backdrop-filter:blur(4px);
+    letter-spacing:.5px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover { background:rgba(255,255,255,0.2); }
+  .btn.solido {
+    background:#fff;
+    color:#000;
+  }
+  .btn.solido:hover { background:#ddd; }
+
+  /* Tarjetas de intro */
+  .tarjeta {
+    position:absolute;
+    width:min(560px, 88vw);
+    background:transparent;
+    border:1.5px solid rgba(255,255,255,0.65);
+    border-radius:14px;
+    padding:18px 30px;
+    color:#fff;
+    opacity:0;
+    pointer-events:none;
+    transform:scale(.96);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .tarjeta.activa {
+    opacity:1;
+    pointer-events:auto;
+    transform:scale(1);
+  }
+  .tarjeta h2 {
+    font-size:clamp(19px, 5.5vw, 24px);
+    margin-bottom:8px;
+    letter-spacing:.5px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.9);
+  }
+  .tarjeta p {
+    font-size:14.5px;
+    line-height:1.55;
+    color:#f2f2f2;
+    text-shadow:0 1px 6px rgba(0,0,0,0.9);
+  }
+  .tarjeta .btnSiguiente {
+    margin-top:14px;
+    padding:9px 22px;
+    font-size:13.5px;
+    border:1.5px solid #fff;
+    border-radius:22px;
+    background:transparent;
+    color:#fff;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tarjeta .btnSiguiente:hover { background:rgba(255,255,255,0.15); }
+
+  /* posiciones distintas en pantalla */
+  .pos-1 { top:14%; left:50%; transform:translateX(-50%) scale(.96); }
+  .pos-1.activa { transform:translateX(-50%) scale(1); }
+  .pos-2 { bottom:16%; right:5%; }
+  .pos-3 { top:38%; left:5%; }
+  .pos-4 { bottom:20%; left:50%; transform:translateX(-50%) scale(.96); }
+  .pos-4.activa { transform:translateX(-50%) scale(1); }
+  /* Nav principal (app) */
+  #navPrincipal {
+    position:fixed;
+    bottom:calc(18px + env(safe-area-inset-bottom));
+    left:0;
+    width:100%;
+    z-index:20;
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    padding:0 12px;
+  }
+  .navBtn {
+    padding:11px 16px;
+    font-size:13px;
+    min-height:40px;
+    border:1.5px solid rgba(255,255,255,0.7);
+    border-radius:24px;
+    background:rgba(0,0,0,0.55);
+    color:#fff;
+    cursor:pointer;
+    backdrop-filter:blur(3px);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .navBtn:hover { background:rgba(255,255,255,0.15); }
+  .navBtn.activo {
+    background:#fff;
+    color:#000;
   }
 
-  #pantallaConocenos .contenido {
-    max-width: 600px;
+  /* Panel de info (contenido al presionar botones) */
+  .panelInfo {
+    width:min(600px, 90vw);
+    max-height:60vh;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    background:transparent;
+    border:1.5px solid rgba(255,255,255,0.65);
+    color:#fff;
+    border-radius:14px;
+    padding:22px 30px;
+    text-align:left;
+    opacity:0;
+    transform:translateY(16px);
+    transition:opacity .5s ease, transform .5s ease;
   }
+  .panelInfo.activa {
+    opacity:1;
+    transform:translateY(0);
+  }
+  .panelInfo h2 {
+    font-size:22px;
+    margin-bottom:10px;
+    padding-bottom:8px;
+    border-bottom:1.5px solid rgba(255,255,255,0.5);
+    text-shadow:0 2px 8px rgba(0,0,0,0.9);
+  }
+  .panelInfo p { font-size:14.5px; line-height:1.6; margin-bottom:10px; color:#f2f2f2; text-shadow:0 1px 6px rgba(0,0,0,0.9); }
+  .panelInfo .cerrar {
+    margin-top:10px;
+    padding:8px 20px;
+    font-size:14px;
+    border:1.5px solid #fff;
+    border-radius:20px;
+    background:transparent;
+    color:#fff;
+    cursor:pointer;
+  }
+  .panelInfo .cerrar:hover { background:rgba(255,255,255,0.15); }
 
-  #pantallaConocenos h1 {
-    font-size: 36px;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
-    color: #e0663d;
-  }
-
-  #pantallaConocenos p {
-    font-size: 18px;
-    line-height: 1.6;
-    color: #ddd;
-  }
+  .oculto-total { display:none !important; }
 </style>
 </head>
 <body>
 
-  <div id="pantallaInicio" class="pantalla activa">
-    <button id="iniciarBtn">Iniciar</button>
-  </div>
+  <!-- Video de fondo, siempre activo -->
+  <video id="videoFondo" autoplay muted loop playsinline></video>
+  <div id="overlayOscuro"></div>
 
-  <div id="pantallaVideo" class="pantalla" style="position: relative;">
-    <video id="miVideo" playsinline></video>
-    <div id="loader">
-      <div class="spinner">
-        <div class="figura f1"></div>
-        <div class="figura f2"></div>
-        <div class="figura f3"></div>
-      </div>
-    </div>
-    <div class="controlesVideo">
-      <button id="btnSaltar" class="btnVideo">Saltar</button>
-      <button id="btnConocenos" class="btnVideo destacado">Conócenos</button>
+  <!-- Loader inicial -->
+  <div id="loader">
+    <div class="spinner">
+      <div class="figura f1"></div>
+      <div class="figura f2"></div>
+      <div class="figura f3"></div>
     </div>
   </div>
 
-  <div id="pantallaBienvenida" class="pantalla">
-    <h1>Bienvenido</h1>
-  </div>
-
-  <div id="pantallaConocenos" class="pantalla">
-    <div class="contenido">
-      <h1>Conócenos</h1>
-      <p>Somos una empresa....</p>
+  <!-- Pantalla inicio -->
+  <div id="pantallaInicio" class="capa">
+    <div>
+      <h1>Bienvenido</h1>
+      <button id="iniciarBtn" class="btn solido">Iniciar</button>
     </div>
   </div>
 
-  <script>
-    const pantallaInicio = document.getElementById('pantallaInicio');
-    const pantallaVideo = document.getElementById('pantallaVideo');
-    const pantallaBienvenida = document.getElementById('pantallaBienvenida');
-    const pantallaConocenos = document.getElementById('pantallaConocenos');
-    const btn = document.getElementById('iniciarBtn');
-    const btnSaltar = document.getElementById('btnSaltar');
-    const btnConocenos = document.getElementById('btnConocenos');
-    const video = document.getElementById('miVideo');
-    const loader = document.getElementById('loader');
+  <!-- Intros (tarjetas) -->
+  <div id="pantallaIntros" class="capa">
+    <div id="tarjeta1" class="tarjeta pos-1">
+      <h2>Hola</h2>
+      <p>Bienvenido a nuestra app. Aquí encontrarás todo lo que necesitas en un solo lugar.</p>
+      <button class="btnSiguiente" data-siguiente>Siguiente</button>
+    </div>
+    <div id="tarjeta2" class="tarjeta pos-2">
+      <h2>Conócenos</h2>
+      <p>Somos una empresa dedicada a ofrecer soluciones prácticas y de calidad para nuestros clientes.</p>
+      <button class="btnSiguiente" data-siguiente>Siguiente</button>
+    </div>
+    <div id="tarjeta3" class="tarjeta pos-3">
+      <h2>Nuestra misión</h2>
+      <p>Simplificar procesos y acercar servicios útiles a más personas cada día.</p>
+      <button class="btnSiguiente" data-siguiente>Siguiente</button>
+    </div>
+    <div id="tarjetaContinuar" class="tarjeta pos-4">
+      <h2>Todo listo</h2>
+      <p>Presiona continuar para explorar la app.</p>
+      <button id="continuarBtn" class="btnSiguiente">Continuar</button>
+    </div>
+  </div>
 
-    const VIDEO_URL = "https://raw.githubusercontent.com/GorillaInforma/centralsoluciones.com/afd7dcb733481d00f656123f7ace33cbe8b01d9e/vid/Screen_Recording_20260719_130218_Pinterest.mp4";
+  <!-- App principal -->
+  <div id="pantallaApp" class="capa">
+    <!-- Paneles de info, ejemplo -->
+    <div id="panelInicio" class="panelInfo">
+      <h2>Inicio</h2>
+      <p>Este es el contenido de ejemplo de la sección Inicio. El video sigue de fondo mientras navegas.</p>
+      <button class="cerrar" data-cerrar>Cerrar</button>
+    </div>
 
-    const todasLasPantallas = [pantallaInicio, pantallaVideo, pantallaBienvenida, pantallaConocenos];
+    <div id="panelConocenos" class="panelInfo oculto-total">
+      <h2>Conócenos</h2>
+      <p>Somos una empresa comprometida con la calidad y la cercanía con nuestros clientes.</p>
+      <button class="cerrar" data-cerrar>Cerrar</button>
+    </div>
 
-    function mostrar(pantalla) {
-      todasLasPantallas.forEach(p => p.classList.remove('activa'));
-      pantalla.classList.add('activa');
+    <div id="panelServicios" class="panelInfo oculto-total">
+      <h2>Servicios</h2>
+      <p>Aquí puedes listar los servicios que ofreces, con una breve descripción de cada uno.</p>
+      <button class="cerrar" data-cerrar>Cerrar</button>
+    </div>
+
+    <div id="panelContacto" class="panelInfo oculto-total">
+      <h2>Contacto</h2>
+      <p>Correo, teléfono o redes sociales de ejemplo para que el usuario pueda comunicarse.</p>
+      <button class="cerrar" data-cerrar>Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Nav de la app -->
+  <div id="navPrincipal" class="oculto-total">
+    <button class="navBtn activo" data-panel="panelInicio">Inicio</button>
+    <button class="navBtn" data-panel="panelConocenos">Conócenos</button>
+    <button class="navBtn" data-panel="panelServicios">Servicios</button>
+    <button class="navBtn" data-panel="panelContacto">Contacto</button>
+  </div>
+
+<script>
+  const video = document.getElementById('videoFondo');
+  const loader = document.getElementById('loader');
+  const pantallaInicio = document.getElementById('pantallaInicio');
+  const pantallaIntros = document.getElementById('pantallaIntros');
+  const pantallaApp = document.getElementById('pantallaApp');
+  const navPrincipal = document.getElementById('navPrincipal');
+
+  const VIDEO_URL = "https://raw.githubusercontent.com/GorillaInforma/centralsoluciones.com/afd7dcb733481d00f656123f7ace33cbe8b01d9e/vid/Screen_Recording_20260719_130218_Pinterest.mp4";
+
+  // El video arranca solo, en bucle, sin sonido, y nunca se detiene
+  video.src = VIDEO_URL;
+  video.play().catch(()=>{});
+
+  function ocultarLoader() {
+    loader.classList.add('oculto');
+    pantallaInicio.classList.add('visible');
+  }
+  video.addEventListener('canplay', ocultarLoader, { once:true });
+  // Respaldo por si 'canplay' tarda demasiado
+  setTimeout(ocultarLoader, 4000);
+
+  // ---------- Botón Iniciar -> secuencia de intros ----------
+  document.getElementById('iniciarBtn').addEventListener('click', () => {
+    pantallaInicio.classList.remove('visible');
+    pantallaIntros.classList.add('visible');
+    secuenciaIntros();
+  });
+
+  function secuenciaIntros() {
+    const tarjetas = ['tarjeta1', 'tarjeta2', 'tarjeta3', 'tarjetaContinuar'];
+    let indice = 0;
+
+    function mostrarActual() {
+      document.getElementById(tarjetas[indice]).classList.add('activa');
     }
+    mostrarActual();
 
-    function detenerVideo() {
-      video.pause();
-      video.currentTime = 0;
-      loader.classList.remove('activo');
-    }
+    document.querySelectorAll('#pantallaIntros [data-siguiente]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById(tarjetas[indice]).classList.remove('activa');
+        indice++;
+        if (indice < tarjetas.length) mostrarActual();
+      }, { once:true });
+    });
+  }
 
+  document.getElementById('continuarBtn').addEventListener('click', () => {
+    pantallaIntros.classList.remove('visible');
+    pantallaApp.classList.add('visible');
+    navPrincipal.classList.remove('oculto-total');
+  });
+
+  // ---------- Nav principal: mostrar paneles sin tocar el video ----------
+  const navBtns = document.querySelectorAll('.navBtn');
+  const paneles = document.querySelectorAll('.panelInfo');
+
+  navBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      loader.classList.add('activo');
-      video.src = VIDEO_URL;
-      mostrar(pantallaVideo);
-      video.play();
+      navBtns.forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+
+      const destino = btn.dataset.panel;
+      paneles.forEach(p => {
+        if (p.id === destino) {
+          p.classList.remove('oculto-total');
+          requestAnimationFrame(() => p.classList.add('activa'));
+        } else {
+          p.classList.remove('activa');
+          setTimeout(() => p.classList.add('oculto-total'), 500);
+        }
+      });
     });
+  });
 
-    // Muestra el spinner mientras el video está cargando o haciendo buffer
-    video.addEventListener('waiting', () => loader.classList.add('activo'));
-    video.addEventListener('loadstart', () => loader.classList.add('activo'));
-
-    // Oculta el spinner en cuanto hay suficientes datos para reproducir
-    video.addEventListener('canplay', () => loader.classList.remove('activo'));
-    video.addEventListener('playing', () => loader.classList.remove('activo'));
-
-    video.addEventListener('ended', () => {
-      mostrar(pantallaBienvenida);
+  document.querySelectorAll('[data-cerrar]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = btn.closest('.panelInfo');
+      panel.classList.remove('activa');
+      setTimeout(() => panel.classList.add('oculto-total'), 500);
+      navBtns.forEach(b => b.classList.remove('activo'));
     });
-
-    btnSaltar.addEventListener('click', () => {
-      detenerVideo();
-      mostrar(pantallaBienvenida);
-    });
-
-    btnConocenos.addEventListener('click', () => {
-      detenerVideo();
-      mostrar(pantallaConocenos);
-    });
-  </script>
+  });
+</script>
 
 </body>
 </html>
