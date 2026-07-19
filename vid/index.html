@@ -1,1 +1,213 @@
-j
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body, html {
+    height: 100%;
+    width: 100%;
+    background: #111;
+    font-family: system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  .pantalla {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .activa {
+    display: flex;
+  }
+
+  /* Pantalla inicial */
+  #pantallaInicio {
+    background: #111;
+  }
+
+  #iniciarBtn {
+    padding: 16px 32px;
+    font-size: 18px;
+    background: #e0663d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  #iniciarBtn:hover {
+    background: #c9552f;
+  }
+
+  /* Pantalla de video */
+  #pantallaVideo {
+    background: #000;
+  }
+
+  #miVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none; /* evita que el usuario pause tocando/clickeando */
+  }
+
+  .controlesVideo {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    z-index: 10;
+  }
+
+  .btnVideo {
+    padding: 12px 24px;
+    font-size: 15px;
+    border: 2px solid white;
+    border-radius: 30px;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+  }
+
+  .btnVideo:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .btnVideo.destacado {
+    background: #e0663d;
+    border-color: #e0663d;
+  }
+
+  .btnVideo.destacado:hover {
+    background: #c9552f;
+  }
+
+  /* Pantalla de bienvenida */
+  #pantallaBienvenida {
+    background: #111;
+    color: white;
+    text-align: center;
+  }
+
+  #pantallaBienvenida h1 {
+    font-size: 42px;
+    letter-spacing: 1px;
+  }
+
+  /* Pantalla conócenos */
+  #pantallaConocenos {
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 40px;
+  }
+
+  #pantallaConocenos .contenido {
+    max-width: 600px;
+  }
+
+  #pantallaConocenos h1 {
+    font-size: 36px;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    color: #e0663d;
+  }
+
+  #pantallaConocenos p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #ddd;
+  }
+</style>
+</head>
+<body>
+
+  <div id="pantallaInicio" class="pantalla activa">
+    <button id="iniciarBtn">Iniciar</button>
+  </div>
+
+  <div id="pantallaVideo" class="pantalla" style="position: relative;">
+    <video id="miVideo" playsinline></video>
+    <div class="controlesVideo">
+      <button id="btnSaltar" class="btnVideo">Saltar</button>
+      <button id="btnConocenos" class="btnVideo destacado">Conócenos</button>
+    </div>
+  </div>
+
+  <div id="pantallaBienvenida" class="pantalla">
+    <h1>Bienvenido</h1>
+  </div>
+
+  <div id="pantallaConocenos" class="pantalla">
+    <div class="contenido">
+      <h1>Conócenos</h1>
+      <p>Somos una empresa....</p>
+    </div>
+  </div>
+
+  <script>
+    const pantallaInicio = document.getElementById('pantallaInicio');
+    const pantallaVideo = document.getElementById('pantallaVideo');
+    const pantallaBienvenida = document.getElementById('pantallaBienvenida');
+    const pantallaConocenos = document.getElementById('pantallaConocenos');
+    const btn = document.getElementById('iniciarBtn');
+    const btnSaltar = document.getElementById('btnSaltar');
+    const btnConocenos = document.getElementById('btnConocenos');
+    const video = document.getElementById('miVideo');
+
+    const VIDEO_URL = "https://raw.githubusercontent.com/GorillaInforma/centralsoluciones.com/main/vid/Screen_Recording_20260719_114404_Pinterest.mp4";
+
+    const todasLasPantallas = [pantallaInicio, pantallaVideo, pantallaBienvenida, pantallaConocenos];
+
+    function mostrar(pantalla) {
+      todasLasPantallas.forEach(p => p.classList.remove('activa'));
+      pantalla.classList.add('activa');
+    }
+
+    function detenerVideo() {
+      video.pause();
+      video.currentTime = 0;
+    }
+
+    btn.addEventListener('click', () => {
+      video.src = VIDEO_URL;
+      mostrar(pantallaVideo);
+      video.play();
+    });
+
+    video.addEventListener('ended', () => {
+      mostrar(pantallaBienvenida);
+    });
+
+    btnSaltar.addEventListener('click', () => {
+      detenerVideo();
+      mostrar(pantallaBienvenida);
+    });
+
+    btnConocenos.addEventListener('click', () => {
+      detenerVideo();
+      mostrar(pantallaConocenos);
+    });
+  </script>
+
+</body>
+</html>
+
