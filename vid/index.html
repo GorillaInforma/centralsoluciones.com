@@ -100,6 +100,88 @@
     background: #c9552f;
   }
 
+  /* Spinner de carga */
+  #loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    z-index: 5;
+  }
+
+  #loader.activo {
+    display: flex;
+  }
+
+  .spinner {
+    position: relative;
+    width: 160px;
+    height: 160px;
+  }
+
+  .spinner .figura {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 3px solid #e0663d;
+    animation: girarPulsar 3s ease-in-out infinite;
+  }
+
+  .spinner .figura::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid rgba(224, 102, 61, 0.5);
+    transform: rotate(45deg);
+  }
+
+  .spinner .f1 {
+    width: 100%;
+    height: 100%;
+    animation-delay: 0s;
+  }
+
+  .spinner .f2 {
+    width: 70%;
+    height: 70%;
+    top: 15%;
+    left: 15%;
+    border-color: #f2a65a;
+    animation-delay: -0.6s;
+    animation-direction: reverse;
+  }
+
+  .spinner .f3 {
+    width: 40%;
+    height: 40%;
+    top: 30%;
+    left: 30%;
+    border-color: #ffffff;
+    animation-delay: -1.2s;
+  }
+
+  @keyframes girarPulsar {
+    0% {
+      transform: rotate(0deg) scale(1);
+      opacity: 0.4;
+    }
+    50% {
+      transform: rotate(180deg) scale(1.15);
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(360deg) scale(1);
+      opacity: 0.4;
+    }
+  }
+
   /* Pantalla de bienvenida */
   #pantallaBienvenida {
     background: #111;
@@ -146,6 +228,13 @@
 
   <div id="pantallaVideo" class="pantalla" style="position: relative;">
     <video id="miVideo" playsinline></video>
+    <div id="loader">
+      <div class="spinner">
+        <div class="figura f1"></div>
+        <div class="figura f2"></div>
+        <div class="figura f3"></div>
+      </div>
+    </div>
     <div class="controlesVideo">
       <button id="btnSaltar" class="btnVideo">Saltar</button>
       <button id="btnConocenos" class="btnVideo destacado">Conócenos</button>
@@ -172,6 +261,7 @@
     const btnSaltar = document.getElementById('btnSaltar');
     const btnConocenos = document.getElementById('btnConocenos');
     const video = document.getElementById('miVideo');
+    const loader = document.getElementById('loader');
 
     const VIDEO_URL = "https://raw.githubusercontent.com/GorillaInforma/centralsoluciones.com/main/vid/Screen_Recording_20260719_114404_Pinterest.mp4";
 
@@ -185,13 +275,23 @@
     function detenerVideo() {
       video.pause();
       video.currentTime = 0;
+      loader.classList.remove('activo');
     }
 
     btn.addEventListener('click', () => {
+      loader.classList.add('activo');
       video.src = VIDEO_URL;
       mostrar(pantallaVideo);
       video.play();
     });
+
+    // Muestra el spinner mientras el video está cargando o haciendo buffer
+    video.addEventListener('waiting', () => loader.classList.add('activo'));
+    video.addEventListener('loadstart', () => loader.classList.add('activo'));
+
+    // Oculta el spinner en cuanto hay suficientes datos para reproducir
+    video.addEventListener('canplay', () => loader.classList.remove('activo'));
+    video.addEventListener('playing', () => loader.classList.remove('activo'));
 
     video.addEventListener('ended', () => {
       mostrar(pantallaBienvenida);
@@ -210,4 +310,3 @@
 
 </body>
 </html>
-
