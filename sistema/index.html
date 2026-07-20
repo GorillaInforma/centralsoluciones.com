@@ -1348,7 +1348,11 @@ Si no encuentras un campo, usa null. Responde ÚNICAMENTE con el objeto JSON. No
                 { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageData}` } }
               ]
             }],
-            max_tokens: 400,
+            // Qwen 3.6 piensa en voz alta por defecto (bloque <think>...</think>) y con
+            // pocos tokens se queda "pensando" sin nunca llegar a escribir el JSON final.
+            // reasoning_effort:"none" apaga ese modo para respuestas directas y cortas.
+            reasoning_effort: 'none',
+            max_tokens: 500,
             temperature: 0.1
           })
         });
