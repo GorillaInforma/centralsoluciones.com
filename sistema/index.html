@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Botica Central — Sistema Integral v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:#16213E;
+  --ink-2:#202D52;
+  --ink-light:#7C87AD;
+  --paper:#FBF8F3;
+  --card:#FFFFFF;
+  --amber:#C97A2B;
+  --amber-deep:#A9611D;
+  --amber-pale:#F3E3CC;
+  --teal:#1F5C52;
+  --teal-pale:#DCEAE6;
+  --rose:#B33A3A;
+  --rose-pale:#F5DEDE;
+  --blue:#2563EB;
+  --blue-pale:#DBEAFE;
+  --green:#16A34A;
+  --green-pale:#DCFCE7;
+  --line:#E9E2D4;
+  --text:#24262B;
+  --text-soft:#6B6E76;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--paper);color:var(--text);font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;}
+.font-display{font-family:'Fraunces',serif;}
+.font-mono{font-family:'IBM Plex Mono',monospace;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:#D8CFBB;border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* Login Screen */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg, var(--ink) 0%, var(--ink-2) 100%);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;}
+#loginScreen.hidden{display:none;}
+.login-box{background:var(--card);border-radius:16px;padding:40px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.login-brand{text-align:center;margin-bottom:30px;}
+.login-brand-mark{width:48px;height:48px;border-radius:12px;background:var(--amber);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.login-brand-mark svg{width:28px;height:28px;color:var(--ink);}
+.login-brand h1{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--ink);margin:0;}
+.login-brand p{font-size:13px;color:var(--text-soft);margin:4px 0 0;}
+.login-form{display:flex;flex-direction:column;gap:14px;}
+.login-field{display:flex;flex-direction:column;}
+.login-field label{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.login-field input, .login-field select{padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;}
+.login-field input:focus, .login-field select:focus{outline:2px solid var(--amber);outline-offset:0;}
+.login-btn{background:var(--amber);color:#fff;border:none;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:filter .15s;width:100%;}
+.login-btn:hover{filter:brightness(1.08);}
+.login-error{color:var(--rose);font-size:12px;text-align:center;min-height:16px;margin-top:4px;}
+.login-demo{font-size:11px;color:var(--text-soft);text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);}
+
+/* App shell */
+#app{display:flex;min-height:100vh;}
+#app.hidden{display:none;}
+
+/* Sidebar */
+#sidebar{
+  width:246px;flex-shrink:0;background:var(--ink);color:#CBD2E8;
+  position:fixed;top:0;left:0;bottom:0;z-index:40;
+  display:flex;flex-direction:column;
+  transform:translateX(0);transition:transform .25s ease;
+}
+#sidebar .brand{padding:22px 20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-mark svg{width:18px;height:18px;}
+#sidebar .brand-text{font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:#fff;line-height:1.1;}
+#sidebar .brand-sub{font-size:10.5px;letter-spacing:.08em;color:var(--ink-light);text-transform:uppercase;margin-top:2px;}
+#sidebar .user-info{padding:12px 14px;background:rgba(255,255,255,.05);border-radius:8px;margin:0 10px 10px;font-size:12px;}
+#sidebar .user-info .user-name{font-weight:600;color:#fff;}
+#sidebar .user-info .user-role{font-size:10px;color:var(--ink-light);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
+#navList{flex:1;overflow-y:auto;padding:14px 10px 20px;}
+.nav-group-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-light);padding:14px 12px 6px;}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;cursor:pointer;
+  font-size:13.5px;font-weight:500;color:#C3CAE6;margin-bottom:2px;position:relative;transition:background .15s;
+}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;opacity:.85;}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.nav-item.active{background:rgba(201,122,43,.16);color:#fff;}
+.nav-item.active::before{content:"";position:absolute;left:-10px;top:6px;bottom:6px;width:3px;border-radius:3px;background:var(--amber);}
+.nav-item .badge{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;background:rgba(255,255,255,.1);color:#fff;padding:1px 6px;border-radius:20px;}
+.nav-item.danger-badge .badge{background:var(--rose);}
+#sidebar .foot{padding:14px 18px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:var(--ink-light);}
+#logoutBtn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;cursor:pointer;width:100%;transition:background .15s;}
+#logoutBtn:hover{background:rgba(255,255,255,.15);}
+
+/* Main */
+#main{flex:1;margin-left:246px;min-height:100vh;display:flex;flex-direction:column;}
+#topbar{
+  background:var(--card);border-bottom:1px solid var(--line);padding:14px 26px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:30;
+}
+#hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;}
+#hamburger svg{width:22px;height:22px;color:var(--ink);}
+#pageTitle{font-family:'Fraunces',serif;font-weight:600;font-size:21px;color:var(--ink);}
+#pageSub{font-size:12.5px;color:var(--text-soft);margin-top:1px;}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.icon-btn{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:8px;cursor:pointer;display:flex;color:var(--ink);transition:background .15s;}
+.icon-btn:hover{background:var(--amber-pale);}
+.icon-btn svg{width:17px;height:17px;}
+
+#content{padding:22px 26px 60px;flex:1;}
+.section{display:none;}
+.section.active{display:block;}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;}
+.kpi-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;}
+.kpi-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--amber);}
+.kpi-card.teal::before{background:var(--teal);}
+.kpi-card.rose::before{background:var(--rose);}
+.kpi-card.blue::before{background:var(--blue);}
+.kpi-card.green::before{background:var(--green);}
+.kpi-label{font-size:11.5px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.kpi-value{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--ink);margin-top:6px;}
+.kpi-sub{font-size:11.5px;color:var(--text-soft);margin-top:3px;}
+
+/* Buttons */
+.btn{border:none;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:filter .15s, transform .1s;}
+.btn:active{transform:scale(.97);}
+.btn svg{width:15px;height:15px;}
+.btn-primary{background:var(--amber);color:#fff;}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-dark{background:var(--ink);color:#fff;}
+.btn-dark:hover{filter:brightness(1.15);}
+.btn-outline{background:#fff;color:var(--ink);border:1px solid var(--line);}
+.btn-outline:hover{background:var(--paper);}
+.btn-success{background:var(--teal);color:#fff;}
+.btn-success:hover{filter:brightness(1.08);}
+.btn-danger{background:var(--rose);color:#fff;}
+.btn-danger:hover{filter:brightness(1.08);}
+.btn-sm{padding:6px 11px;font-size:12.5px;}
+.btn-icon{padding:7px;border-radius:8px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+/* Table */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card);}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px;}
+thead th{background:var(--paper);text-align:left;padding:11px 14px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap;}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#FCFAF5;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.tag-amber{background:var(--amber-pale);color:var(--amber-deep);}
+.tag-teal{background:var(--teal-pale);color:var(--teal);}
+.tag-rose{background:var(--rose-pale);color:var(--rose);}
+.tag-blue{background:var(--blue-pale);color:var(--blue);}
+.tag-green{background:var(--green-pale);color:var(--green);}
+.tag-gray{background:#EDEBE4;color:#68696E;}
+
+/* Forms */
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;}
+.field input, .field select, .field textarea{
+  width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;font-family:'Inter',sans-serif;background:#fff;color:var(--text);
+}
+.field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--amber);outline-offset:0;border-color:var(--amber);}
+.field input:disabled, .field select:disabled{background:#F3F4F6;color:var(--text-soft);cursor:not-allowed;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hint{font-size:11px;color:var(--text-soft);margin-top:4px;}
+
+/* Modal */
+#modalOverlay{position:fixed;inset:0;background:rgba(22,33,62,.55);backdrop-filter:blur(2px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto;}
+#modalOverlay.show{display:flex;}
+#modalBox{background:#fff;border-radius:16px;width:100%;max-width:560px;padding:22px 22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+#modalBox.wide{max-width:720px;}
+#modalHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+#modalTitle{font-family:'Fraunces',serif;font-weight:600;font-size:19px;color:var(--ink);}
+#modalClose{background:none;border:none;cursor:pointer;color:var(--text-soft);padding:4px;}
+#modalClose svg{width:20px;height:20px;}
+#modalFoot{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);}
+
+/* Toast */
+#toastRoot{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--ink);color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;align-items:center;gap:8px;animation:slideIn .2s ease;}
+.toast.error{background:var(--rose);}
+.toast.success{background:var(--teal);}
+.toast.info{background:var(--blue);}
+.toast.warning{background:var(--amber);}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* Empty state */
+.empty{padding:40px 20px;text-align:center;color:var(--text-soft);}
+.empty svg{width:38px;height:38px;color:#D8CFBB;margin-bottom:10px;}
+
+/* Filters bar */
+.filters-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center;}
+.filters-bar input, .filters-bar select{padding:8px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;}
+.filters-bar input[type="search"]{min-width:200px;flex:1;}
+
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.section-head h2{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--ink);margin:0;}
+.section-head p{font-size:12.5px;color:var(--text-soft);margin:2px 0 0;}
+
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px;}
+
+.progress-bar{height:6px;border-radius:4px;background:#EFE9DC;overflow:hidden;}
+.progress-bar span{display:block;height:100%;background:var(--teal);}
+
+.overlay-scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:39;display:none;}
+.overlay-scrim.show{display:block;}
+
+/* Timeline */
+.timeline{margin:16px 0;}
+.timeline-item{display:flex;gap:12px;margin-bottom:12px;position:relative;padding-left:28px;}
+.timeline-item::before{content:"";position:absolute;left:6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--amber);}
+.timeline-item:last-child::after{display:none;}
+.timeline-item::after{content:"";position:absolute;left:10px;top:16px;bottom:-12px;width:1px;background:var(--line);}
+.timeline-dot.success::before{background:var(--teal);}
+.timeline-dot.error::before{background:var(--rose);}
+.timeline-dot.info::before{background:var(--blue);}
+.timeline-content{flex:1;}
+.timeline-title{font-weight:600;font-size:13px;color:var(--ink);}
+.timeline-desc{font-size:12px;color:var(--text-soft);margin-top:2px;}
+.timeline-time{font-size:11px;color:var(--text-soft);margin-top:4px;}
+
+/* File upload */
+.file-upload{border:2px dashed var(--line);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .15s, background .15s;}
+.file-upload:hover{border-color:var(--amber);background:var(--amber-pale);}
+.file-upload input[type="file"]{display:none;}
+.file-upload-icon{font-size:28px;margin-bottom:8px;}
+.file-upload-text{font-size:13px;color:var(--text);margin-bottom:4px;}
+.file-upload-hint{font-size:11px;color:var(--text-soft);}
+
+/* Status badge */
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.status-borrador{background:#F3F4F6;color:#6B7280;}
+.status-en_revision{background:var(--blue-pale);color:var(--blue);}
+.status-verificado_sat{background:var(--teal-pale);color:var(--teal);}
+.status-por_pagar{background:var(--amber-pale);color:var(--amber-deep);}
+.status-pagado{background:var(--green-pale);color:var(--green);}
+.status-rechazado{background:var(--rose-pale);color:var(--rose);}
+
+/* Budget bar */
+.budget-bar{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.budget-bar-fill{flex:1;height:8px;background:#EFE9DC;border-radius:4px;overflow:hidden;}
+.budget-bar-fill span{display:block;height:100%;background:var(--amber);border-radius:4px;}
+.budget-bar-text{font-size:11px;color:var(--text-soft);min-width:60px;text-align:right;}
+
+/* Alert boxes */
+.alert{padding:12px 14px;border-radius:8px;border-left:3px solid;margin-bottom:14px;font-size:13px;}
+.alert.warning{background:var(--amber-pale);border-color:var(--amber);color:var(--amber-deep);}
+.alert.error{background:var(--rose-pale);border-color:var(--rose);color:var(--rose);}
+.alert.success{background:var(--green-pale);border-color:var(--green);color:var(--green);}
+.alert.info{background:var(--blue-pale);border-color:var(--blue);color:var(--blue);}
+
+@media (max-width:900px){
+  #sidebar{transform:translateX(-100%);}
+  #sidebar.open{transform:translateX(0);}
+  #main{margin-left:0;}
+  #hamburger{display:flex;}
+  #content{padding:16px 14px 50px;}
+  #topbar{padding:12px 14px;}
+  .field-row{grid-template-columns:1fr;}
+  #pageTitle{font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-brand">
+      <div class="login-brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6v5.2a4 4 0 0 0 1.2 2.85l3.3 3.2a4 4 0 0 1 1.2 2.85V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.9a4 4 0 0 1 1.2-2.85l3.3-3.2A4 4 0 0 0 9 8.2V3Z"/><path d="M12 13v4M10 15h4"/></svg>
+      </div>
+      <h1>Botica Central</h1>
+      <p>Sistema Integral v3.0</p>
+    </div>
+    <form class="login-form" id="loginForm">
+      <div class="login-field">
+        <label>Usuario</label>
+        <select id="loginUser">
+          <option value="">Selecciona un usuario...</option>
+        </select>
+      </div>
+      <div class="login-field">
+        <label>PIN</label>
+        <input type="password" id="loginPin" placeholder="Ingresa tu PIN">
+      </div>
+      <button type="submit" class="login-btn">Ingresar</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+    <div class="login-demo">
+      <strong>Demo:</strong> PIN: <strong>1234</strong> para todos
+    </div>
+  </div>
+</div>
+
+<!-- APP CONTAINER -->
+<div id="app" class="hidden">
+  <div class="overlay-scrim" id="scrim"></div>
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#16213E" stroke-width="2.4" stroke-linecap="round"><path d="M9 3h6v5.2a4 4 0 0 0 1.2 2.85l3.3 3.2a4 4 0 0 1 1.2 2.85V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.9a4 4 0 0 1 1.2-2.85l3.3-3.2A4 4 0 0 0 9 8.2V3Z"/><path d="M12 13v4M10 15h4"/></svg>
+      </div>
+      <div>
+        <div class="brand-text">Botica Central</div>
+        <div class="brand-sub">v3.0 Integral</div>
+      </div>
+    </div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarUserName">Usuario</div>
+      <div class="user-role" id="sidebarUserRole">rol</div>
+    </div>
+    <nav id="navList"></nav>
+    <div class="foot">
+      <button id="logoutBtn">Cerrar sesión</button>
+      <div style="margin-top:10px;font-size:10px;">v3.0 · Control presupuestario</div>
+    </div>
+  </aside>
+
+  <div id="main">
+    <header id="topbar">
+      <button id="hamburger" aria-label="Menú">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div>
+        <div id="pageTitle">Panel general</div>
+        <div id="pageSub">Resumen del sistema</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="btnExport" title="Exportar datos (JSON)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        </button>
+        <button class="icon-btn" id="btnReset" title="Reiniciar datos de prueba">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+        </button>
+      </div>
+    </header>
+    <main id="content"></main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modalOverlay">
+  <div id="modalBox">
+    <div id="modalHead">
+      <div id="modalTitle">Título</div>
+      <button id="modalClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="modalBody"></div>
+    <div id="modalFoot"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toastRoot"></div>
+
+<script>
+/* =========================================================================
+   BOTICA CENTRAL v3.0 — Sistema Profesional con Control Presupuestario
+   ========================================================================= */
+
+const DB_KEY = 'boticaCentralDB_v3';
+// ⚠️ SEGURIDAD: estas keys quedan visibles para cualquiera que abra este HTML
+// o inspeccione el código fuente. Se recomienda revocarlas en console.groq.com
+// y, si es posible, mover estas llamadas a un backend/proxy en vez de exponerlas
+// directamente en el navegador.
+const GROQ_KEYS = [
+  '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',
+  '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'
+];
+
+let currentUser = null;
+let currentSection = 'dashboard';
+let salesChart = null;
+
+const ROLES = {
+  admin: { label: 'Administrador', color: 'rose' },
+  contador: { label: 'Contador', color: 'blue' },
+  adm_gastos: { label: 'Adm. de Gastos', color: 'amber' },
+  vendedor: { label: 'Vendedor', color: 'teal' },
+  promotor: { label: 'Promotor', color: 'teal' }
+};
+
+const ESTADOS_GASTO = {
+  borrador: 'Borrador',
+  en_revision: 'En Revisión',
+  verificado_sat: 'Verificado SAT',
+  por_pagar: 'Por Pagar',
+  pagado: 'Pagado',
+  rechazado: 'Rechazado'
+};
+
+const CATEGORIAS_GASTO = ['Renta','Servicios','Sueldos','Mantenimiento','Papelería','Transporte','Otros'];
+
+const ICONS = {
+  dashboard: '<path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/>',
+  gastos: '<path d="M12 2v20M17 6.5c0-1.9-2.2-3.5-5-3.5S7 4.6 7 6.5 9.2 10 12 10s5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5"/>',
+  presupuestos: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/>',
+  mis_gastos: '<path d="M3 3h2l2.6 12.4A2 2 0 0 0 9.55 17H18a2 2 0 0 0 1.96-1.6L21.5 8H6"/><circle cx="9" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/>',
+  bandeja: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/>',
+  verificacion: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  pagos: '<path d="M12 2v20M17 6.5c0-1.9-2.2-3.5-5-3.5S7 4.6 7 6.5 9.2 10 12 10s5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5"/>',
+  reportes: '<path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
+  usuarios: '<circle cx="9" cy="8" r="3.3"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.6"/><path d="M15.5 13.2A5.2 5.2 0 0 1 21.5 18"/>',
+};
+
+// ========== INICIALIZACIÓN BD (IndexedDB) ==========
+// Se usa IndexedDB en vez de localStorage porque localStorage tiene un límite
+// de ~5-10MB por origen, y al guardar fotos de comprobantes ese límite se
+// alcanza rápido: cuando se llena, localStorage.setItem falla en silencio
+// (o lanza un error que nadie capturaba) y la sesión "no se guarda".
+// IndexedDB soporta cientos de MB o más, y aquí se maneja con una API simple
+// tipo promesa para no reescribir toda la lógica síncrona de la app.
+const IDB_NAME = 'boticaCentralDB';
+const IDB_STORE = 'kv';
+
+function idbOpen(){
+  return new Promise((resolve, reject) => {
+    if(!('indexedDB' in window)){
+      reject(new Error('Este navegador no soporta IndexedDB'));
+      return;
+    }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      if(!req.result.objectStoreNames.contains(IDB_STORE)){
+        req.result.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGet(key){
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSet(key, value){
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(value, key);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function defaultDB(){
+  return {
+    usuarios: [
+      { id: 'u1', nombre: 'Carlos Mendez', rol: 'admin', pin: '1234', email: 'carlos@botica.com' },
+      { id: 'u2', nombre: 'Ana López', rol: 'contador', pin: '1234', email: 'ana@botica.com' },
+      { id: 'u3', nombre: 'Luis García', rol: 'adm_gastos', pin: '1234', email: 'luis@botica.com' },
+      { id: 'u4', nombre: 'María Rodríguez', rol: 'vendedor', pin: '1234', email: 'maria@botica.com' },
+      { id: 'u5', nombre: 'Juan Pérez', rol: 'promotor', pin: '1234', email: 'juan@botica.com' }
+    ],
+    presupuestos: [
+      { id: 'pres_1', categoria: 'Renta', presupuesto: 50000, gastado: 0, mes: new Date().toISOString().slice(0, 7) },
+      { id: 'pres_2', categoria: 'Servicios', presupuesto: 15000, gastado: 0, mes: new Date().toISOString().slice(0, 7) },
+      { id: 'pres_3', categoria: 'Sueldos', presupuesto: 100000, gastado: 0, mes: new Date().toISOString().slice(0, 7) },
+      { id: 'pres_4', categoria: 'Mantenimiento', presupuesto: 10000, gastado: 0, mes: new Date().toISOString().slice(0, 7) },
+      { id: 'pres_5', categoria: 'Papelería', presupuesto: 5000, gastado: 0, mes: new Date().toISOString().slice(0, 7) },
+      { id: 'pres_6', categoria: 'Transporte', presupuesto: 20000, gastado: 0, mes: new Date().toISOString().slice(0, 7) },
+      { id: 'pres_7', categoria: 'Otros', presupuesto: 15000, gastado: 0, mes: new Date().toISOString().slice(0, 7) }
+    ],
+    gastos: [],
+    notificaciones: [],
+    auditoria: []
+  };
+}
+
+async function loadDB(){
+  try {
+    let db = await idbGet(DB_KEY);
+    if(!db){
+      // Migración: si había datos viejos guardados en localStorage, los rescatamos
+      // una sola vez y los pasamos a IndexedDB.
+      const legacy = localStorage.getItem(DB_KEY);
+      if(legacy){
+        try { db = JSON.parse(legacy); } catch(e){ db = null; }
+      }
+    }
+    if(!db) db = defaultDB();
+    await idbSet(DB_KEY, db);
+    return db;
+  } catch(err){
+    console.error('Error cargando la base de datos local:', err);
+    toast('⚠️ No se pudo abrir el almacenamiento local. Revisa la consola (F12).', 'error');
+    return defaultDB();
+  }
+}
+
+let DB = null;
+let dbSaveQueue = Promise.resolve();
+
+function saveDB(db = DB){
+  // Encolamos los guardados para evitar condiciones de carrera si se llama
+  // varias veces seguidas, y mostramos un aviso claro si algo falla en vez
+  // de perder datos en silencio.
+  dbSaveQueue = dbSaveQueue
+    .then(() => idbSet(DB_KEY, db))
+    .catch(err => {
+      console.error('Error guardando datos:', err);
+      toast('⚠️ No se pudieron guardar los cambios. Espacio insuficiente o navegador en modo privado.', 'error');
+    });
+  return dbSaveQueue;
+}
+
+// ========== UTILIDADES ==========
+function uid(prefix = ''){
+  return prefix + Date.now() + Math.random().toString(36).substr(2, 9);
+}
+
+function esc(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function money(n){
+  return new Intl.NumberFormat('es-MX', {style:'currency', currency:'MXN'}).format(n);
+}
+
+function fmtDate(d){
+  if(!d) return '—';
+  const date = new Date(d);
+  return date.toLocaleDateString('es-MX', {year:'2-digit', month:'2-digit', day:'2-digit'});
+}
+
+function fmtDateTime(d){
+  if(!d) return '—';
+  const date = new Date(d);
+  return date.toLocaleDateString('es-MX', {year:'2-digit', month:'2-digit', day:'2-digit'}) + ' ' + 
+         date.toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'});
+}
+
+function todayISO(){
+  return new Date().toISOString().split('T')[0];
+}
+
+function currentMonthISO(){
+  return new Date().toISOString().slice(0, 7);
+}
+
+function isSameDay(d1, d2){
+  const a = new Date(d1), b = new Date(d2);
+  return a.toDateString() === b.toDateString();
+}
+
+function isSameMonth(d1, d2){
+  const a = new Date(d1), b = new Date(d2);
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+}
+
+function toast(msg, type = 'info'){
+  const root = document.getElementById('toastRoot');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  root.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+function getPresupuesto(categoria, mes = currentMonthISO()){
+  return DB.presupuestos.find(p => p.categoria === categoria && p.mes === mes) || 
+         { categoria, presupuesto: 0, gastado: 0, mes };
+}
+
+function actualizarGastadoPresupuesto(){
+  const mes = currentMonthISO();
+  DB.presupuestos.forEach(p => {
+    if(p.mes === mes){
+      p.gastado = DB.gastos
+        .filter(g => g.categoria === p.categoria && g.estado !== 'rechazado' && isSameMonth(g.fecha, new Date()))
+        .reduce((s, g) => s + g.monto, 0);
+    }
+  });
+  saveDB();
+}
+
+// ========== LOGIN ==========
+function initLoginScreen(){
+  const userSelect = document.getElementById('loginUser');
+  DB.usuarios.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.id;
+    opt.textContent = `${u.nombre} (${ROLES[u.rol].label})`;
+    userSelect.appendChild(opt);
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const userId = document.getElementById('loginUser').value;
+    const pin = document.getElementById('loginPin').value;
+    const user = DB.usuarios.find(u => u.id === userId);
+    
+    if(!user || user.pin !== pin){
+      document.getElementById('loginError').textContent = 'Usuario o PIN incorrecto';
+      return;
+    }
+
+    currentUser = user;
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    initApp();
+  });
+}
+
+function logout(){
+  currentUser = null;
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('loginPin').value = '';
+  document.getElementById('loginUser').value = '';
+}
+
+// ========== NAVEGACIÓN ==========
+function getNavItems(){
+  const baseNav = [
+    { group: 'General', items: [{ id: 'dashboard', label: 'Panel General', icon: 'dashboard' }] }
+  ];
+
+  if(currentUser.rol === 'admin'){
+    baseNav.push({
+      group: 'Gestión Financiera',
+      items: [
+        { id: 'presupuestos', label: 'Presupuestos', icon: 'presupuestos' },
+        { id: 'gastos', label: 'Todos los Gastos', icon: 'gastos' },
+        { id: 'bandeja_admin', label: 'Bandeja de Entrada', icon: 'bandeja', badge: 'pendientes' },
+        { id: 'pagos', label: 'Programación de Pagos', icon: 'pagos' },
+        { id: 'reportes', label: 'Reportes', icon: 'reportes' }
+      ]
+    });
+    baseNav.push({
+      group: 'Administración',
+      items: [
+        { id: 'usuarios', label: 'Usuarios', icon: 'usuarios' }
+      ]
+    });
+  } else if(currentUser.rol === 'contador'){
+    baseNav.push({
+      group: 'Fiscalización',
+      items: [
+        { id: 'bandeja_contador', label: 'Bandeja de Entrada', icon: 'bandeja', badge: 'pendientes' },
+        { id: 'verificacion', label: 'Verificación SAT', icon: 'verificacion' },
+        { id: 'presupuestos', label: 'Presupuestos', icon: 'presupuestos' },
+        { id: 'reportes', label: 'Reportes Fiscales', icon: 'reportes' }
+      ]
+    });
+  } else if(currentUser.rol === 'adm_gastos'){
+    baseNav.push({
+      group: 'Revisión de Gastos',
+      items: [
+        { id: 'bandeja_adm', label: 'Bandeja de Entrada', icon: 'bandeja', badge: 'pendientes' },
+        { id: 'presupuestos', label: 'Presupuestos', icon: 'presupuestos' },
+        { id: 'gastos', label: 'Historial de Gastos', icon: 'gastos' },
+        { id: 'reportes', label: 'Reportes', icon: 'reportes' }
+      ]
+    });
+  } else if(currentUser.rol === 'vendedor' || currentUser.rol === 'promotor'){
+    baseNav.push({
+      group: 'Mis Gastos',
+      items: [
+        { id: 'mis_gastos', label: 'Mis Solicitudes', icon: 'mis_gastos', badge: 'pendientes' },
+        { id: 'nuevo_gasto', label: 'Subir Comprobante', icon: 'gastos' }
+      ]
+    });
+  }
+
+  return baseNav;
+}
+
+function renderNav(){
+  const nav = document.getElementById('navList');
+  nav.innerHTML = getNavItems().map(group => `
+    <div class="nav-group-label">${group.group}</div>
+    ${group.items.map(item => `
+      <div class="nav-item" data-section="${item.id}" data-nav-badge="${item.id}">
+        <svg viewBox="0 0 24 24" fill="currentColor">${ICONS[item.icon] || ''}</svg>
+        <span>${item.label}</span>
+        ${item.badge ? `<span class="badge">0</span>` : ''}
+      </div>
+    `).join('')}
+  `).join('');
+
+  nav.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('click', () => {
+      showSection(el.dataset.section);
+      if(window.innerWidth <= 900) closeSidebar();
+    });
+  });
+
+  updateNavBadges();
+}
+
+function updateNavBadges(){
+  actualizarGastadoPresupuesto();
+  
+  if(currentUser.rol === 'admin'){
+    const pendientes = DB.gastos.filter(g => ['en_revision','verificado_sat','por_pagar'].includes(g.estado)).length;
+    setBadge('bandeja_admin', pendientes);
+  } else if(currentUser.rol === 'adm_gastos'){
+    const pendientes = DB.gastos.filter(g => g.estado === 'en_revision' && g.solicitanteId !== currentUser.id).length;
+    setBadge('bandeja_adm', pendientes);
+  } else if(currentUser.rol === 'contador'){
+    const pendientes = DB.gastos.filter(g => g.estado === 'verificado_sat' && !g.verificadoSat).length;
+    setBadge('bandeja_contador', pendientes);
+  } else if(currentUser.rol === 'vendedor' || currentUser.rol === 'promotor'){
+    const pendientes = DB.gastos.filter(g => g.solicitanteId === currentUser.id && ['borrador','en_revision','verificado_sat','por_pagar'].includes(g.estado)).length;
+    setBadge('mis_gastos', pendientes);
+  }
+}
+
+function setBadge(id, count){
+  const el = document.querySelector(`[data-nav-badge="${id}"] .badge`);
+  if(el) el.textContent = count > 0 ? count : '';
+}
+
+function showSection(id){
+  currentSection = id;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.section === id));
+  
+  const meta = {
+    dashboard: ['Panel General', 'Resumen del sistema'],
+    presupuestos: ['Presupuestos', 'Gestión de presupuestos por categoría'],
+    gastos: ['Todos los Gastos', 'Gestión integral de comprobantes'],
+    mis_gastos: ['Mis Solicitudes', 'Seguimiento de tus gastos'],
+    nuevo_gasto: ['Subir Comprobante', 'Registra un nuevo gasto'],
+    bandeja_admin: ['Bandeja de Entrada', 'Gastos pendientes de aprobación final'],
+    bandeja_adm: ['Bandeja de Entrada', 'Gastos pendientes de revisión'],
+    bandeja_contador: ['Bandeja de Entrada', 'Gastos por verificar en SAT'],
+    verificacion: ['Verificación SAT', 'Validar comprobantes fiscales'],
+    pagos: ['Programación de Pagos', 'Gestionar pagos programados'],
+    reportes: ['Reportes', 'Análisis y estadísticas'],
+    usuarios: ['Usuarios', 'Gestión de usuarios del sistema']
+  };
+
+  if(meta[id]){
+    document.getElementById('pageTitle').textContent = meta[id][0];
+    document.getElementById('pageSub').textContent = meta[id][1];
+  }
+
+  renderSection(id);
+}
+
+function renderSection(id){
+  const renderers = {
+    dashboard: renderDashboard,
+    presupuestos: renderPresupuestos,
+    gastos: renderGastos,
+    mis_gastos: renderMisGastos,
+    nuevo_gasto: renderNuevoGasto,
+    bandeja_admin: renderBandejaAdmin,
+    bandeja_adm: renderBandejaAdm,
+    bandeja_contador: renderBandejaContador,
+    verificacion: renderVerificacion,
+    pagos: renderPagos,
+    reportes: renderReportes,
+    usuarios: renderUsuarios
+  };
+
+  const renderer = renderers[id];
+  if(renderer){
+    document.getElementById('content').innerHTML = renderer();
+    attachSectionHandlers(id);
+    updateNavBadges();
+  }
+}
+
+function attachSectionHandlers(id){
+  if(id === 'dashboard') drawDashboardCharts();
+  if(id === 'nuevo_gasto') attachNuevoGastoHandlers();
+  if(id === 'mis_gastos') attachMisGastosHandlers();
+  if(id === 'bandeja_adm') attachBandejaAdmHandlers();
+  if(id === 'bandeja_contador') attachBandejaContadorHandlers();
+  if(id === 'bandeja_admin') attachBandejaAdminHandlers();
+  if(id === 'gastos') attachGastosHandlers();
+  if(id === 'presupuestos') attachPresupuestosHandlers();
+  if(id === 'verificacion') attachVerificacionHandlers();
+  if(id === 'pagos') attachPagosHandlers();
+}
+
+function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('scrim').classList.add('show'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('scrim').classList.remove('show'); }
+
+// ========== MODAL ==========
+function openModal(title, bodyHTML, {wide=false, saveLabel='Guardar', onSave=null, hideFoot=false} = {}){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHTML;
+  document.getElementById('modalBox').classList.toggle('wide', wide);
+  const foot = document.getElementById('modalFoot');
+  if(hideFoot){
+    foot.innerHTML = '';
+  } else {
+    foot.innerHTML = `<button class="btn btn-outline" id="modalCancelBtn">Cancelar</button><button class="btn btn-primary" id="modalSaveBtn">${saveLabel}</button>`;
+    document.getElementById('modalCancelBtn').onclick = closeModal;
+    document.getElementById('modalSaveBtn').onclick = () => { if(onSave) onSave(); };
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+document.getElementById('modalClose').onclick = closeModal;
+document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target.id === 'modalOverlay') closeModal(); });
+
+// ========== DASHBOARD ==========
+function renderDashboard(){
+  actualizarGastadoPresupuesto();
+  const now = new Date();
+  const gastosHoy = DB.gastos.filter(g => isSameDay(g.fecha, now));
+  const gastosMes = DB.gastos.filter(g => isSameMonth(g.fecha, now));
+  const totalGastosHoy = gastosHoy.reduce((s,g) => s + g.monto, 0);
+  const totalGastosMes = gastosMes.reduce((s,g) => s + g.monto, 0);
+  const totalPresupuestoMes = DB.presupuestos.filter(p => p.mes === currentMonthISO()).reduce((s,p) => s + p.presupuesto, 0);
+  const gastosPendientes = DB.gastos.filter(g => g.estado !== 'pagado' && g.estado !== 'rechazado').length;
+  const gastosVerificados = DB.gastos.filter(g => g.estado === 'verificado_sat').length;
+
+  return `
+  <div class="grid-cards">
+    <div class="kpi-card">
+      <div class="kpi-label">Gastos de hoy</div>
+      <div class="kpi-value">${money(totalGastosHoy)}</div>
+      <div class="kpi-sub">${gastosHoy.length} comprobante(s)</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">Gastos del mes</div>
+      <div class="kpi-value">${money(totalGastosMes)}</div>
+      <div class="kpi-sub">${gastosMes.length} registro(s)</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Presupuesto mes</div>
+      <div class="kpi-value">${money(totalPresupuestoMes)}</div>
+      <div class="kpi-sub">Disponible: ${money(totalPresupuestoMes - totalGastosMes)}</div>
+    </div>
+    <div class="kpi-card rose">
+      <div class="kpi-label">Pendientes</div>
+      <div class="kpi-value">${gastosPendientes}</div>
+      <div class="kpi-sub">En proceso de validación</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:20px;">
+    <div class="card">
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;color:var(--ink);margin-bottom:10px;">Gastos — últimos 7 días</div>
+      <canvas id="gastosChart" height="150"></canvas>
+    </div>
+    <div class="card">
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;color:var(--ink);margin-bottom:10px;">Estado de Gastos</div>
+      ${Object.entries(ESTADOS_GASTO).map(([estado, label]) => {
+        const count = DB.gastos.filter(g => g.estado === estado).length;
+        return `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;">
+          <span>${label}</span><span class="mono tag tag-gray">${count}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  `;
+}
+
+function drawDashboardCharts(){
+  const ctx = document.getElementById('gastosChart');
+  if(!ctx || typeof Chart === 'undefined') return;
+  
+  const labels = [];
+  const data = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString('es-MX', {weekday:'short'}));
+    const total = DB.gastos.filter(g => isSameDay(g.fecha, d) && g.estado !== 'rechazado').reduce((s,g) => s + g.monto, 0);
+    data.push(total);
+  }
+
+  if(salesChart) salesChart.destroy();
+  salesChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: '#C97A2B', borderRadius: 6, maxBarThickness: 36 }] },
+    options: {
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => money(c.raw) } } },
+      scales: { y: { beginAtZero: true, grid: { color: '#EEE7D8' }, ticks: { callback: v => '$' + v } }, x: { grid: { display: false } } }
+    }
+  });
+}
+
+// ========== PRESUPUESTOS ==========
+function renderPresupuestos(){
+  actualizarGastadoPresupuesto();
+  const mes = currentMonthISO();
+  const presupuestos = DB.presupuestos.filter(p => p.mes === mes);
+  const totalPresupuesto = presupuestos.reduce((s,p) => s + p.presupuesto, 0);
+  const totalGastado = presupuestos.reduce((s,p) => s + p.gastado, 0);
+  const disponible = totalPresupuesto - totalGastado;
+
+  return `
+  <div class="section-head">
+    <div><h2>Presupuestos ${mes}</h2><p>Control presupuestario por categoría</p></div>
+    ${currentUser.rol === 'contador' ? `<button class="btn btn-primary" id="btnEditarPresupuestos">Editar Presupuestos</button>` : ''}
+  </div>
+
+  <div class="grid-cards">
+    <div class="kpi-card">
+      <div class="kpi-label">Presupuesto Total</div>
+      <div class="kpi-value">${money(totalPresupuesto)}</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">Gastado</div>
+      <div class="kpi-value">${money(totalGastado)}</div>
+      <div class="kpi-sub">${((totalGastado / totalPresupuesto) * 100).toFixed(1)}% utilizado</div>
+    </div>
+    <div class="kpi-card ${disponible >= 0 ? 'green' : 'rose'}">
+      <div class="kpi-label">Disponible</div>
+      <div class="kpi-value">${money(disponible)}</div>
+      <div class="kpi-sub">${disponible >= 0 ? 'En rango' : 'EXCEDIDO'}</div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Categoría</th><th>Presupuesto</th><th>Gastado</th><th>Disponible</th><th>% Utilizado</th><th></th></tr></thead>
+      <tbody>
+        ${presupuestos.map(p => {
+          const disponible = p.presupuesto - p.gastado;
+          const pct = ((p.gastado / p.presupuesto) * 100).toFixed(1);
+          const estado = p.gastado > p.presupuesto ? 'error' : (pct > 80 ? 'warning' : 'success');
+          return `<tr>
+            <td style="font-weight:500;">${esc(p.categoria)}</td>
+            <td class="mono">${money(p.presupuesto)}</td>
+            <td class="mono">${money(p.gastado)}</td>
+            <td class="mono ${disponible < 0 ? 'style="color:var(--rose);"' : ''}>${money(disponible)}</td>
+            <td>
+              <div class="budget-bar">
+                <div class="budget-bar-fill"><span style="width:${Math.min(100, pct)}%;background:${estado === 'error' ? 'var(--rose)' : (estado === 'warning' ? 'var(--amber)' : 'var(--teal)')}"></span></div>
+                <div class="budget-bar-text">${pct}%</div>
+              </div>
+            </td>
+            <td>${estado === 'error' ? '<span class="tag tag-rose">EXCEDIDO</span>' : (estado === 'warning' ? '<span class="tag tag-amber">ALTO</span>' : '')}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function attachPresupuestosHandlers(){
+  const btn = document.getElementById('btnEditarPresupuestos');
+  if(btn){
+    btn.addEventListener('click', () => {
+      const mes = currentMonthISO();
+      const presupuestos = DB.presupuestos.filter(p => p.mes === mes);
+      let html = '<div style="margin-bottom:16px;"><p style="font-size:12px;color:var(--text-soft);">Ajusta los presupuestos para el mes actual. Estos límites se usarán para validar gastos.</p></div>';
+      
+      presupuestos.forEach(p => {
+        html += `
+          <div class="field-row">
+            <div class="field">
+              <label>${esc(p.categoria)}</label>
+              <input type="number" class="pres-input" data-pres-id="${p.id}" value="${p.presupuesto}" min="0" step="100">
+            </div>
+            <div class="field">
+              <label>Gastado</label>
+              <input type="number" disabled value="${p.gastado}" style="background:#F3F4F6;">
+            </div>
+          </div>
+        `;
+      });
+
+      openModal('Editar Presupuestos', html, {
+        wide: true,
+        saveLabel: 'Guardar Cambios',
+        onSave: () => {
+          document.querySelectorAll('.pres-input').forEach(inp => {
+            const presId = inp.dataset.presId;
+            const pres = DB.presupuestos.find(p => p.id === presId);
+            if(pres) pres.presupuesto = parseFloat(inp.value) || 0;
+          });
+          saveDB();
+          toast('Presupuestos actualizados', 'success');
+          closeModal();
+          renderSection('presupuestos');
+        }
+      });
+    });
+  }
+}
+
+// ========== GASTOS (VISTA GENERAL) ==========
+function renderGastos(){
+  const rows = DB.gastos.slice().sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+  const total = rows.reduce((s,g) => s + g.monto, 0);
+
+  return `
+  <div class="section-head">
+    <div><h2>Todos los Gastos</h2><p>${rows.length} registro(s) · total ${money(total)}</p></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Solicitante</th><th>Categoría</th><th>Descripción</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        ${rows.length ? rows.map(g => {
+          const user = DB.usuarios.find(u => u.id === g.solicitanteId);
+          return `<tr>
+            <td style="font-size:12.5px;">${fmtDate(g.fecha)}</td>
+            <td style="font-size:12.5px;">${esc(user?.nombre || '—')}</td>
+            <td><span class="tag tag-gray">${esc(g.categoria)}</span></td>
+            <td style="font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${esc(g.descripcion)}</td>
+            <td class="mono">${money(g.monto)}</td>
+            <td><span class="status-badge status-${g.estado}">${ESTADOS_GASTO[g.estado]}</span></td>
+            <td><button class="btn btn-outline btn-sm btn-icon" data-view-gasto="${g.id}" title="Ver detalles"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+          </tr>`;
+        }).join('') : `<tr><td colspan="7"><div class="empty">Sin gastos registrados.</div></td></tr>`}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function attachGastosHandlers(){
+  document.querySelectorAll('[data-view-gasto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gastoId = btn.dataset.viewGasto;
+      const gasto = DB.gastos.find(g => g.id === gastoId);
+      if(gasto) showGastoDetail(gasto);
+    });
+  });
+}
+
+// ========== MIS GASTOS (VENDEDOR/PROMOTOR) ==========
+function renderMisGastos(){
+  const rows = DB.gastos.filter(g => g.solicitanteId === currentUser.id).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+  const total = rows.reduce((s,g) => s + g.monto, 0);
+
+  return `
+  <div class="section-head">
+    <div><h2>Mis Solicitudes</h2><p>${rows.length} gasto(s) · total ${money(total)}</p></div>
+    <button class="btn btn-primary" id="btnNuevoGasto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Subir Comprobante
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        ${rows.length ? rows.map(g => `<tr>
+          <td style="font-size:12.5px;">${fmtDate(g.fecha)}</td>
+          <td><span class="tag tag-gray">${esc(g.categoria)}</span></td>
+          <td style="font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${esc(g.descripcion)}</td>
+          <td class="mono">${money(g.monto)}</td>
+          <td><span class="status-badge status-${g.estado}">${ESTADOS_GASTO[g.estado]}</span></td>
+          <td><button class="btn btn-outline btn-sm btn-icon" data-view-gasto="${g.id}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+        </tr>`).join('') : `<tr><td colspan="6"><div class="empty">Aún no has subido ningún comprobante.</div></td></tr>`}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function attachMisGastosHandlers(){
+  document.getElementById('btnNuevoGasto').addEventListener('click', () => showSection('nuevo_gasto'));
+  document.querySelectorAll('[data-view-gasto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gastoId = btn.dataset.viewGasto;
+      const gasto = DB.gastos.find(g => g.id === gastoId);
+      if(gasto) showGastoDetail(gasto);
+    });
+  });
+}
+
+// ========== NUEVO GASTO (SUBIR COMPROBANTE) ==========
+function renderNuevoGasto(){
+  return `
+  <div class="card">
+    <div style="font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--ink);margin-bottom:20px;">Subir Nuevo Comprobante</div>
+    
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:10px;">Selecciona una imagen o PDF</label>
+      <div class="file-upload" id="fileUploadArea">
+        <div class="file-upload-icon">📄</div>
+        <div class="file-upload-text">Arrastra un archivo aquí o haz clic para seleccionar</div>
+        <div class="file-upload-hint">JPG, PNG, PDF · Máx. 10MB</div>
+        <input type="file" id="fileInput" accept="image/*,.pdf">
+      </div>
+    </div>
+
+    <div id="extractedDataContainer" style="display:none;">
+      <div style="margin-bottom:20px;padding:14px;background:var(--blue-pale);border-radius:8px;border-left:3px solid var(--blue);">
+        <div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:4px;">⚙️ Procesando comprobante...</div>
+        <div id="processingStatus" style="font-size:12px;color:var(--blue);"></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Tipo de Gasto</label>
+          <select id="mCategoria">${CATEGORIAS_GASTO.map(c => `<option value="${c}">${c}</option>`).join('')}</select>
+        </div>
+        <div class="field">
+          <label>Fecha</label>
+          <input type="date" id="mFecha" value="${todayISO()}">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Descripción</label>
+        <input type="text" id="mDescripcion" placeholder="Ej. Gasolina para visita a cliente">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Monto Total</label>
+          <input type="number" id="mMonto" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Impuestos (IVA)</label>
+          <input type="number" id="mImpuestos" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>RFC Emisor</label>
+        <input type="text" id="mRFC" placeholder="Ej. ABC123456XYZ">
+      </div>
+
+      <div class="field">
+        <label>Folio Fiscal (UUID)</label>
+        <input type="text" id="mFolio" placeholder="Ej. 12345678-1234-1234-1234-123456789012">
+      </div>
+
+      <div id="presupuestoAlert"></div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-outline" id="btnCancelarGasto">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarGasto">Enviar para Revisión</button>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function attachNuevoGastoHandlers(){
+  currentComprobante = null;
+  const fileUploadArea = document.getElementById('fileUploadArea');
+  const fileInput = document.getElementById('fileInput');
+  const extractedContainer = document.getElementById('extractedDataContainer');
+
+  fileUploadArea.addEventListener('click', () => fileInput.click());
+  fileUploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileUploadArea.style.borderColor = 'var(--amber)';
+  });
+  fileUploadArea.addEventListener('dragleave', () => {
+    fileUploadArea.style.borderColor = 'var(--line)';
+  });
+  fileUploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileUploadArea.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]);
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if(e.target.files.length) handleFileUpload(e.target.files[0]);
+  });
+
+  document.getElementById('btnCancelarGasto').addEventListener('click', () => {
+    currentComprobante = null;
+    showSection('mis_gastos');
+  });
+  document.getElementById('btnGuardarGasto').addEventListener('click', guardarNuevoGasto);
+
+  // Listener para actualizar alerta de presupuesto
+  document.getElementById('mCategoria').addEventListener('change', actualizarAlertaPresupuesto);
+  document.getElementById('mMonto').addEventListener('input', actualizarAlertaPresupuesto);
+}
+
+function actualizarAlertaPresupuesto(){
+  const categoria = document.getElementById('mCategoria').value;
+  const monto = parseFloat(document.getElementById('mMonto').value) || 0;
+  const presupuesto = getPresupuesto(categoria);
+  const disponible = presupuesto.presupuesto - presupuesto.gastado;
+  const alertDiv = document.getElementById('presupuestoAlert');
+
+  if(monto > disponible){
+    alertDiv.innerHTML = `<div class="alert error">⚠️ Este gasto excede el presupuesto disponible. Disponible: ${money(disponible)}</div>`;
+  } else if(monto > 0 && (presupuesto.gastado + monto) > (presupuesto.presupuesto * 0.8)){
+    alertDiv.innerHTML = `<div class="alert warning">⚠️ Este gasto utilizará más del 80% del presupuesto de ${categoria}. Disponible después: ${money(disponible - monto)}</div>`;
+  } else {
+    alertDiv.innerHTML = '';
+  }
+}
+
+// Comprobante actualmente adjunto en el formulario "Nuevo Gasto".
+// Se guarda aquí y se adjunta al gasto al momento de enviarlo, para que
+// quede disponible para todo el flujo de aprobadores (contador, admin, etc.).
+let currentComprobante = null; // { dataUrl, mimeType, esPdf }
+
+async function handleFileUpload(file){
+  if(file.size > 10 * 1024 * 1024){
+    toast('El archivo es demasiado grande (máx. 10MB)', 'error');
+    return;
+  }
+
+  currentComprobante = null;
+  const extractedContainer = document.getElementById('extractedDataContainer');
+  extractedContainer.style.display = 'block';
+  
+  const processingStatus = document.getElementById('processingStatus');
+  processingStatus.textContent = 'Leyendo archivo...';
+
+  const esPdf = file.type === 'application/pdf';
+
+  try {
+    if(esPdf){
+      // Los modelos de visión de Groq no aceptan PDFs como imagen: si se le manda
+      // un PDF disfrazado de imagen, Groq responde con error o datos basura.
+      // Por eso, para PDF guardamos el archivo tal cual y pedimos captura manual.
+      const base64Data = await fileToBase64(file);
+      currentComprobante = { dataUrl: base64Data, mimeType: 'application/pdf', esPdf: true };
+      processingStatus.parentElement.innerHTML = '<div class="alert info">📄 Es un PDF: no se puede leer automáticamente con IA todavía. El archivo se adjuntará al gasto — completa los datos manualmente.</div>';
+      return;
+    }
+
+    processingStatus.textContent = 'Optimizando imagen...';
+    // Comprimimos/redimensionamos antes de mandar a Groq y antes de guardar:
+    // evita pagos "413 Payload Too Large" con fotos de celular (varios MB) y
+    // evita llenar el almacenamiento local con imágenes pesadas.
+    const compressedDataUrl = await compressImage(file);
+    currentComprobante = { dataUrl: compressedDataUrl, mimeType: 'image/jpeg', esPdf: false };
+
+    processingStatus.textContent = 'Enviando a IA para análisis (Groq Qwen3.6 27B Vision)...';
+    const extracted = await extractFacturaWithGroq(compressedDataUrl, processingStatus);
+    
+    if(extracted){
+      document.getElementById('mCategoria').value = extracted.categoria || CATEGORIAS_GASTO[0];
+      document.getElementById('mDescripcion').value = extracted.descripcion || '';
+      document.getElementById('mMonto').value = extracted.monto || '';
+      document.getElementById('mImpuestos').value = extracted.impuestos || '';
+      document.getElementById('mRFC').value = extracted.rfc || '';
+      document.getElementById('mFolio').value = extracted.folio || '';
+      document.getElementById('mFecha').value = extracted.fecha || todayISO();
+      
+      processingStatus.parentElement.innerHTML = '<div class="alert success">✓ Datos extraídos correctamente con Groq Vision (Qwen3.6). Revisa y corrige si es necesario.</div>';
+      actualizarAlertaPresupuesto();
+    }
+  } catch(err){
+    console.error(err);
+    // Mostramos el mensaje real del error (incluye si fue CORS/red, auth, o del modelo)
+    // en vez de un mensaje genérico, para poder diagnosticar bloqueos del navegador.
+    processingStatus.parentElement.innerHTML = `<div class="alert error">⚠️ No se pudo extraer con IA: ${esc(err.message)}. El comprobante ya quedó adjunto — completa los datos manualmente y continúa.</div>`;
+  }
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Redimensiona y comprime una imagen a JPEG usando un <canvas>, para que
+// nunca se envíen ni se guarden fotos de varios MB sin necesidad.
+function compressImage(file, maxDim = 1600, quality = 0.75){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          if(width >= height){
+            height = Math.round(height * (maxDim / width));
+            width = maxDim;
+          } else {
+            width = Math.round(width * (maxDim / height));
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function extractFacturaWithGroq(base64Data, statusEl){
+  const imageData = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+  const mimeType = base64Data.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+
+  const prompt = `Eres un experto en análisis de facturas y comprobantes fiscales mexicanos. Analiza esta imagen de un comprobante y extrae los siguientes datos en formato JSON:
+{
+  "categoria": "Categoría del gasto (Renta, Servicios, Sueldos, Mantenimiento, Papelería, Transporte, Otros)",
+  "descripcion": "Descripción breve del comprobante",
+  "monto": número total,
+  "impuestos": número de IVA u otros impuestos,
+  "rfc": "RFC del emisor",
+  "folio": "Folio fiscal o UUID",
+  "fecha": "YYYY-MM-DD"
+}
+
+Si no encuentras un campo, usa null. Responde ÚNICAMENTE con el objeto JSON. No incluyas razonamiento, explicaciones, ni bloques de markdown antes o después.`;
+
+  for(let i = 0; i < GROQ_KEYS.length; i++){
+    try {
+      if(statusEl) statusEl.textContent = `Intento ${i + 1}/${GROQ_KEYS.length} con Groq...`;
+      
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_KEYS[i]}`
+        },
+        body: JSON.stringify({
+          // meta-llama/llama-4-scout-17b-16e-instruct fue descontinuado por Groq (17-jun-2026).
+          // qwen/qwen3.6-27b es el modelo vigente con soporte de visión (texto + imagen).
+          model: 'qwen/qwen3.6-27b',
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageData}` } }
+            ]
+          }],
+          max_tokens: 800,
+          temperature: 0.1
+        })
+      });
+
+      if(!response.ok){
+        const err = await response.json().catch(() => ({}));
+        throw new Error('Groq: ' + (err.error?.message || `Error ${response.status}`));
+      }
+
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content || '';
+      // Qwen3.6 puede devolver texto de "pensamiento" (thinking mode) antes del JSON.
+      // En vez de confiar en que la respuesta completa sea JSON puro, extraemos
+      // el primer bloque { ... } válido, ignorando cualquier texto alrededor.
+      let cleaned = text.replace(/```json|```/g, '').trim();
+      const jsonStart = cleaned.indexOf('{');
+      const jsonEnd = cleaned.lastIndexOf('}');
+      if(jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart){
+        cleaned = cleaned.slice(jsonStart, jsonEnd + 1);
+      }
+      const parsed = JSON.parse(cleaned);
+      
+      return {
+        categoria: parsed.categoria || CATEGORIAS_GASTO[0],
+        descripcion: parsed.descripcion || '',
+        monto: parsed.monto || 0,
+        impuestos: parsed.impuestos || 0,
+        rfc: parsed.rfc || '',
+        folio: parsed.folio || '',
+        fecha: parsed.fecha || todayISO()
+      };
+    } catch(err){
+      console.warn(`Groq key ${i + 1} failed:`, err.message);
+      if(i === GROQ_KEYS.length - 1){
+        // "Failed to fetch" sin más detalle casi siempre es la red/CORS/una extensión
+        // del navegador bloqueando la petición (no llegó respuesta del servidor).
+        const pista = /Failed to fetch|NetworkError/i.test(err.message)
+          ? ' (parece un bloqueo de red/CORS del navegador, no un error de Groq — revisa la pestaña Network de las herramientas de desarrollador)'
+          : '';
+        throw new Error(err.message + pista);
+      }
+    }
+  }
+}
+
+function guardarNuevoGasto(){
+  const categoria = document.getElementById('mCategoria').value;
+  const descripcion = document.getElementById('mDescripcion').value.trim();
+  const monto = parseFloat(document.getElementById('mMonto').value) || 0;
+  const impuestos = parseFloat(document.getElementById('mImpuestos').value) || 0;
+  const rfc = document.getElementById('mRFC').value.trim();
+  const folio = document.getElementById('mFolio').value.trim();
+  const fecha = document.getElementById('mFecha').value;
+
+  if(!descripcion || monto <= 0){
+    toast('Completa los campos obligatorios', 'error');
+    return;
+  }
+
+  // Validar presupuesto
+  const presupuesto = getPresupuesto(categoria);
+  const disponible = presupuesto.presupuesto - presupuesto.gastado;
+  if(monto > disponible){
+    toast(`Gasto excede presupuesto disponible (${money(disponible)})`, 'error');
+    return;
+  }
+
+  const gasto = {
+    id: uid('gas_'),
+    solicitanteId: currentUser.id,
+    fecha: new Date(fecha).toISOString(),
+    categoria,
+    descripcion,
+    monto,
+    impuestos,
+    rfc,
+    folio,
+    estado: 'en_revision',
+    historial: [
+      { estado: 'en_revision', fecha: new Date().toISOString(), actorId: currentUser.id, nota: 'Comprobante subido y enviado para revisión' }
+    ],
+    verificadoSat: false,
+    linkSat: '',
+    documentoValidacionSat: null,
+    // Comprobante (imagen JPEG comprimida o PDF en base64) — así queda disponible
+    // para todo el flujo de aprobadores, no solo para la extracción con IA.
+    comprobante: currentComprobante
+  };
+
+  DB.gastos.push(gasto);
+  saveDB();
+  actualizarGastadoPresupuesto();
+  toast('Comprobante enviado para revisión', 'success');
+  currentComprobante = null;
+  
+  setTimeout(() => {
+    showSection('mis_gastos');
+  }, 1500);
+}
+
+// ========== BANDEJA ADMIN (APROBACIÓN FINAL) ==========
+function renderBandejaAdmin(){
+  const gastos = DB.gastos.filter(g => ['en_revision','verificado_sat','por_pagar'].includes(g.estado));
+  
+  return `
+  <div class="section-head">
+    <div><h2>Bandeja de Entrada</h2><p>${gastos.length} gasto(s) pendiente(s) de aprobación</p></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Solicitante</th><th>Categoría</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        ${gastos.length ? gastos.map(g => {
+          const user = DB.usuarios.find(u => u.id === g.solicitanteId);
+          return `<tr>
+            <td style="font-size:12.5px;">${fmtDate(g.fecha)}</td>
+            <td style="font-size:12.5px;">${esc(user?.nombre || '—')}</td>
+            <td><span class="tag tag-gray">${esc(g.categoria)}</span></td>
+            <td class="mono">${money(g.monto)}</td>
+            <td><span class="status-badge status-${g.estado}">${ESTADOS_GASTO[g.estado]}</span></td>
+            <td><button class="btn btn-outline btn-sm" data-view-gasto="${g.id}">Ver</button></td>
+          </tr>`;
+        }).join('') : `<tr><td colspan="6"><div class="empty">No hay gastos pendientes.</div></td></tr>`}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function attachBandejaAdminHandlers(){
+  document.querySelectorAll('[data-view-gasto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gastoId = btn.dataset.viewGasto;
+      const gasto = DB.gastos.find(g => g.id === gastoId);
+      if(gasto) showGastoDetail(gasto);
+    });
+  });
+}
+
+// ========== BANDEJA ADM GASTOS ==========
+function renderBandejaAdm(){
+  const gastos = DB.gastos.filter(g => g.estado === 'en_revision' && g.solicitanteId !== currentUser.id);
+  
+  return `
+  <div class="section-head">
+    <div><h2>Bandeja de Entrada</h2><p>${gastos.length} gasto(s) pendiente(s) de revisión</p></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Solicitante</th><th>Categoría</th><th>Descripción</th><th>Monto</th><th>Acciones</th></tr></thead>
+      <tbody>
+        ${gastos.length ? gastos.map(g => {
+          const user = DB.usuarios.find(u => u.id === g.solicitanteId);
+          return `<tr>
+            <td style="font-size:12.5px;">${fmtDate(g.fecha)}</td>
+            <td style="font-size:12.5px;">${esc(user?.nombre || '—')}</td>
+            <td><span class="tag tag-gray">${esc(g.categoria)}</span></td>
+            <td style="font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${esc(g.descripcion)}</td>
+            <td class="mono">${money(g.monto)}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-success btn-sm" data-aprobar-gasto="${g.id}">Aprobar</button>
+              <button class="btn btn-danger btn-sm" data-rechazar-gasto="${g.id}">Rechazar</button>
+            </td>
+          </tr>`;
+        }).join('') : `<tr><td colspan="6"><div class="empty">No hay gastos pendientes de revisión.</div></td></tr>`}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function attachBandejaAdmHandlers(){
+  document.querySelectorAll('[data-aprobar-gasto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gastoId = btn.dataset.aprobarGasto;
+      const gasto = DB.gastos.find(g => g.id === gastoId);
+      if(gasto){
+        openModal('Aprobar Gasto', `
+          <div class="alert info">Este gasto pasará a verificación en el SAT. El contador deberá validarlo.</div>
+          <div class="field">
+            <label>Observaciones (opcional)</label>
+            <textarea id="obsAprobacion" rows="2" placeholder="Ej. Aprobado según política de gastos..."></textarea>
+          </div>
+        `, {
+          saveLabel: 'Aprobar',
+          onSave: () => {
+            const obs = document.getElementById('obsAprobacion').value.trim();
+            gasto.estado = 'verificado_sat';
+            gasto.historial.push({
+              estado: 'verificado_sat',
+              fecha: new Date().toISOString(),
+              actorId: currentUser.id,
+              nota: obs || 'Aprobado por Adm. de Gastos'
+            });
+            saveDB();
+            actualizarGastadoPresupuesto();
+            toast('Gasto aprobado. Enviado a verificación SAT', 'success');
+            closeModal();
+            renderSection('bandeja_adm');
+          }
+        });
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-rechazar-gasto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gastoId = btn.dataset.rechazarGasto;
+      openModal('Rechazar Gasto', `
+        <div class="alert error">⚠️ El gasto será rechazado y regresará al solicitante.</div>
+        <div class="field">
+          <label>Motivo del rechazo *</label>
+          <textarea id="motivoRechazo" rows="3" placeholder="Especifica por qué se rechaza este gasto (obligatorio)..."></textarea>
+        </div>
+      `, {
+        saveLabel: 'Rechazar',
+        onSave: () => {
+          const motivo = document.getElementById('motivoRechazo').value.trim();
+          if(!motivo){
+            toast('Debes especificar un motivo de rechazo', 'error');
+            return;
+          }
+          const gasto = DB.gastos.find(g => g.id === gastoId);
+          if(gasto){
+            gasto.estado = 'rechazado';
+            gasto.historial.push({
+              estado: 'rechazado',
+              fecha: new Date().toISOString(),
+              actorId: currentUser.id,
+              nota: motivo
+            });
+            saveDB();
+            actualizarGastadoPresupuesto();
+            toast('Gasto rechazado', 'error');
+            closeModal();
+            renderSection('bandeja_adm');
+          }
+        }
+      });
+    });
+  });
+}
+
+// ========== BANDEJA CONTADOR ==========
+function renderBandejaContador(){
+  const gastos = DB.gastos.filter(g => g.estado === 'verificado_sat' && !g.verificadoSat);
+  
+  return `
+  <div class="section-head">
+    <div><h2>Bandeja de Entrada</h2><p>${gastos.length} gasto(s) pendiente(s) de verificación en SAT</p></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Solicitante</th><th>RFC</th><th>Folio</th><th>Monto</th><th>Acciones</th></tr></thead>
+      <tbody>
+        ${gastos.length ? gastos.map(g => {
+          const user = DB.usuarios.find(u => u.id === g.solicitanteId);
+          return `<tr>
+            <td style="font-size:12.5px;">${fmtDate(g.fecha)}</td>
+            <td style="font-size:12.5px;">${esc(user?.nombre || '—')}</td>
+            <td class="mono" style="font-size:11px;">${esc(g.rfc || '—')}</td>
+            <td class="mono" style="font-size:11px;">${esc(g.folio?.substring(0, 8) + '...' || '—')}</td>
+            <td class="mono">${money(g.monto)}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-outline btn-sm" data-verificar-sat="${g.id}">Verificar SAT</button>
+            </td>
+          </tr>`;
+        }).join('') : `<tr><td colspan="6"><div class="empty">No hay gastos pendientes de verificación.</div></td></tr>`}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function attachBandejaContadorHandlers(){
+  document.querySelectorAll('[data-verificar-sat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gastoId = btn.dataset.verificarSat;
+      openModal('Verificación en SAT', `
+        <div class="alert info">Sube el documento de validación del SAT (PDF o imagen) y pega el link de verificación.</div>
+        <div class="field">
+          <label>Documento de Validación SAT *</label>
+          <div class="file-upload" id="fileUploadSat" style="margin-bottom:10px;">
+            <div class="file-upload-icon">📄</div>
+            <div class="file-upload-text">Arrastra el documento aquí o haz clic</div>
+            <div class="file-upload-hint">PDF, JPG, PNG</div>
+            <input type="file" id="fileInputSat" accept="application/pdf,image/*">
+          </div>
+          <div id="fileNameSat" style="font-size:12px;color:var(--teal);margin-bottom:10px;display:none;">✓ Archivo cargado</div>
+        </div>
+        <div class="field">
+          <label>Link de Verificación (portal del SAT) *</label>
+          <input type="url" id="linkSat" placeholder="https://portalfiscal.sat.gob.mx/...">
+        </div>
+      `, {
+        wide: true,
+        saveLabel: 'Marcar como Verificado',
+        onSave: () => {
+          const linkSat = document.getElementById('linkSat').value.trim();
+          const fileNameEl = document.getElementById('fileNameSat');
+          
+          if(!linkSat){
+            toast('Debes pegar el link de verificación del SAT', 'error');
+            return;
+          }
+          
+          if(fileNameEl.style.display === 'none'){
+            toast('Debes subir el documento de validación del SAT', 'error');
+            return;
+          }
+
+          const gasto = DB.gastos.find(g => g.id === gastoId);
+          if(gasto){
+            gasto.verificadoSat = true;
+            gasto.linkSat = linkSat;
+            gasto.estado = 'por_pagar';
+            gasto.historial.push({
+              estado: 'por_pagar',
+              fecha: new Date().toISOString(),
+              actorId: currentUser.id,
+              nota: 'Verificado en SAT'
+            });
+            saveDB();
+            actualizarGastadoPresupuesto();
+            toast('Gasto verificado en SAT', 'success');
+            closeModal();
+            renderSection('bandeja_contador');
+          }
+        }
+      });
+
+      // Manejar carga de archivo
+      setTimeout(() => {
+        const fileUploadSat = document.getElementById('fileUploadSat');
+        const fileInputSat = document.getElementById('fileInputSat');
+        const fileNameSat = document.getElementById('fileNameSat');
+
+        fileUploadSat.addEventListener('click', () => fileInputSat.click());
+        fileUploadSat.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          fileUploadSat.style.borderColor = 'var(--amber)';
+        });
+        fileUploadSat.addEventListener('dragleave', () => {
+          fileUploadSat.style.borderColor = 'var(--line)';
+        });
+        fileUploadSat.addEventListener('drop', (e) => {
+          e.preventDefault();
+          fileUploadSat.style.borderColor = 'var(--line)';
+          if(e.dataTransfer.files.length){
+            fileNameSat.textContent = '✓ ' + e.dataTransfer.files[0].name;
+            fileNameSat.style.display = 'block';
+          }
+        });
+
+        fileInputSat.addEventListener('change', (e) => {
+          if(e.target.files.length){
+            fileNameSat.textContent = '✓ ' + e.target.files[0].name;
+            fileNameSat.style.display = 'block';
+          }
+        });
+      }, 100);
+    });
+  });
+}
+
+// ========== VERIFICACIÓN SAT (VISTA GENERAL) ==========
+function renderVerificacion(){
+  const gastos = DB.gastos.filter(g => g.verificadoSat);
+  
+  return `
+  <div class="section-head">
+    <div><h2>Comprobantes Verificados</h2><p>${gastos.length} comprobante(s) validado(s) en el SAT</p></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>RFC</th><th>Folio</th><th>Monto</th><th>Verificado por</th><th>Link SAT</th></tr></thead>
+      <tbody>
+        ${gastos.length ? gastos.map(g => {
+          const user = DB.usuarios.find(u => u.id === g.solicitanteId);
+          const verificador = DB.usuarios.find(u => g.historial.find(h => h.estado === 'por_pagar' && h.actorId === u.id));
+          return `<tr>
+            <td style="font-size:12.5px;">${fmtDate(g.fecha)}</td>
+            <td class="mono" style="font-size:11px;">${esc(g.rfc || '—')}</td>
+            <td class="mono" style="font-size:11px;">${esc(g.folio?.substring(0, 8) + '...' || '—')}</td>
+            <td class="mono">${money(g.monto)}</td>
+            <td style="font-size:12px;">${esc(verificador?.nombre || '—')}</td>
+            <td><a href="${esc(g.linkSat)}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;font-size:12px;">Ver en SAT →</a></td>
+          </tr>`;
+        }).join('') : `<tr><td colspan="6"><div class="empty">No hay comprobantes verificados aún.</div></td></tr>`}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function attachVerificacionHandlers(){}
+
+// ========== PAGOS (PROGRAMACIÓN) ==========
+function renderPagos(){
+  const gastos = DB.gastos.filter(g => g.estado === 'por_pagar' || g.estado === 'pagado');
+  
+  return `
+  <div class="section-head">
+    <div><h2>Programación de Pagos</h2><p>${gastos.filter(g => g.estado === 'por_pagar').length} pendiente(s) · ${gastos.filter(g => g.estado === 'pagado').length} pagado(s)</p></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Solicitante</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        ${gastos.length ? gastos.map(g => {
+          const user = DB.usuarios.find(u => u.id === g.solicitanteId);
+          return `<tr>
+            <td style="font-size:12.5px;">${fmtDate(g.fecha)}</td>
+            <td style="font-size:12.5px;">${esc(user?.nombre || '—')}</td>
+            <td class="mono">${money(g.monto)}</td>
+            <td><span class="status-badge status-${g.estado}">${ESTADOS_GASTO[g.estado]}</span></td>
+            <td>
+              ${g.estado === 'por_pagar' ? `<button class="btn btn-success btn-sm" data-marcar-pagado="${g.id}">Marcar como Pagado</button>` : '<span style="font-size:12px;color:var(--text-soft);">Completado</span>'}
+            </td>
+          </tr>`;
+        }).join('') : `<tr><td colspan="5"><div class="empty">No hay pagos pendientes.</div></td></tr>`}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function attachPagosHandlers(){
+  document.querySelectorAll('[data-marcar-pagado]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gastoId = btn.dataset.marcarPagado;
+      openModal('Registrar Pago', `
+        <div class="alert success">Confirma que el pago ha sido procesado.</div>
+        <div class="field">
+          <label>Referencia de Pago (opcional)</label>
+          <input type="text" id="refPago" placeholder="Ej. Transferencia #123456">
+        </div>
+      `, {
+        saveLabel: 'Marcar como Pagado',
+        onSave: () => {
+          const refPago = document.getElementById('refPago').value.trim();
+          const gasto = DB.gastos.find(g => g.id === gastoId);
+          if(gasto){
+            gasto.estado = 'pagado';
+            gasto.historial.push({
+              estado: 'pagado',
+              fecha: new Date().toISOString(),
+              actorId: currentUser.id,
+              nota: refPago || 'Pago procesado'
+            });
+            saveDB();
+            actualizarGastadoPresupuesto();
+            toast('Pago registrado', 'success');
+            closeModal();
+            renderSection('pagos');
+          }
+        }
+      });
+    });
+  });
+}
+
+// ========== REPORTES ==========
+function renderReportes(){
+  const gastosPorCategoria = {};
+  const gastosPorEstado = {};
+  
+  DB.gastos.forEach(g => {
+    if(g.estado !== 'rechazado'){
+      gastosPorCategoria[g.categoria] = (gastosPorCategoria[g.categoria] || 0) + g.monto;
+      gastosPorEstado[g.estado] = (gastosPorEstado[g.estado] || 0) + g.monto;
+    }
+  });
+
+  return `
+  <div class="section-head">
+    <h2>Reportes y Análisis</h2>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+    <div class="card">
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;color:var(--ink);margin-bottom:14px;">Gastos por Categoría</div>
+      ${Object.entries(gastosPorCategoria).length ? Object.entries(gastosPorCategoria).sort((a,b) => b[1] - a[1]).map(([cat, monto]) => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;">
+          <span>${esc(cat)}</span>
+          <span class="mono" style="font-weight:600;">${money(monto)}</span>
+        </div>
+      `).join('') : '<p style="font-size:13px;color:var(--text-soft);">Sin datos</p>'}
+    </div>
+
+    <div class="card">
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;color:var(--ink);margin-bottom:14px;">Gastos por Estado</div>
+      ${Object.entries(gastosPorEstado).length ? Object.entries(gastosPorEstado).map(([estado, monto]) => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;">
+          <span><span class="status-badge status-${estado}">${ESTADOS_GASTO[estado]}</span></span>
+          <span class="mono" style="font-weight:600;">${money(monto)}</span>
+        </div>
+      `).join('') : '<p style="font-size:13px;color:var(--text-soft);">Sin datos</p>'}
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;color:var(--ink);margin-bottom:14px;">Resumen General</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+      <div style="padding:12px;background:var(--paper);border-radius:8px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:6px;">Total de Gastos</div>
+        <div style="font-size:20px;font-weight:600;color:var(--ink);">${money(DB.gastos.filter(g => g.estado !== 'rechazado').reduce((s,g) => s + g.monto, 0))}</div>
+      </div>
+      <div style="padding:12px;background:var(--paper);border-radius:8px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:6px;">Total Impuestos</div>
+        <div style="font-size:20px;font-weight:600;color:var(--ink);">${money(DB.gastos.filter(g => g.estado !== 'rechazado').reduce((s,g) => s + (g.impuestos || 0), 0))}</div>
+      </div>
+      <div style="padding:12px;background:var(--paper);border-radius:8px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:6px;">Gastos Pagados</div>
+        <div style="font-size:20px;font-weight:600;color:var(--ink);">${money(DB.gastos.filter(g => g.estado === 'pagado').reduce((s,g) => s + g.monto, 0))}</div>
+      </div>
+      <div style="padding:12px;background:var(--paper);border-radius:8px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:6px;">Gastos Rechazados</div>
+        <div style="font-size:20px;font-weight:600;color:var(--rose);">${money(DB.gastos.filter(g => g.estado === 'rechazado').reduce((s,g) => s + g.monto, 0))}</div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+// ========== USUARIOS (ADMIN) ==========
+function renderUsuarios(){
+  return `
+  <div class="section-head">
+    <div><h2>Usuarios del Sistema</h2><p>${DB.usuarios.length} usuario(s) registrado(s)</p></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nombre</th><th>Rol</th><th>Email</th><th>Gastos</th><th></th></tr></thead>
+      <tbody>
+        ${DB.usuarios.map(u => {
+          const gastosCount = DB.gastos.filter(g => g.solicitanteId === u.id).length;
+          return `<tr>
+            <td style="font-weight:500;">${esc(u.nombre)}</td>
+            <td><span class="tag tag-gray">${ROLES[u.rol].label}</span></td>
+            <td style="font-size:12px;color:var(--text-soft);">${esc(u.email)}</td>
+            <td class="mono">${gastosCount}</td>
+            <td><button class="btn btn-outline btn-sm btn-icon" data-edit-usuario="${u.id}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+// ========== DETALLE DE GASTO ==========
+function showGastoDetail(gasto){
+  const user = DB.usuarios.find(u => u.id === gasto.solicitanteId);
+  
+  let html = `
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+      <div>
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;font-weight:600;margin-bottom:4px;">Información del Comprobante</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div><span style="font-size:11px;color:var(--text-soft);">Fecha</span><div style="font-weight:600;">${fmtDate(gasto.fecha)}</div></div>
+            <div><span style="font-size:11px;color:var(--text-soft);">Categoría</span><div><span class="tag tag-gray">${esc(gasto.categoria)}</span></div></div>
+            <div><span style="font-size:11px;color:var(--text-soft);">RFC Emisor</span><div class="mono" style="font-weight:600;">${esc(gasto.rfc || '—')}</div></div>
+            <div><span style="font-size:11px;color:var(--text-soft);">Folio</span><div class="mono" style="font-weight:600;font-size:11px;">${esc(gasto.folio || '—')}</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;font-weight:600;margin-bottom:8px;">Comprobante Adjunto</div>
+          ${gasto.comprobante && gasto.comprobante.dataUrl ? (
+            gasto.comprobante.esPdf
+              ? `<a href="${gasto.comprobante.dataUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">📄 Ver PDF del comprobante</a>`
+              : `<a href="${gasto.comprobante.dataUrl}" target="_blank" rel="noopener">
+                   <img src="${gasto.comprobante.dataUrl}" alt="Comprobante" style="max-width:220px;max-height:280px;border-radius:8px;border:1px solid var(--line);display:block;cursor:zoom-in;">
+                 </a>
+                 <div style="font-size:11px;color:var(--text-soft);margin-top:6px;">Haz clic para ver en tamaño completo</div>`
+          ) : `<div style="padding:12px;background:var(--paper);border-radius:8px;font-size:12px;color:var(--text-soft);">Este gasto no tiene un comprobante adjunto (fue creado antes de esta función, o se guardó solo con datos manuales).</div>`}
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;font-weight:600;margin-bottom:8px;">Descripción</div>
+          <div style="padding:12px;background:var(--paper);border-radius:8px;font-size:13px;">${esc(gasto.descripcion)}</div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;font-weight:600;margin-bottom:8px;">Montos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="padding:12px;background:var(--paper);border-radius:8px;">
+              <div style="font-size:11px;color:var(--text-soft);">Monto Total</div>
+              <div style="font-size:18px;font-weight:600;color:var(--ink);">${money(gasto.monto)}</div>
+            </div>
+            <div style="padding:12px;background:var(--paper);border-radius:8px;">
+              <div style="font-size:11px;color:var(--text-soft);">Impuestos</div>
+              <div style="font-size:18px;font-weight:600;color:var(--ink);">${money(gasto.impuestos || 0)}</div>
+            </div>
+          </div>
+        </div>
+
+        ${gasto.linkSat ? `
+          <div style="margin-bottom:20px;padding:12px;background:var(--green-pale);border-radius:8px;border-left:3px solid var(--green);">
+            <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;">✓ Verificado en SAT</div>
+            <a href="${esc(gasto.linkSat)}" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-size:12px;">Ver comprobante en el portal del SAT →</a>
+          </div>
+        ` : ''}
+
+        <div>
+          <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;font-weight:600;margin-bottom:8px;">Historial de Cambios</div>
+          <div class="timeline">
+            ${gasto.historial.map((h, i) => {
+              const actor = DB.usuarios.find(u => u.id === h.actorId);
+              return `
+                <div class="timeline-item ${h.estado === 'rechazado' ? 'timeline-dot error' : h.estado === 'pagado' ? 'timeline-dot success' : 'timeline-dot info'}">
+                  <div class="timeline-content">
+                    <div class="timeline-title">${ESTADOS_GASTO[h.estado]}</div>
+                    <div class="timeline-desc">${esc(h.nota)}</div>
+                    <div class="timeline-time">Por ${esc(actor?.nombre || '—')} · ${fmtDateTime(h.fecha)}</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="padding:16px;background:var(--paper);border-radius:8px;margin-bottom:16px;">
+          <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;font-weight:600;margin-bottom:8px;">Estado Actual</div>
+          <div style="margin-bottom:12px;"><span class="status-badge status-${gasto.estado}" style="font-size:12px;padding:6px 12px;">${ESTADOS_GASTO[gasto.estado]}</span></div>
+          <div style="font-size:11px;color:var(--text-soft);line-height:1.5;">
+            ${gasto.estado === 'en_revision' ? 'En revisión por el Administrador de Gastos.' : ''}
+            ${gasto.estado === 'verificado_sat' ? 'Aprobado, pendiente de verificación en SAT.' : ''}
+            ${gasto.estado === 'por_pagar' ? 'Verificado en SAT, listo para programación de pago.' : ''}
+            ${gasto.estado === 'pagado' ? 'Pago completado.' : ''}
+            ${gasto.estado === 'rechazado' ? 'Rechazado. Revisa el historial para más detalles.' : ''}
+          </div>
+        </div>
+
+        <div style="padding:16px;background:var(--paper);border-radius:8px;">
+          <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;font-weight:600;margin-bottom:8px;">Solicitante</div>
+          <div style="font-weight:600;margin-bottom:4px;">${esc(user?.nombre || '—')}</div>
+          <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px;">${ROLES[user?.rol].label}</div>
+          <div style="font-size:12px;color:var(--text-soft);">${esc(user?.email || '—')}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  openModal(`Detalle de Gasto #${gasto.id.substring(4, 10)}`, html, { wide: true, hideFoot: true });
+}
+
+// ========== INICIALIZACIÓN APP ==========
+function initApp(){
+  document.getElementById('sidebarUserName').textContent = currentUser.nombre;
+  document.getElementById('sidebarUserRole').textContent = ROLES[currentUser.rol].label;
+  
+  renderNav();
+  showSection('dashboard');
+
+  document.getElementById('hamburger').addEventListener('click', openSidebar);
+  document.getElementById('scrim').addEventListener('click', closeSidebar);
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+
+  document.getElementById('btnExport').addEventListener('click', () => {
+    const data = JSON.stringify(DB, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `botica-central-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnReset').addEventListener('click', async () => {
+    if(confirm('¿Reiniciar todos los datos de prueba? Esta acción no se puede deshacer.')){
+      localStorage.removeItem(DB_KEY);
+      DB = defaultDB();
+      await saveDB();
+      renderSection(currentSection);
+      toast('Datos reiniciados', 'success');
+    }
+  });
+}
+
+// ========== INICIO ==========
+(async function bootstrap(){
+  DB = await loadDB();
+  initLoginScreen();
+})();
+</script>
+</body>
+</html>
+
