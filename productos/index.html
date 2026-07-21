@@ -3,527 +3,416 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Lookup Mega</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<title>Escáner · Consulta de productos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0b0f14; --panel:#131a22; --panel2:#1a232d; --border:#243040;
-    --text:#e8eef4; --muted:#8ba0b4; --accent:#4fd1c5; --accent2:#f6ad55;
-    --danger:#f56565; --ok:#68d391;
+    --bg: #0e1210;
+    --bg-panel: #161c19;
+    --line: #2a332e;
+    --laser: #ff3b30;
+    --amber: #ffb800;
+    --ink: #e9efe9;
+    --ink-dim: #8ea095;
+    --paper: #f4f1e6;
+    --paper-ink: #1c1c1a;
   }
   *{box-sizing:border-box;}
   body{
-    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    background:var(--bg); color:var(--text); min-height:100vh;
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top, rgba(255,59,48,0.06), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'JetBrains Mono', monospace;
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 80px;
   }
-  header{
-    padding:18px 16px 10px; text-align:center; border-bottom:1px solid var(--border);
+  .rig{
+    width:100%;
+    max-width:480px;
   }
-  header h1{margin:0; font-size:19px; letter-spacing:.3px;}
-  header p{margin:6px 0 0; color:var(--muted); font-size:12.5px;}
-  .wrap{max-width:640px; margin:0 auto; padding:16px;}
-  .card{
-    background:var(--panel); border:1px solid var(--border); border-radius:14px;
-    padding:16px; margin-bottom:14px;
+  .brand{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:22px;
   }
-  .row{display:flex; gap:8px;}
-  input[type=text]{
-    flex:1; background:var(--panel2); border:1px solid var(--border); color:var(--text);
-    padding:12px 14px; border-radius:10px; font-size:16px; outline:none;
+  .brand h1{
+    font-family:'Archivo Black', sans-serif;
+    font-size:22px;
+    letter-spacing:0.5px;
+    margin:0;
   }
-  input[type=text]:focus{border-color:var(--accent);}
+  .brand h1 span{color:var(--laser);}
+  .brand .clock{
+    font-size:11px;
+    color:var(--ink-dim);
+  }
+
+  .scanner{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .scanner::before{
+    content:"";
+    position:absolute;
+    left:0; right:0; top:0;
+    height:2px;
+    background:linear-gradient(90deg, transparent, var(--laser), transparent);
+    animation: sweep 2.4s linear infinite;
+    opacity:0.75;
+  }
+  @keyframes sweep{
+    0%{ transform:translateY(0); }
+    50%{ transform:translateY(96px); }
+    100%{ transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .scanner::before{ animation:none; }
+  }
+
+  .field-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:var(--ink-dim);
+    margin-bottom:8px;
+  }
+  form{ display:flex; gap:8px; }
+  input[type="text"]{
+    flex:1;
+    background:#0a0d0b;
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family:'JetBrains Mono', monospace;
+    font-size:18px;
+    letter-spacing:2px;
+    padding:12px 14px;
+    border-radius:8px;
+    outline:none;
+  }
+  input[type="text"]:focus{
+    border-color:var(--laser);
+  }
+  input[type="text"]::placeholder{
+    color:#4a564e;
+    letter-spacing:1px;
+  }
   button{
-    border:none; border-radius:10px; padding:12px 16px; font-size:14px; font-weight:600;
-    cursor:pointer; transition:.15s; white-space:nowrap;
+    background:var(--laser);
+    color:#1a0a08;
+    border:none;
+    font-family:'Archivo Black', sans-serif;
+    font-size:13px;
+    letter-spacing:0.5px;
+    padding:0 18px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:transform 0.08s ease, background 0.15s ease;
   }
-  .btn-primary{background:var(--accent); color:#04231f;}
-  .btn-primary:active{transform:scale(.97);}
-  .btn-secondary{background:var(--panel2); color:var(--text); border:1px solid var(--border);}
-  .btn-secondary:active{transform:scale(.97);}
-  .btn-full{width:100%; margin-top:8px;}
-  #cam-wrap{display:none; margin-top:12px;}
-  #reader{width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--border);}
-  .status{
-    font-size:13px; color:var(--muted); margin-top:10px; min-height:18px;
+  button:hover{ background:#ff5245; }
+  button:active{ transform:scale(0.96); }
+  button:disabled{ background:#5c4340; cursor:progress; }
+
+  .hint{
+    margin-top:10px;
+    font-size:11px;
+    color:var(--ink-dim);
   }
-  .log{
-    font-size:12px; color:var(--muted); margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;
+
+  /* ---- receipt output ---- */
+  .receipt-slot{
+    margin-top:24px;
   }
-  .pill{
-    padding:3px 9px; border-radius:20px; border:1px solid var(--border); font-size:11px;
+  .receipt{
+    background:var(--paper);
+    color:var(--paper-ink);
+    border-radius:2px;
+    padding:22px 20px 26px;
+    position:relative;
+    box-shadow:0 18px 40px -12px rgba(0,0,0,0.6);
+    animation: drop 0.35s cubic-bezier(.2,.9,.3,1.15);
+    transform-origin: top center;
   }
-  .pill.hit{border-color:var(--ok); color:var(--ok);}
-  .pill.miss{border-color:var(--border); color:var(--muted);}
-  .pill.err{border-color:var(--danger); color:var(--danger);}
-  .pill.pending{border-color:var(--accent2); color:var(--accent2);}
-  #result{display:none;}
-  .prod-header{display:flex; gap:14px; align-items:flex-start;}
-  .prod-img{
-    width:84px; height:84px; border-radius:10px; object-fit:cover; background:var(--panel2);
-    border:1px solid var(--border); flex-shrink:0;
+  @keyframes drop{
+    from{ opacity:0; transform:translateY(-14px) scaleY(0.96); }
+    to{ opacity:1; transform:translateY(0) scaleY(1); }
   }
-  .prod-name{font-size:16.5px; font-weight:700; margin:0 0 4px;}
-  .prod-brand{color:var(--accent2); font-size:13px; margin:0 0 6px;}
-  .prod-source{
-    display:inline-block; font-size:11px; background:var(--panel2); color:var(--accent);
-    padding:2px 8px; border-radius:20px; border:1px solid var(--border);
+  .receipt::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:-9px;
+    height:18px;
+    background:
+      radial-gradient(circle at 8px 0, transparent 8px, var(--paper) 9px) repeat-x;
+    background-size:18px 18px;
   }
-  .fields{margin-top:14px; display:grid; gap:8px;}
-  .field{
-    display:flex; justify-content:space-between; gap:10px; font-size:13.5px;
-    padding:8px 10px; background:var(--panel2); border-radius:8px; border:1px solid var(--border);
+  .r-head{
+    text-align:center;
+    border-bottom:1px dashed #9a9587;
+    padding-bottom:12px;
+    margin-bottom:12px;
   }
-  .field .k{color:var(--muted); flex-shrink:0;}
-  .field .v{text-align:right; word-break:break-word;}
-  .empty{text-align:center; color:var(--muted); font-size:13.5px; padding:20px 10px;}
-  .footer-note{font-size:11.5px; color:var(--muted); text-align:center; margin-top:18px; line-height:1.5;}
-  .spinner{
-    width:14px; height:14px; border:2px solid var(--border); border-top-color:var(--accent);
-    border-radius:50%; display:inline-block; animation:spin .7s linear infinite; vertical-align:middle; margin-right:6px;
+  .r-head .status{
+    font-size:11px;
+    letter-spacing:2px;
+    color:#6b6a5f;
   }
-  @keyframes spin{to{transform:rotate(360deg);}}
+  .r-head img{
+    max-width:120px;
+    max-height:120px;
+    margin:10px auto 8px;
+    display:block;
+    mix-blend-mode:multiply;
+  }
+  .r-name{
+    font-family:'Archivo Black', sans-serif;
+    font-size:16px;
+    line-height:1.3;
+    margin:2px 0 2px;
+  }
+  .r-brand{
+    font-size:12px;
+    color:#5a5a52;
+  }
+  .r-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    padding:4px 0;
+    border-bottom:1px dotted #cfc9b8;
+  }
+  .r-row span:first-child{ color:#6b6a5f; }
+  .r-row span:last-child{ text-align:right; max-width:60%; }
+  .r-code{
+    text-align:center;
+    margin-top:14px;
+    letter-spacing:3px;
+    font-size:11px;
+    color:#3a392f;
+  }
+  .r-bars{
+    display:flex;
+    justify-content:center;
+    gap:2px;
+    margin-top:8px;
+    height:34px;
+    align-items:flex-end;
+  }
+  .r-bars div{
+    width:2px;
+    background:#1c1c1a;
+  }
+  .r-time{
+    text-align:center;
+    font-size:10px;
+    color:#8a8878;
+    margin-top:6px;
+  }
+
+  .not-found .r-name{ color:#8a2c22; }
+  .not-found .status{ color:#8a2c22; }
+
+  .history{
+    margin-top:26px;
+  }
+  .history-title{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:var(--ink-dim);
+    margin-bottom:10px;
+  }
+  .history-item{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    font-size:12px;
+    padding:8px 0;
+    border-bottom:1px solid var(--line);
+    color:var(--ink-dim);
+    cursor:pointer;
+  }
+  .history-item:hover{ color:var(--ink); }
+  .history-item .h-code{ color:var(--amber); }
+
+  .loading .r-name::after{
+    content:"…";
+  }
 </style>
 </head>
 <body>
-
-<header>
-  <h1>🔎 Product Lookup Mega</h1>
-  <p>Cascada de APIs gratuitas de identificación de productos</p>
-</header>
-
-<div class="wrap">
-
-  <div class="card">
-    <div class="row">
-      <input type="text" id="barcode-input" inputmode="numeric" placeholder="Escribe o escanea el código de barras" />
-      <button class="btn-primary" onclick="lookup()">Buscar</button>
-    </div>
-    <button class="btn-secondary btn-full" onclick="toggleCamera()">📷 Escanear con cámara</button>
-    <button class="btn-secondary btn-full" onclick="runDiagnostics()">🩺 Diagnosticar conexión</button>
-    <div id="cam-wrap">
-      <div id="reader"></div>
-    </div>
-    <div class="status" id="status"></div>
-    <div id="diag-output" class="log" style="display:block;"></div>
-    <div class="log" id="log"></div>
+<div class="rig">
+  <div class="brand">
+    <h1>ESCÁNER<span>·</span>PRODUCTOS</h1>
+    <div class="clock" id="clock"></div>
   </div>
 
-  <div class="card" id="insecure-warning" style="display:none; border-color:var(--danger);">
-    <p style="margin:0 0 6px; color:var(--danger); font-weight:700; font-size:13.5px;">⚠️ Contexto inseguro detectado</p>
-    <p style="margin:0; font-size:13px; color:var(--muted); line-height:1.5;">
-      Estás abriendo este archivo localmente (no por HTTPS). La cámara no va a funcionar y algunas APIs pueden bloquear las consultas por CORS.
-      Sube este archivo a Vercel (o cualquier hosting con HTTPS) para que todo funcione correctamente.
-    </p>
+  <div class="scanner">
+    <div class="field-label">Código de barras</div>
+    <form id="scan-form">
+      <input type="text" id="code-input" inputmode="numeric" placeholder="7500478044283" autocomplete="off" autofocus>
+      <button type="submit" id="scan-btn">BUSCAR</button>
+    </form>
+    <div class="hint">Consulta en vivo contra Open Food Facts</div>
   </div>
 
-  <div class="card" id="result">
-    <div class="prod-header">
-      <img id="p-img" class="prod-img" src="" alt="">
-      <div>
-        <p class="prod-name" id="p-name">—</p>
-        <p class="prod-brand" id="p-brand"></p>
-        <span class="prod-source" id="p-source"></span>
-      </div>
-    </div>
-    <div class="fields" id="p-fields"></div>
-  </div>
+  <div class="receipt-slot" id="receipt-slot"></div>
 
-  <div class="footer-note">
-    Fuentes: Open Food Facts → Open Beauty Facts → Open Products Facts → Open Pet Food Facts → UPCitemdb (trial, sin key) → Wikidata (GTIN) → Open Library (solo ISBN de libros) → EAN-Search (gratis limitado).<br>
-    Si una fuente falla por bloqueo de red/CORS, se reintenta automáticamente vía proxy público.<br>
-    No existe una API pública del gobierno mexicano (PROFECO/gob.mx) que mapee código de barras a producto — no la incluí porque no existe, no por omisión.
+  <div class="history" id="history" style="display:none;">
+    <div class="history-title">Últimos escaneos</div>
+    <div id="history-list"></div>
   </div>
-
 </div>
 
 <script>
-let html5QrCode = null;
-let camActive = false;
+const form = document.getElementById('scan-form');
+const input = document.getElementById('code-input');
+const btn = document.getElementById('scan-btn');
+const slot = document.getElementById('receipt-slot');
+const historyWrap = document.getElementById('history');
+const historyList = document.getElementById('history-list');
+const clock = document.getElementById('clock');
 
-function toggleCamera(){
-  const wrap = document.getElementById('cam-wrap');
-  if(!camActive){
-    wrap.style.display = 'block';
-    html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 150 } },
-      (decodedText) => {
-        document.getElementById('barcode-input').value = decodedText;
-        stopCamera();
-        lookup();
-      },
-      () => {}
-    ).then(()=>{ camActive = true; }).catch(err=>{
-      setStatus('No se pudo acceder a la cámara: ' + err, true);
-      wrap.style.display = 'none';
-    });
-  } else {
-    stopCamera();
+let history = [];
+
+function tickClock(){
+  const now = new Date();
+  clock.textContent = now.toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+function randomBars(n){
+  let out = '';
+  for(let i=0;i<n;i++){
+    const h = 12 + Math.floor(Math.random()*22);
+    out += `<div style="height:${h}px"></div>`;
   }
+  return out;
 }
 
-function stopCamera(){
-  const wrap = document.getElementById('cam-wrap');
-  if(html5QrCode && camActive){
-    html5QrCode.stop().then(()=>{
-      html5QrCode.clear();
-      camActive = false;
-      wrap.style.display = 'none';
-    }).catch(()=>{
-      camActive = false;
-      wrap.style.display = 'none';
-    });
-  } else {
-    wrap.style.display = 'none';
-  }
-}
-
-function setStatus(msg, isErr){
-  const el = document.getElementById('status');
-  el.textContent = msg;
-  el.style.color = isErr ? 'var(--danger)' : 'var(--muted)';
-}
-
-function resetLog(sources){
-  const log = document.getElementById('log');
-  log.innerHTML = '';
-  sources.forEach(s=>{
-    const pill = document.createElement('span');
-    pill.className = 'pill pending';
-    pill.id = 'pill-' + s.id;
-    pill.textContent = s.label;
-    log.appendChild(pill);
-  });
-}
-
-function markPill(id, state){
-  const pill = document.getElementById('pill-' + id);
-  if(pill){
-    pill.className = 'pill ' + state;
-  }
-}
-
-// Devuelve {ok:true, data} | {ok:false, reason:'miss'|'network'|'http', detail}
-async function tryFetch(url, opts){
-  try{
-    const res = await fetch(url, opts || {});
-    if(!res.ok) return { ok:false, reason:'http', detail: `HTTP ${res.status}` };
-    const data = await res.json();
-    return { ok:true, data };
-  }catch(e){
-    // Fallo directo (CORS bloqueado, DNS, sin red, contexto inseguro). Reintenta vía proxy CORS público.
-    try{
-      const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const res2 = await fetch(proxied);
-      if(!res2.ok) return { ok:false, reason:'network', detail: `${e.message || e} (proxy también falló: HTTP ${res2.status})` };
-      const data2 = await res2.json();
-      return { ok:true, data: data2 };
-    }catch(e2){
-      return { ok:false, reason:'network', detail: `${e.message || e} (proxy también falló: ${e2.message || e2})` };
-    }
-  }
-}
-
-// --- Fuentes ---
-// Cada función recibe el código y regresa null (sin match) o un objeto normalizado
-
-async function srcOpenFoodFacts(code){
-  const r = await tryFetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
-  if(!r.ok) return r;
-  const d = r.data;
-  if(d && d.status === 1 && d.product){
-    const p = d.product;
-    return { ok:true, match:{
-      name: p.product_name || p.generic_name || null,
-      brand: p.brands || null,
-      image: p.image_front_url || p.image_url || null,
-      source: 'Open Food Facts',
-      extra: {
-        'Categoría': p.categories,
-        'Cantidad': p.quantity,
-        'Ingredientes': p.ingredients_text_es || p.ingredients_text,
-        'Nutri-Score': p.nutriscore_grade ? p.nutriscore_grade.toUpperCase() : null,
-        'País': p.countries
-      }
-    }};
-  }
-  return { ok:false, reason:'miss', detail:'Sin producto para este código' };
-}
-
-async function srcOpenBeautyFacts(code){
-  const r = await tryFetch(`https://world.openbeautyfacts.org/api/0/product/${code}.json`);
-  if(!r.ok) return r;
-  const d = r.data;
-  if(d && d.status === 1 && d.product){
-    const p = d.product;
-    return { ok:true, match:{
-      name: p.product_name || null,
-      brand: p.brands || null,
-      image: p.image_front_url || p.image_url || null,
-      source: 'Open Beauty Facts',
-      extra: { 'Categoría': p.categories, 'Cantidad': p.quantity, 'País': p.countries }
-    }};
-  }
-  return { ok:false, reason:'miss', detail:'Sin producto para este código' };
-}
-
-async function srcOpenProductsFacts(code){
-  const r = await tryFetch(`https://world.openproductsfacts.org/api/0/product/${code}.json`);
-  if(!r.ok) return r;
-  const d = r.data;
-  if(d && d.status === 1 && d.product){
-    const p = d.product;
-    return { ok:true, match:{
-      name: p.product_name || null,
-      brand: p.brands || null,
-      image: p.image_front_url || p.image_url || null,
-      source: 'Open Products Facts',
-      extra: { 'Categoría': p.categories, 'País': p.countries }
-    }};
-  }
-  return { ok:false, reason:'miss', detail:'Sin producto para este código' };
-}
-
-async function srcOpenPetFoodFacts(code){
-  const r = await tryFetch(`https://world.openpetfoodfacts.org/api/0/product/${code}.json`);
-  if(!r.ok) return r;
-  const d = r.data;
-  if(d && d.status === 1 && d.product){
-    const p = d.product;
-    return { ok:true, match:{
-      name: p.product_name || null,
-      brand: p.brands || null,
-      image: p.image_front_url || p.image_url || null,
-      source: 'Open Pet Food Facts',
-      extra: { 'Categoría': p.categories, 'Cantidad': p.quantity }
-    }};
-  }
-  return { ok:false, reason:'miss', detail:'Sin producto para este código' };
-}
-
-async function srcUpcItemDb(code){
-  const r = await tryFetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`);
-  if(!r.ok) return r;
-  const d = r.data;
-  if(d && d.code === 'OK' && d.items && d.items.length > 0){
-    const p = d.items[0];
-    return { ok:true, match:{
-      name: p.title || null,
-      brand: p.brand || null,
-      image: (p.images && p.images[0]) || null,
-      source: 'UPCitemdb',
-      extra: {
-        'Categoría': p.category,
-        'Modelo': p.model,
-        'Precio ref.': (p.lowest_recorded_price ? `$${p.lowest_recorded_price} - $${p.highest_recorded_price}` : null),
-        'Descripción': p.description ? p.description.slice(0, 200) : null
-      }
-    }};
-  }
-  return { ok:false, reason: (d && d.code) ? 'miss' : 'http', detail: (d && d.message) || 'Sin resultados' };
-}
-
-async function srcEanSearch(code){
-  // EAN-Search demo token público con límite bajo; puede fallar por cuota
-  const r = await tryFetch(`https://api.ean-search.org/api?token=demo&op=barcode-lookup&format=json&ean=${code}`);
-  if(!r.ok) return r;
-  const d = r.data;
-  if(Array.isArray(d) && d.length > 0 && d[0].name){
-    return { ok:true, match:{
-      name: d[0].name,
-      brand: null,
-      image: null,
-      source: 'EAN-Search',
-      extra: { 'Categoría': d[0].categoryName }
-    }};
-  }
-  return { ok:false, reason:'miss', detail:'Sin resultados o cuota agotada' };
-}
-
-async function srcWikidata(code){
-  const sparql = `
-    SELECT ?item ?itemLabel ?brandLabel ?image WHERE {
-      { ?item wdt:P3962 "${code}". }
-      UNION
-      { ?item wdt:P3962 "${code.replace(/^0+/, '')}". }
-      OPTIONAL { ?item wdt:P1716 ?brand. }
-      OPTIONAL { ?item wdt:P18 ?image. }
-      SERVICE wikibase:label { bd:serviceParam wikibase:language "es,en". }
-    } LIMIT 1
+function renderLoading(code){
+  slot.innerHTML = `
+    <div class="receipt loading">
+      <div class="r-head">
+        <div class="status">CONSULTANDO BASE PÚBLICA…</div>
+        <div class="r-name">Buscando</div>
+      </div>
+      <div class="r-code">${code}</div>
+      <div class="r-bars">${randomBars(38)}</div>
+    </div>
   `;
-  const url = `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(sparql)}`;
-  const r = await tryFetch(url);
-  if(!r.ok) return r;
-  const bindings = r.data && r.data.results && r.data.results.bindings;
-  if(bindings && bindings.length > 0){
-    const b = bindings[0];
-    return { ok:true, match:{
-      name: b.itemLabel ? b.itemLabel.value : null,
-      brand: b.brandLabel ? b.brandLabel.value : null,
-      image: b.image ? b.image.value : null,
-      source: 'Wikidata',
-      extra: { 'Wikidata ID': b.item ? b.item.value.split('/').pop() : null }
-    }};
-  }
-  return { ok:false, reason:'miss', detail:'Sin entidad registrada en Wikidata' };
 }
 
-async function srcOpenLibrary(code){
-  // Solo aplica a códigos con pinta de ISBN (prefijo 978/979, típico de libros)
-  if(!/^97[89]\d{10}$/.test(code)){
-    return { ok:false, reason:'miss', detail:'No es un ISBN válido' };
-  }
-  const r = await tryFetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${code}&format=json&jscmd=data`);
-  if(!r.ok) return r;
-  const d = r.data;
-  const key = `ISBN:${code}`;
-  if(d && d[key]){
-    const b = d[key];
-    return { ok:true, match:{
-      name: b.title || null,
-      brand: (b.publishers && b.publishers[0] && b.publishers[0].name) || null,
-      image: (b.cover && (b.cover.large || b.cover.medium)) || null,
-      source: 'Open Library',
-      extra: {
-        'Autores': b.authors ? b.authors.map(a=>a.name).join(', ') : null,
-        'Año': b.publish_date
-      }
-    }};
-  }
-  return { ok:false, reason:'miss', detail:'ISBN no encontrado' };
+function renderNotFound(code){
+  slot.innerHTML = `
+    <div class="receipt not-found">
+      <div class="r-head">
+        <div class="status">SIN COINCIDENCIA</div>
+        <div class="r-name">Producto no encontrado</div>
+        <div class="r-brand">Este código no está registrado en Open Food Facts</div>
+      </div>
+      <div class="r-code">${code}</div>
+      <div class="r-bars">${randomBars(38)}</div>
+      <div class="r-time">${new Date().toLocaleString('es-MX')}</div>
+    </div>
+  `;
 }
 
-const SOURCES = [
-  { id: 'off',  label: 'Open Food Facts',    fn: srcOpenFoodFacts },
-  { id: 'obf',  label: 'Open Beauty Facts',  fn: srcOpenBeautyFacts },
-  { id: 'opf',  label: 'Open Products Facts',fn: srcOpenProductsFacts },
-  { id: 'oppf', label: 'Open Pet Food Facts',fn: srcOpenPetFoodFacts },
-  { id: 'upc',  label: 'UPCitemdb',          fn: srcUpcItemDb },
-  { id: 'wd',   label: 'Wikidata',           fn: srcWikidata },
-  { id: 'ol',   label: 'Open Library (ISBN)',fn: srcOpenLibrary },
-  { id: 'ean',  label: 'EAN-Search',         fn: srcEanSearch },
-];
-
-async function lookup(){
-  const code = document.getElementById('barcode-input').value.trim();
-  if(!code){ setStatus('Escribe o escanea un código primero.', true); return; }
-
-  document.getElementById('result').style.display = 'none';
-  resetLog(SOURCES);
-  setStatus('Consultando fuentes...');
-
-  const problems = [];
-
-  for(const s of SOURCES){
-    setStatus(`Consultando ${s.label}...`);
-    let result;
-    try{
-      result = await s.fn(code);
-    }catch(e){
-      result = { ok:false, reason:'network', detail: e.message || String(e) };
-    }
-
-    if(result.ok && result.match && result.match.name){
-      markPill(s.id, 'hit');
-      showResult(result.match);
-      setStatus(`Encontrado en ${result.match.source}.`);
-      return;
-    }
-
-    if(result.reason === 'network' || result.reason === 'http'){
-      markPill(s.id, 'err');
-      problems.push(`${s.label}: ${result.detail}`);
-    } else {
-      markPill(s.id, 'miss');
-    }
-  }
-
-  if(problems.length === SOURCES.length){
-    // Todas fallaron por red/CORS, no es que no exista el producto
-    setStatus('⚠️ No se pudo conectar con ninguna fuente (bloqueo de red/CORS). Probablemente estás abriendo el archivo localmente en vez de por HTTPS — súbelo a Vercel para que funcione.', true);
-  } else if(problems.length > 0){
-    setStatus(`Ninguna fuente encontró el producto. ${problems.length} fuente(s) tuvieron error de conexión — revisa los pills en rojo.`, true);
-  } else {
-    setStatus('Ninguna fuente gratuita tiene este producto registrado.', true);
-  }
+function renderError(code, msg){
+  slot.innerHTML = `
+    <div class="receipt not-found">
+      <div class="r-head">
+        <div class="status">ERROR DE CONSULTA</div>
+        <div class="r-name">No se pudo conectar</div>
+        <div class="r-brand">${msg}</div>
+      </div>
+      <div class="r-code">${code}</div>
+      <div class="r-time">${new Date().toLocaleString('es-MX')}</div>
+    </div>
+  `;
 }
 
-function showResult(data){
-  document.getElementById('result').style.display = 'block';
-  document.getElementById('p-name').textContent = data.name || 'Nombre no disponible';
-  document.getElementById('p-brand').textContent = data.brand || '';
-  document.getElementById('p-source').textContent = data.source;
+function renderProduct(code, p){
+  const name = p.product_name_es || p.product_name || 'Nombre no disponible';
+  const brand = p.brands || '—';
+  const qty = p.quantity || '—';
+  const cat = (p.categories_tags && p.categories_tags.length)
+    ? p.categories_tags[p.categories_tags.length-1].replace('en:','').replace('es:','').replace(/-/g,' ')
+    : '—';
+  const img = p.image_front_small_url || p.image_url || '';
 
-  const img = document.getElementById('p-img');
-  if(data.image){
-    img.src = data.image;
-    img.style.display = 'block';
-  } else {
-    img.style.display = 'none';
-  }
+  slot.innerHTML = `
+    <div class="receipt">
+      <div class="r-head">
+        <div class="status">PRODUCTO ENCONTRADO</div>
+        ${img ? `<img src="${img}" alt="${name}">` : ''}
+        <div class="r-name">${name}</div>
+        <div class="r-brand">${brand}</div>
+      </div>
+      <div class="r-row"><span>Cantidad</span><span>${qty}</span></div>
+      <div class="r-row"><span>Categoría</span><span>${cat}</span></div>
+      <div class="r-row"><span>Código</span><span>${code}</span></div>
+      <div class="r-bars">${randomBars(38)}</div>
+      <div class="r-time">${new Date().toLocaleString('es-MX')}</div>
+    </div>
+  `;
 
-  const fieldsEl = document.getElementById('p-fields');
-  fieldsEl.innerHTML = '';
-  const extra = data.extra || {};
-  let any = false;
-  Object.keys(extra).forEach(k=>{
-    if(extra[k]){
-      any = true;
-      const row = document.createElement('div');
-      row.className = 'field';
-      row.innerHTML = `<span class="k">${k}</span><span class="v">${extra[k]}</span>`;
-      fieldsEl.appendChild(row);
-    }
+  history.unshift({code, name});
+  history = history.slice(0,8);
+  renderHistory();
+}
+
+function renderHistory(){
+  if(!history.length){ historyWrap.style.display = 'none'; return; }
+  historyWrap.style.display = 'block';
+  historyList.innerHTML = history.map(h => `
+    <div class="history-item" data-code="${h.code}">
+      <span>${h.name}</span>
+      <span class="h-code">${h.code}</span>
+    </div>
+  `).join('');
+  historyList.querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', () => {
+      input.value = el.dataset.code;
+      form.requestSubmit();
+    });
   });
-  if(!any){
-    fieldsEl.innerHTML = '<div class="empty">Sin datos adicionales de esta fuente.</div>';
-  }
 }
 
-async function runDiagnostics(){
-  const out = document.getElementById('diag-output');
-  out.innerHTML = '';
-  setStatus('Corriendo diagnóstico...');
-
-  const checks = [
-    { label: 'Internet básico', url: 'https://api.allorigins.win/raw?url=https://example.com' },
-    { label: 'Open Food Facts (directo)', url: 'https://world.openfoodfacts.org/api/v0/product/0000000000000.json' },
-    { label: 'Wikidata (directo)', url: 'https://query.wikidata.org/sparql?format=json&query=SELECT%20%3Fx%20WHERE%20%7BBIND(1%20AS%20%3Fx)%7D' },
-    { label: 'Proxy CORS (allorigins)', url: 'https://api.allorigins.win/raw?url=https://world.openfoodfacts.org/api/v0/product/0000000000000.json' },
-  ];
-
-  for(const c of checks){
-    const div = document.createElement('div');
-    div.className = 'pill pending';
-    div.textContent = c.label + '...';
-    out.appendChild(div);
-    try{
-      const res = await fetch(c.url);
-      if(res.ok){
-        div.className = 'pill hit';
-        div.textContent = `${c.label}: OK (${res.status})`;
-      } else {
-        div.className = 'pill err';
-        div.textContent = `${c.label}: HTTP ${res.status}`;
-      }
-    }catch(e){
-      div.className = 'pill err';
-      div.textContent = `${c.label}: ${e.message || e}`;
+async function lookup(code){
+  renderLoading(code);
+  btn.disabled = true;
+  try{
+    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json`);
+    const data = await res.json();
+    if(data.status === 1 && data.product){
+      renderProduct(code, data.product);
+    } else {
+      renderNotFound(code);
     }
+  } catch(err){
+    renderError(code, 'Revisa tu conexión a internet e intenta de nuevo.');
+  } finally {
+    btn.disabled = false;
   }
-  setStatus('Diagnóstico completo. Revisa los resultados arriba.');
 }
 
-document.getElementById('barcode-input').addEventListener('keypress', (e)=>{
-  if(e.key === 'Enter') lookup();
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const code = input.value.trim();
+  if(!code) return;
+  lookup(code);
 });
-
-// Detecta si NO estamos en un contexto seguro (https o localhost)
-if(!window.isSecureContext){
-  document.getElementById('insecure-warning').style.display = 'block';
-}
 </script>
-
 </body>
 </html>
