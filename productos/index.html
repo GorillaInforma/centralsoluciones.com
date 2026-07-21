@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Lookup Mega</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#131a22; --panel2:#1a232d; --border:#243040;
+    --text:#e8eef4; --muted:#8ba0b4; --accent:#4fd1c5; --accent2:#f6ad55;
+    --danger:#f56565; --ok:#68d391;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh;
+  }
+  header{
+    padding:18px 16px 10px; text-align:center; border-bottom:1px solid var(--border);
+  }
+  header h1{margin:0; font-size:19px; letter-spacing:.3px;}
+  header p{margin:6px 0 0; color:var(--muted); font-size:12.5px;}
+  .wrap{max-width:640px; margin:0 auto; padding:16px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:16px; margin-bottom:14px;
+  }
+  .row{display:flex; gap:8px;}
+  input[type=text]{
+    flex:1; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    padding:12px 14px; border-radius:10px; font-size:16px; outline:none;
+  }
+  input[type=text]:focus{border-color:var(--accent);}
+  button{
+    border:none; border-radius:10px; padding:12px 16px; font-size:14px; font-weight:600;
+    cursor:pointer; transition:.15s; white-space:nowrap;
+  }
+  .btn-primary{background:var(--accent); color:#04231f;}
+  .btn-primary:active{transform:scale(.97);}
+  .btn-secondary{background:var(--panel2); color:var(--text); border:1px solid var(--border);}
+  .btn-secondary:active{transform:scale(.97);}
+  .btn-full{width:100%; margin-top:8px;}
+  #cam-wrap{display:none; margin-top:12px;}
+  #reader{width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--border);}
+  .status{
+    font-size:13px; color:var(--muted); margin-top:10px; min-height:18px;
+  }
+  .log{
+    font-size:12px; color:var(--muted); margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;
+  }
+  .pill{
+    padding:3px 9px; border-radius:20px; border:1px solid var(--border); font-size:11px;
+  }
+  .pill.hit{border-color:var(--ok); color:var(--ok);}
+  .pill.miss{border-color:var(--border); color:var(--muted);}
+  .pill.err{border-color:var(--danger); color:var(--danger);}
+  .pill.pending{border-color:var(--accent2); color:var(--accent2);}
+  #result{display:none;}
+  .prod-header{display:flex; gap:14px; align-items:flex-start;}
+  .prod-img{
+    width:84px; height:84px; border-radius:10px; object-fit:cover; background:var(--panel2);
+    border:1px solid var(--border); flex-shrink:0;
+  }
+  .prod-name{font-size:16.5px; font-weight:700; margin:0 0 4px;}
+  .prod-brand{color:var(--accent2); font-size:13px; margin:0 0 6px;}
+  .prod-source{
+    display:inline-block; font-size:11px; background:var(--panel2); color:var(--accent);
+    padding:2px 8px; border-radius:20px; border:1px solid var(--border);
+  }
+  .fields{margin-top:14px; display:grid; gap:8px;}
+  .field{
+    display:flex; justify-content:space-between; gap:10px; font-size:13.5px;
+    padding:8px 10px; background:var(--panel2); border-radius:8px; border:1px solid var(--border);
+  }
+  .field .k{color:var(--muted); flex-shrink:0;}
+  .field .v{text-align:right; word-break:break-word;}
+  .empty{text-align:center; color:var(--muted); font-size:13.5px; padding:20px 10px;}
+  .footer-note{font-size:11.5px; color:var(--muted); text-align:center; margin-top:18px; line-height:1.5;}
+  .spinner{
+    width:14px; height:14px; border:2px solid var(--border); border-top-color:var(--accent);
+    border-radius:50%; display:inline-block; animation:spin .7s linear infinite; vertical-align:middle; margin-right:6px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔎 Product Lookup Mega</h1>
+  <p>Cascada de APIs gratuitas de identificación de productos</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <div class="row">
+      <input type="text" id="barcode-input" inputmode="numeric" placeholder="Escribe o escanea el código de barras" />
+      <button class="btn-primary" onclick="lookup()">Buscar</button>
+    </div>
+    <button class="btn-secondary btn-full" onclick="toggleCamera()">📷 Escanear con cámara</button>
+    <div id="cam-wrap">
+      <div id="reader"></div>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="card" id="insecure-warning" style="display:none; border-color:var(--danger);">
+    <p style="margin:0 0 6px; color:var(--danger); font-weight:700; font-size:13.5px;">⚠️ Contexto inseguro detectado</p>
+    <p style="margin:0; font-size:13px; color:var(--muted); line-height:1.5;">
+      Estás abriendo este archivo localmente (no por HTTPS). La cámara no va a funcionar y algunas APIs pueden bloquear las consultas por CORS.
+      Sube este archivo a Vercel (o cualquier hosting con HTTPS) para que todo funcione correctamente.
+    </p>
+  </div>
+
+  <div class="card" id="result">
+    <div class="prod-header">
+      <img id="p-img" class="prod-img" src="" alt="">
+      <div>
+        <p class="prod-name" id="p-name">—</p>
+        <p class="prod-brand" id="p-brand"></p>
+        <span class="prod-source" id="p-source"></span>
+      </div>
+    </div>
+    <div class="fields" id="p-fields"></div>
+  </div>
+
+  <div class="footer-note">
+    Fuentes consultadas en orden: Open Food Facts → Open Beauty Facts → Open Products Facts → Open Pet Food Facts → UPCitemdb (trial, sin key) → EAN-Search (gratis limitado).<br>
+    Se detiene en la primera que encuentre coincidencia real.
+  </div>
+
+</div>
+
+<script>
+let html5QrCode = null;
+let camActive = false;
+
+function toggleCamera(){
+  const wrap = document.getElementById('cam-wrap');
+  if(!camActive){
+    wrap.style.display = 'block';
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      (decodedText) => {
+        document.getElementById('barcode-input').value = decodedText;
+        stopCamera();
+        lookup();
+      },
+      () => {}
+    ).then(()=>{ camActive = true; }).catch(err=>{
+      setStatus('No se pudo acceder a la cámara: ' + err, true);
+      wrap.style.display = 'none';
+    });
+  } else {
+    stopCamera();
+  }
+}
+
+function stopCamera(){
+  const wrap = document.getElementById('cam-wrap');
+  if(html5QrCode && camActive){
+    html5QrCode.stop().then(()=>{
+      html5QrCode.clear();
+      camActive = false;
+      wrap.style.display = 'none';
+    }).catch(()=>{
+      camActive = false;
+      wrap.style.display = 'none';
+    });
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function setStatus(msg, isErr){
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--danger)' : 'var(--muted)';
+}
+
+function resetLog(sources){
+  const log = document.getElementById('log');
+  log.innerHTML = '';
+  sources.forEach(s=>{
+    const pill = document.createElement('span');
+    pill.className = 'pill pending';
+    pill.id = 'pill-' + s.id;
+    pill.textContent = s.label;
+    log.appendChild(pill);
+  });
+}
+
+function markPill(id, state){
+  const pill = document.getElementById('pill-' + id);
+  if(pill){
+    pill.className = 'pill ' + state;
+  }
+}
+
+// Devuelve {ok:true, data} | {ok:false, reason:'miss'|'network'|'http', detail}
+async function tryFetch(url, opts){
+  try{
+    const res = await fetch(url, opts || {});
+    if(!res.ok) return { ok:false, reason:'http', detail: `HTTP ${res.status}` };
+    const data = await res.json();
+    return { ok:true, data };
+  }catch(e){
+    // Esto captura fallos de red, CORS bloqueado, o contexto inseguro (file:// / content://)
+    return { ok:false, reason:'network', detail: e.message || String(e) };
+  }
+}
+
+// --- Fuentes ---
+// Cada función recibe el código y regresa null (sin match) o un objeto normalizado
+
+async function srcOpenFoodFacts(code){
+  const r = await tryFetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+  if(!r.ok) return r;
+  const d = r.data;
+  if(d && d.status === 1 && d.product){
+    const p = d.product;
+    return { ok:true, match:{
+      name: p.product_name || p.generic_name || null,
+      brand: p.brands || null,
+      image: p.image_front_url || p.image_url || null,
+      source: 'Open Food Facts',
+      extra: {
+        'Categoría': p.categories,
+        'Cantidad': p.quantity,
+        'Ingredientes': p.ingredients_text_es || p.ingredients_text,
+        'Nutri-Score': p.nutriscore_grade ? p.nutriscore_grade.toUpperCase() : null,
+        'País': p.countries
+      }
+    }};
+  }
+  return { ok:false, reason:'miss', detail:'Sin producto para este código' };
+}
+
+async function srcOpenBeautyFacts(code){
+  const r = await tryFetch(`https://world.openbeautyfacts.org/api/0/product/${code}.json`);
+  if(!r.ok) return r;
+  const d = r.data;
+  if(d && d.status === 1 && d.product){
+    const p = d.product;
+    return { ok:true, match:{
+      name: p.product_name || null,
+      brand: p.brands || null,
+      image: p.image_front_url || p.image_url || null,
+      source: 'Open Beauty Facts',
+      extra: { 'Categoría': p.categories, 'Cantidad': p.quantity, 'País': p.countries }
+    }};
+  }
+  return { ok:false, reason:'miss', detail:'Sin producto para este código' };
+}
+
+async function srcOpenProductsFacts(code){
+  const r = await tryFetch(`https://world.openproductsfacts.org/api/0/product/${code}.json`);
+  if(!r.ok) return r;
+  const d = r.data;
+  if(d && d.status === 1 && d.product){
+    const p = d.product;
+    return { ok:true, match:{
+      name: p.product_name || null,
+      brand: p.brands || null,
+      image: p.image_front_url || p.image_url || null,
+      source: 'Open Products Facts',
+      extra: { 'Categoría': p.categories, 'País': p.countries }
+    }};
+  }
+  return { ok:false, reason:'miss', detail:'Sin producto para este código' };
+}
+
+async function srcOpenPetFoodFacts(code){
+  const r = await tryFetch(`https://world.openpetfoodfacts.org/api/0/product/${code}.json`);
+  if(!r.ok) return r;
+  const d = r.data;
+  if(d && d.status === 1 && d.product){
+    const p = d.product;
+    return { ok:true, match:{
+      name: p.product_name || null,
+      brand: p.brands || null,
+      image: p.image_front_url || p.image_url || null,
+      source: 'Open Pet Food Facts',
+      extra: { 'Categoría': p.categories, 'Cantidad': p.quantity }
+    }};
+  }
+  return { ok:false, reason:'miss', detail:'Sin producto para este código' };
+}
+
+async function srcUpcItemDb(code){
+  const r = await tryFetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`);
+  if(!r.ok) return r;
+  const d = r.data;
+  if(d && d.code === 'OK' && d.items && d.items.length > 0){
+    const p = d.items[0];
+    return { ok:true, match:{
+      name: p.title || null,
+      brand: p.brand || null,
+      image: (p.images && p.images[0]) || null,
+      source: 'UPCitemdb',
+      extra: {
+        'Categoría': p.category,
+        'Modelo': p.model,
+        'Precio ref.': (p.lowest_recorded_price ? `$${p.lowest_recorded_price} - $${p.highest_recorded_price}` : null),
+        'Descripción': p.description ? p.description.slice(0, 200) : null
+      }
+    }};
+  }
+  return { ok:false, reason: (d && d.code) ? 'miss' : 'http', detail: (d && d.message) || 'Sin resultados' };
+}
+
+async function srcEanSearch(code){
+  // EAN-Search demo token público con límite bajo; puede fallar por cuota
+  const r = await tryFetch(`https://api.ean-search.org/api?token=demo&op=barcode-lookup&format=json&ean=${code}`);
+  if(!r.ok) return r;
+  const d = r.data;
+  if(Array.isArray(d) && d.length > 0 && d[0].name){
+    return { ok:true, match:{
+      name: d[0].name,
+      brand: null,
+      image: null,
+      source: 'EAN-Search',
+      extra: { 'Categoría': d[0].categoryName }
+    }};
+  }
+  return { ok:false, reason:'miss', detail:'Sin resultados o cuota agotada' };
+}
+
+const SOURCES = [
+  { id: 'off',  label: 'Open Food Facts',    fn: srcOpenFoodFacts },
+  { id: 'obf',  label: 'Open Beauty Facts',  fn: srcOpenBeautyFacts },
+  { id: 'opf',  label: 'Open Products Facts',fn: srcOpenProductsFacts },
+  { id: 'oppf', label: 'Open Pet Food Facts',fn: srcOpenPetFoodFacts },
+  { id: 'upc',  label: 'UPCitemdb',          fn: srcUpcItemDb },
+  { id: 'ean',  label: 'EAN-Search',         fn: srcEanSearch },
+];
+
+async function lookup(){
+  const code = document.getElementById('barcode-input').value.trim();
+  if(!code){ setStatus('Escribe o escanea un código primero.', true); return; }
+
+  document.getElementById('result').style.display = 'none';
+  resetLog(SOURCES);
+  setStatus('Consultando fuentes...');
+
+  const problems = [];
+
+  for(const s of SOURCES){
+    setStatus(`Consultando ${s.label}...`);
+    let result;
+    try{
+      result = await s.fn(code);
+    }catch(e){
+      result = { ok:false, reason:'network', detail: e.message || String(e) };
+    }
+
+    if(result.ok && result.match && result.match.name){
+      markPill(s.id, 'hit');
+      showResult(result.match);
+      setStatus(`Encontrado en ${result.match.source}.`);
+      return;
+    }
+
+    if(result.reason === 'network' || result.reason === 'http'){
+      markPill(s.id, 'err');
+      problems.push(`${s.label}: ${result.detail}`);
+    } else {
+      markPill(s.id, 'miss');
+    }
+  }
+
+  if(problems.length === SOURCES.length){
+    // Todas fallaron por red/CORS, no es que no exista el producto
+    setStatus('⚠️ No se pudo conectar con ninguna fuente (bloqueo de red/CORS). Probablemente estás abriendo el archivo localmente en vez de por HTTPS — súbelo a Vercel para que funcione.', true);
+  } else if(problems.length > 0){
+    setStatus(`Ninguna fuente encontró el producto. ${problems.length} fuente(s) tuvieron error de conexión — revisa los pills en rojo.`, true);
+  } else {
+    setStatus('Ninguna fuente gratuita tiene este producto registrado.', true);
+  }
+}
+
+function showResult(data){
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('p-name').textContent = data.name || 'Nombre no disponible';
+  document.getElementById('p-brand').textContent = data.brand || '';
+  document.getElementById('p-source').textContent = data.source;
+
+  const img = document.getElementById('p-img');
+  if(data.image){
+    img.src = data.image;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+
+  const fieldsEl = document.getElementById('p-fields');
+  fieldsEl.innerHTML = '';
+  const extra = data.extra || {};
+  let any = false;
+  Object.keys(extra).forEach(k=>{
+    if(extra[k]){
+      any = true;
+      const row = document.createElement('div');
+      row.className = 'field';
+      row.innerHTML = `<span class="k">${k}</span><span class="v">${extra[k]}</span>`;
+      fieldsEl.appendChild(row);
+    }
+  });
+  if(!any){
+    fieldsEl.innerHTML = '<div class="empty">Sin datos adicionales de esta fuente.</div>';
+  }
+}
+
+document.getElementById('barcode-input').addEventListener('keypress', (e)=>{
+  if(e.key === 'Enter') lookup();
+});
+
+// Detecta si NO estamos en un contexto seguro (https o localhost)
+if(!window.isSecureContext){
+  document.getElementById('insecure-warning').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
