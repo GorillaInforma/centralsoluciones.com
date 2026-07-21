@@ -99,10 +99,12 @@
       <button class="btn-primary" onclick="lookup()">Buscar</button>
     </div>
     <button class="btn-secondary btn-full" onclick="toggleCamera()">📷 Escanear con cámara</button>
+    <button class="btn-secondary btn-full" onclick="runDiagnostics()">🩺 Diagnosticar conexión</button>
     <div id="cam-wrap">
       <div id="reader"></div>
     </div>
     <div class="status" id="status"></div>
+    <div id="diag-output" class="log" style="display:block;"></div>
     <div class="log" id="log"></div>
   </div>
 
@@ -127,8 +129,9 @@
   </div>
 
   <div class="footer-note">
-    Fuentes consultadas en orden: Open Food Facts → Open Beauty Facts → Open Products Facts → Open Pet Food Facts → UPCitemdb (trial, sin key) → EAN-Search (gratis limitado).<br>
-    Se detiene en la primera que encuentre coincidencia real.
+    Fuentes: Open Food Facts → Open Beauty Facts → Open Products Facts → Open Pet Food Facts → UPCitemdb (trial, sin key) → Wikidata (GTIN) → Open Library (solo ISBN de libros) → EAN-Search (gratis limitado).<br>
+    Si una fuente falla por bloqueo de red/CORS, se reintenta automáticamente vía proxy público.<br>
+    No existe una API pública del gobierno mexicano (PROFECO/gob.mx) que mapee código de barras a producto — no la incluí porque no existe, no por omisión.
   </div>
 
 </div>
@@ -209,8 +212,16 @@ async function tryFetch(url, opts){
     const data = await res.json();
     return { ok:true, data };
   }catch(e){
-    // Esto captura fallos de red, CORS bloqueado, o contexto inseguro (file:// / content://)
-    return { ok:false, reason:'network', detail: e.message || String(e) };
+    // Fallo directo (CORS bloqueado, DNS, sin red, contexto inseguro). Reintenta vía proxy CORS público.
+    try{
+      const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      const res2 = await fetch(proxied);
+      if(!res2.ok) return { ok:false, reason:'network', detail: `${e.message || e} (proxy también falló: HTTP ${res2.status})` };
+      const data2 = await res2.json();
+      return { ok:true, data: data2 };
+    }catch(e2){
+      return { ok:false, reason:'network', detail: `${e.message || e} (proxy también falló: ${e2.message || e2})` };
+    }
   }
 }
 
@@ -330,12 +341,67 @@ async function srcEanSearch(code){
   return { ok:false, reason:'miss', detail:'Sin resultados o cuota agotada' };
 }
 
+async function srcWikidata(code){
+  const sparql = `
+    SELECT ?item ?itemLabel ?brandLabel ?image WHERE {
+      { ?item wdt:P3962 "${code}". }
+      UNION
+      { ?item wdt:P3962 "${code.replace(/^0+/, '')}". }
+      OPTIONAL { ?item wdt:P1716 ?brand. }
+      OPTIONAL { ?item wdt:P18 ?image. }
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "es,en". }
+    } LIMIT 1
+  `;
+  const url = `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(sparql)}`;
+  const r = await tryFetch(url);
+  if(!r.ok) return r;
+  const bindings = r.data && r.data.results && r.data.results.bindings;
+  if(bindings && bindings.length > 0){
+    const b = bindings[0];
+    return { ok:true, match:{
+      name: b.itemLabel ? b.itemLabel.value : null,
+      brand: b.brandLabel ? b.brandLabel.value : null,
+      image: b.image ? b.image.value : null,
+      source: 'Wikidata',
+      extra: { 'Wikidata ID': b.item ? b.item.value.split('/').pop() : null }
+    }};
+  }
+  return { ok:false, reason:'miss', detail:'Sin entidad registrada en Wikidata' };
+}
+
+async function srcOpenLibrary(code){
+  // Solo aplica a códigos con pinta de ISBN (prefijo 978/979, típico de libros)
+  if(!/^97[89]\d{10}$/.test(code)){
+    return { ok:false, reason:'miss', detail:'No es un ISBN válido' };
+  }
+  const r = await tryFetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${code}&format=json&jscmd=data`);
+  if(!r.ok) return r;
+  const d = r.data;
+  const key = `ISBN:${code}`;
+  if(d && d[key]){
+    const b = d[key];
+    return { ok:true, match:{
+      name: b.title || null,
+      brand: (b.publishers && b.publishers[0] && b.publishers[0].name) || null,
+      image: (b.cover && (b.cover.large || b.cover.medium)) || null,
+      source: 'Open Library',
+      extra: {
+        'Autores': b.authors ? b.authors.map(a=>a.name).join(', ') : null,
+        'Año': b.publish_date
+      }
+    }};
+  }
+  return { ok:false, reason:'miss', detail:'ISBN no encontrado' };
+}
+
 const SOURCES = [
   { id: 'off',  label: 'Open Food Facts',    fn: srcOpenFoodFacts },
   { id: 'obf',  label: 'Open Beauty Facts',  fn: srcOpenBeautyFacts },
   { id: 'opf',  label: 'Open Products Facts',fn: srcOpenProductsFacts },
   { id: 'oppf', label: 'Open Pet Food Facts',fn: srcOpenPetFoodFacts },
   { id: 'upc',  label: 'UPCitemdb',          fn: srcUpcItemDb },
+  { id: 'wd',   label: 'Wikidata',           fn: srcWikidata },
+  { id: 'ol',   label: 'Open Library (ISBN)',fn: srcOpenLibrary },
   { id: 'ean',  label: 'EAN-Search',         fn: srcEanSearch },
 ];
 
@@ -413,6 +479,40 @@ function showResult(data){
   if(!any){
     fieldsEl.innerHTML = '<div class="empty">Sin datos adicionales de esta fuente.</div>';
   }
+}
+
+async function runDiagnostics(){
+  const out = document.getElementById('diag-output');
+  out.innerHTML = '';
+  setStatus('Corriendo diagnóstico...');
+
+  const checks = [
+    { label: 'Internet básico', url: 'https://api.allorigins.win/raw?url=https://example.com' },
+    { label: 'Open Food Facts (directo)', url: 'https://world.openfoodfacts.org/api/v0/product/0000000000000.json' },
+    { label: 'Wikidata (directo)', url: 'https://query.wikidata.org/sparql?format=json&query=SELECT%20%3Fx%20WHERE%20%7BBIND(1%20AS%20%3Fx)%7D' },
+    { label: 'Proxy CORS (allorigins)', url: 'https://api.allorigins.win/raw?url=https://world.openfoodfacts.org/api/v0/product/0000000000000.json' },
+  ];
+
+  for(const c of checks){
+    const div = document.createElement('div');
+    div.className = 'pill pending';
+    div.textContent = c.label + '...';
+    out.appendChild(div);
+    try{
+      const res = await fetch(c.url);
+      if(res.ok){
+        div.className = 'pill hit';
+        div.textContent = `${c.label}: OK (${res.status})`;
+      } else {
+        div.className = 'pill err';
+        div.textContent = `${c.label}: HTTP ${res.status}`;
+      }
+    }catch(e){
+      div.className = 'pill err';
+      div.textContent = `${c.label}: ${e.message || e}`;
+    }
+  }
+  setStatus('Diagnóstico completo. Revisa los resultados arriba.');
 }
 
 document.getElementById('barcode-input').addEventListener('keypress', (e)=>{
