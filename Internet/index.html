@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CAUCE — banner comercial</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;700;800;900&display=swap');
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1620px; font-family:'Inter', sans-serif; overflow:hidden; }
+  .banner{ position:relative; width:1080px; height:1620px; background: linear-gradient(160deg, #0A4FA3 0%, #0D6FD1 45%, #14B8E8 100%); overflow:hidden; }
+  .header{ position:relative; height:150px; background:#083064; display:flex; align-items:center; justify-content:space-between; padding:0 40px; }
+  .header::after{ content:""; position:absolute; left:0; right:0; bottom:-10px; height:10px; background:#F2B705; }
+  .logo{ font-family:'Archivo Black', sans-serif; font-size:64px; color:#FFFFFF; letter-spacing:-0.01em; }
+  .logo .u{ color:#FFD23F; }
+  .claim{ text-align:right; font-family:'Archivo Black', sans-serif; font-size:18px; line-height:1.35; color:#FFFFFF; max-width:280px; }
+  .price-section{ display:flex; align-items:center; justify-content:center; gap:35px; padding:35px 0 25px; }
+  .price-text{ text-align:right; }
+  .por-solo{ font-family:'Archivo Black', sans-serif; font-size:24px; color:#FFFFFF; letter-spacing:0.05em; }
+  .headline{ font-family:'Archivo Black', sans-serif; font-size:42px; color:#0A2A55; line-height:1; margin-top:4px; }
+  .headline .line2{ color:#FFFFFF; -webkit-text-stroke:1.5px #0A2A55; font-size:42px; }
+  .price-box{ background:#FFFFFF; border-radius:16px; padding:16px 30px 10px; box-shadow:0 10px 0 rgba(0,0,0,0.18); text-align:center; transform:rotate(-2deg); }
+  .price-box .row{ display:flex; align-items:flex-start; justify-content:center; }
+  .price-box .cur{ font-family:'Archivo Black', sans-serif; font-size:36px; color:#D81E2C; margin-top:8px; }
+  .price-box .num{ font-family:'Archivo Black', sans-serif; font-size:110px; color:#D81E2C; letter-spacing:-0.02em; }
+  .price-box .al-mes{ font-family:'Archivo Black', sans-serif; font-size:18px; color:#0A2A55; margin-top:-4px; }
+  .badges{ padding:0 40px; display:flex; flex-direction:column; gap:12px; }
+  .badge{ background:#FFFFFF; border:3px solid #0A2A55; border-radius:12px; padding:14px 18px; display:flex; align-items:center; gap:14px; }
+  .badge .icon{ flex:0 0 auto; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900; color:#FFFFFF; }
+  .badge .icon.blue{ background:#0D6FD1; }
+  .badge .icon.gold{ background:#F2B705; }
+  .badge .icon.red{ background:#D81E2C; }
+  .badge .text b{ display:block; font-family:'Archivo Black', sans-serif; font-size:16px; color:#0A2A55; line-height:1.2; }
+  .badge .text span{ display:block; font-size:12px; font-weight:600; color:#3A4A63; margin-top:2px; }
+  .device-info{ margin: 20px 40px; background: linear-gradient(135deg, #F2B705 0%, #FFD23F 100%); border-radius: 12px; padding: 16px 24px; border: 3px solid #0A2A55; }
+  .device-info .title{ font-family:'Archivo Black', sans-serif; font-size: 18px; color: #0A2A55; margin-bottom: 8px; }
+  .device-info .item{ font-size: 13px; font-weight: 700; color: #083064; margin: 4px 0; }
+  .device-info .highlight{ color: #D81E2C; font-weight: 900; }
+  .incluye-label{ margin:20px 40px 12px; font-family:'Archivo Black', sans-serif; font-size:22px; color:#FFFFFF; text-shadow:2px 2px 0 rgba(0,0,0,0.15); }
+  .grid{ margin:0 40px; display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; }
+  .cell{ background:rgba(255,255,255,0.94); border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:10px; }
+  .cell .ico{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; color:#FFFFFF; flex:0 0 auto; }
+  .cell span{ font-size:13px; font-weight:800; color:#0A2A55; line-height:1.25; }
+  .ico.c1{ background:#0D6FD1; }
+  .ico.c2{ background:#F2B705; }
+  .ico.c3{ background:#D81E2C; }
+  .ico.c4{ background:#1E9E5A; }
+  .regalo-wrap{ margin:20px 40px 0; background:#0A2A55; border-radius:12px; padding:16px 20px; }
+  .regalo-wrap .label{ font-family:'Archivo Black', sans-serif; font-size:16px; color:#FFD23F; letter-spacing:0.04em; }
+  .regalo-wrap .big{ font-family:'Archivo Black', sans-serif; font-size:28px; color:#FFFFFF; margin-top:2px; }
+  .regalo-wrap .sub{ font-size:12px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:4px; }
+  .logos-section{ margin: 20px 0 0; padding: 20px 32px; background: rgba(255,255,255,0.05); }
+  .logos-title{ font-family:'Archivo Black', sans-serif; font-size:22px; color:#FFFFFF; text-align:center; margin-bottom: 6px; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
+  .logos-subtitle{ font-size:12px; color: rgba(255,255,255,0.85); text-align:center; margin-bottom: 16px; font-weight: 600; }
+  .logos-grid{ display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; }
+  .logo-item{ background: #FFFFFF; border-radius: 8px; padding: 6px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: 0 3px 0 rgba(0,0,0,0.15); min-height: 58px; }
+  .logo-item img{ width: 28px; height: 28px; object-fit: contain; }
+  .logo-item span{ font-size: 6px; font-weight: 700; color: #0A2A55; text-align: center; line-height: 1.1; }
+  .footer{ position:relative; margin-top:20px; height:140px; display:flex; align-items:center; justify-content:space-between; padding:0 40px; }
+  .character{ width:120px; height:140px; flex:0 0 auto; }
+  .contrata{ background:#D81E2C; color:#FFFFFF; font-family:'Archivo Black', sans-serif; font-size:24px; padding:16px 32px; border-radius:10px; box-shadow:0 6px 0 rgba(0,0,0,0.2); }
+  .footnote{ position:absolute; bottom:4px; right:40px; font-size:10px; color:rgba(255,255,255,0.7); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="banner">
+
+  <div class="header">
+    <div class="logo">ca<span class="u">u</span>ce</div>
+    <div class="claim">INTERNET + IA<br>LA CORRIENTE MÁS RÁPIDA</div>
+  </div>
+
+  <div class="price-section">
+    <div class="price-text">
+      <div class="por-solo">POR SOLO</div>
+      <div class="headline">TOTALMENTE<br><span class="line2">ILIMITADO</span></div>
+    </div>
+    <div class="price-box">
+      <div class="row"><span class="cur">$</span><span class="num">1,100</span></div>
+      <div class="al-mes">AL MES</div>
+    </div>
+  </div>
+
+  <div class="badges">
+    <div class="badge">
+      <div class="icon blue">◎</div>
+      <div class="text">
+        <b>Detecta tu wifi automáticamente</b>
+        <span>Reconoce al instante si tu red ya tiene IA ilimitada activa.</span>
+      </div>
+    </div>
+    <div class="badge">
+      <div class="icon gold">✦</div>
+      <div class="text">
+        <b>Todos los modelos de IA + API</b>
+        <span>Acceso ilimitado a ChatGPT, Gemini, Claude y tokens API sin límites.</span>
+      </div>
+    </div>
+    <div class="badge">
+      <div class="icon red"></div>
+      <div class="text">
+        <b>+100 servicios premium</b>
+        <span>Streaming, productividad, VPN, educación — todo con suscripción incluida.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="device-info">
+    <div class="title">📱 CONFIGURACIÓN INCLUIDA:</div>
+    <div class="item">✓ <strong>1 DISPOSITIVO</strong> con <strong>1 CUENTA</strong> por servicio</div>
+    <div class="item highlight">➕ Dispositivo adicional: +$500/mes</div>
+  </div>
+
+  <div class="incluye-label">INCLUYE</div>
+  <div class="grid">
+    <div class="cell"><div class="ico c1"></div><span>1 Gbps<br>simétrico</span></div>
+    <div class="cell"><div class="ico c2"></div><span>IA generativa<br>sin límite</span></div>
+    <div class="cell"><div class="ico c3"></div><span>Tokens API<br>ilimitados</span></div>
+    <div class="cell"><div class="ico c4"></div><span>+100 apps<br>premium</span></div>
+  </div>
+
+  <div class="regalo-wrap">
+    <div class="label">Y DE REGALO</div>
+    <div class="big">TUTOR IA FAMILIAR</div>
+    <div class="sub">Para todos los perfiles del hogar, 6 meses sin costo.</div>
+  </div>
+
+  <div class="logos-section">
+    <div class="logos-title">+100 SERVICIOS PREMIUM CON SUSCRIPCIÓN</div>
+    <div class="logos-subtitle">Solo plataformas de pago — Sin anuncios • Sin límites • 2026</div>
+    
+    <div class="logos-grid">
+      <!-- STREAMING -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/netflix" alt="Netflix"><span>Netflix</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/amazon" alt="Prime"><span>Prime Video</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/disneyplus" alt="Disney+"><span>Disney+</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/hbomax" alt="HBO Max"><span>HBO Max</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/youtube" alt="YT Premium"><span>YT Premium</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/paramountplus" alt="Paramount+"><span>Paramount+</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/apple" alt="Apple TV+"><span>Apple TV+</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/hulu" alt="Hulu"><span>Hulu</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/peacock" alt="Peacock"><span>Peacock</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/crunchyroll" alt="Crunchyroll"><span>Crunchyroll</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/starplus" alt="Star+"><span>Star+</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/vix" alt="ViX"><span>ViX</span></div>
+
+      <!-- MÚSICA -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/spotify" alt="Spotify"><span>Spotify</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/youtubemusic" alt="YT Music"><span>YT Music</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/AppleMusic" alt="Apple Music"><span>Apple Music</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/deezer" alt="Deezer"><span>Deezer</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/tidal" alt="TIDAL"><span>TIDAL</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/soundcloud" alt="SoundCloud"><span>SoundCloud</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/pandora" alt="Pandora"><span>Pandora</span></div>
+
+      <!-- IA -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/openai" alt="ChatGPT"><span>ChatGPT</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/google" alt="Gemini"><span>Gemini</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/anthropic" alt="Claude"><span>Claude</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/midjourney" alt="Midjourney"><span>Midjourney</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/perplexity" alt="Perplexity"><span>Perplexity</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/microsoftcopilot" alt="Copilot"><span>Copilot</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/runway" alt="Runway"><span>Runway</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/stablediffusion" alt="Stable Diffusion"><span>Stable Diffusion</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/leonardoai" alt="Leonardo"><span>Leonardo</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/jasper" alt="Jasper"><span>Jasper</span></div>
+
+      <!-- PRODUCTIVIDAD -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/notion" alt="Notion"><span>Notion</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/microsoft365" alt="Office 365"><span>Office 365</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/canva" alt="Canva"><span>Canva</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/grammarly" alt="Grammarly"><span>Grammarly</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/slack" alt="Slack"><span>Slack</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/trello" alt="Trello"><span>Trello</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/asana" alt="Asana"><span>Asana</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/figma" alt="Figma"><span>Figma</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/miro" alt="Miro"><span>Miro</span></div>
+
+      <!-- VPN -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/nordvpn" alt="NordVPN"><span>NordVPN</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/expressvpn" alt="ExpressVPN"><span>ExpressVPN</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/surfshark" alt="Surfshark"><span>Surfshark</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/norton" alt="Norton"><span>Norton 360</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/malwarebytes" alt="Malwarebytes"><span>Malwarebytes</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/1password" alt="1Password"><span>1Password</span></div>
+
+      <!-- EDUCACIÓN -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/coursera" alt="Coursera"><span>Coursera</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/udemy" alt="Udemy"><span>Udemy</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/linkedin" alt="LI Learning"><span>LI Learning</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/masterclass" alt="MasterClass"><span>MasterClass</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/skillshare" alt="Skillshare"><span>Skillshare</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/blinkist" alt="Blinkist"><span>Blinkist</span></div>
+
+      <!-- GAMING -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/xbox" alt="Xbox GP"><span>Xbox GP</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/playstation" alt="PS Plus"><span>PS Plus</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/electronicarts" alt="EA Play"><span>EA Play</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/nintendo" alt="Switch"><span>Switch Online</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/discord" alt="Discord"><span>Discord</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/steam" alt="Steam"><span>Steam</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/twitch" alt="Twitch"><span>Twitch</span></div>
+
+      <!-- BIENESTAR -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/calm" alt="Calm"><span>Calm</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/headspace" alt="Headspace"><span>Headspace</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/audible" alt="Audible"><span>Audible</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/kindle" alt="Kindle"><span>Kindle</span></div>
+
+      <!-- NUBE -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/google" alt="G. One"><span>G. One</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/icloud" alt="iCloud+"><span>iCloud+</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/microsoftonedrive" alt="OneDrive"><span>OneDrive</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/mega" alt="MEGA"><span>MEGA</span></div>
+
+      <!-- COMUNICACIÓN -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/zoom" alt="Zoom"><span>Zoom Pro</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/microsoftteams" alt="Teams"><span>Teams</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/microsoftoutlook" alt="Outlook"><span>Outlook</span></div>
+
+      <!-- DEPORTES -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/espn" alt="ESPN+"><span>ESPN+</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/dazn" alt="DAZN"><span>DAZN</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/nba" alt="NBA LP"><span>NBA LP</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/nfl" alt="NFL+"><span>NFL+</span></div>
+
+      <!-- EXTRAS -->
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/scribd" alt="Scribd"><span>Scribd</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/fubotv" alt="fuboTV"><span>fuboTV</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/superhuman" alt="Superhuman"><span>Superhuman</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/dropbox" alt="Dropbox"><span>Dropbox</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/lastpass" alt="LastPass"><span>LastPass</span></div>
+      <div class="logo-item"><img src="https://cdn.simpleicons.org/adobe" alt="Adobe"><span>Adobe CC</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <svg class="character" viewBox="0 0 420 560" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="230" cy="540" rx="150" ry="20" fill="rgba(10,42,85,0.15)"/>
+      <rect x="190" y="380" width="55" height="150" rx="20" fill="#0A2A55"/>
+      <rect x="255" y="380" width="55" height="150" rx="20" fill="#0A2A55"/>
+      <path d="M170 220 Q170 180 230 180 Q300 180 300 220 L310 400 Q230 430 165 400 Z" fill="#FFD23F"/>
+      <path d="M175 240 Q100 260 70 330 Q60 355 85 365 Q108 373 120 350 Q150 300 195 265 Z" fill="#FFD23F"/>
+      <circle cx="80" cy="352" r="16" fill="#F2C879"/>
+      <path d="M295 240 Q330 280 320 340 Q315 362 292 358 Q272 353 278 330 Q280 290 260 260 Z" fill="#FFD23F"/>
+      <circle cx="300" cy="345" r="15" fill="#F2C879"/>
+      <rect x="55" y="320" width="46" height="80" rx="8" fill="#0A2A55"/>
+      <rect x="60" y="328" width="36" height="58" rx="2" fill="#14B8E8"/>
+      <rect x="212" y="150" width="36" height="40" fill="#F2C879"/>
+      <circle cx="230" cy="120" r="62" fill="#F2C879"/>
+      <path d="M168 110 Q160 40 230 40 Q300 40 292 110 Q296 70 230 66 Q164 70 168 110 Z" fill="#0A2A55"/>
+      <path d="M168 108 Q160 160 178 190 Q168 150 176 112 Z" fill="#0A2A55"/>
+      <path d="M292 108 Q300 160 282 190 Q292 150 284 112 Z" fill="#0A2A55"/>
+      <circle cx="206" cy="120" r="7" fill="#0A2A55"/>
+      <circle cx="254" cy="120" r="7" fill="#0A2A55"/>
+      <path d="M198 145 Q230 175 262 145 Q230 200 198 145 Z" fill="#D81E2C"/>
+      <path d="M204 148 Q230 168 256 148 Q230 160 204 148 Z" fill="#FFFFFF"/>
+      <path d="M186 100 Q206 90 208 108" stroke="#0A2A55" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M274 100 Q254 90 252 108" stroke="#0A2A55" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="contrata">CONTRATA YA →</div>
+  </div>
+
+  <div class="footnote">CAUCE · COBERTURA SUJETA A DISPONIBILIDAD · SOLO SERVICIOS PREMIUM DE PAGO</div>
+</div>
+</body>
+        </html>
