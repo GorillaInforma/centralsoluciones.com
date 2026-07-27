@@ -110,7 +110,19 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
   margin-left:12px;
 }
 .frame-close:hover{background:#B91C1C}
-.frame-panel iframe{flex:1;width:100%;border:none}
+.frame-viewport{
+  flex:1;
+  position:relative;
+  overflow:hidden;
+  background:#fff;
+}
+.frame-viewport iframe{
+  position:absolute;
+  top:0;
+  left:0;
+  border:none;
+  transform-origin:0 0;
+}
 .frame-fallback{
   flex:1;
   display:flex;
@@ -139,7 +151,9 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
         <span class="url">centralsoluciones.com/México/Economía/DependenciaEEUU</span>
         <button type="button" class="frame-close" id="frameClose" aria-label="Cerrar">✕</button>
       </div>
-      <iframe id="analysisFrame" src="" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      <div class="frame-viewport" id="frameViewport">
+        <iframe id="analysisFrame" src="" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      </div>
     </div>
   </div>
 
@@ -221,8 +235,8 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
     });
   }
   applyZoomAndFit();
-  window.addEventListener('resize', function(){ applyZoomAndFit(); if (overlay && overlay.classList.contains('open')) fixOverlayZoom(); });
-  window.addEventListener('orientationchange', function(){ applyZoomAndFit(); if (overlay && overlay.classList.contains('open')) fixOverlayZoom(); });
+  window.addEventListener('resize', function(){ applyZoomAndFit(); if (overlay && overlay.classList.contains('open')) { fixOverlayZoom(); sizeIframeAsDesktop(); } });
+  window.addEventListener('orientationchange', function(){ applyZoomAndFit(); if (overlay && overlay.classList.contains('open')) { fixOverlayZoom(); sizeIframeAsDesktop(); } });
 
   // Franja fija: arriba por defecto, abajo cuando se llega al final, y de regreso arriba al subir
   var bar = document.getElementById('analysisBar');
@@ -240,10 +254,22 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
 
   // Abrir el análisis en un iframe superpuesto: la URL de esta página nunca cambia
   var ANALYSIS_URL = 'https://centralsoluciones.com/M%C3%A9xico/Econom%C3%ADa/DependenciaEEUU';
+  var DESKTOP_WIDTH = 1440; // ancho fijo tipo escritorio: obliga al sitio a mostrar su versión de computadora
   var overlay = document.getElementById('frameOverlay');
+  var viewport = document.getElementById('frameViewport');
   var frame = document.getElementById('analysisFrame');
   var closeBtn = document.getElementById('frameClose');
   var frameLoaded = false;
+
+  function sizeIframeAsDesktop(){
+    var rect = viewport.getBoundingClientRect();
+    var panelW = rect.width, panelH = rect.height;
+    if (panelW <= 0 || panelH <= 0) return;
+    var scale = panelW / DESKTOP_WIDTH;
+    frame.style.width = DESKTOP_WIDTH + 'px';
+    frame.style.height = (panelH / scale) + 'px';
+    frame.style.transform = 'scale(' + scale + ')';
+  }
 
   function fixOverlayZoom(){
     // El body tiene "zoom" aplicado para encajar el diseño de 1280px en la pantalla.
@@ -252,9 +278,10 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
     overlay.style.zoom = currentZoom > 0 ? (1 / currentZoom) : 1;
   }
   function openOverlay(){
+    overlay.classList.add('open');
     fixOverlayZoom();
     if (!frameLoaded) { frame.src = ANALYSIS_URL; frameLoaded = true; }
-    overlay.classList.add('open');
+    sizeIframeAsDesktop();
     document.body.style.overflow = 'hidden';
   }
   function closeOverlay(){
