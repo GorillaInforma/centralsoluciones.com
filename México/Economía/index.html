@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>México: esto es preocupante</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Geist:wght@400;500;700&family=Geist+Mono:wght@500;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#000;font-family:'Geist',ui-sans-serif,system-ui,sans-serif}
+.font-display{font-family:'Syne',sans-serif;font-weight:800}
+.font-body{font-family:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* --- lienzo fijo tamaño "escritorio", se escala completo a cualquier pantalla --- */
+#viewport{width:100vw;height:100vh;overflow:hidden;position:relative}
+#scroller{width:100%;height:100%;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch}
+#scroller::-webkit-scrollbar{display:none}
+#scroller{scrollbar-width:none}
+#wrap{position:relative;overflow:hidden;width:100%}
+#stage{position:absolute;top:0;left:0;width:1280px;transform-origin:top left}
+
+.page{width:1280px;height:800px;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;justify-content:center;padding:0 90px;position:relative;overflow:hidden}
+.eyebrow{font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em}
+.num{font-family:'Syne',sans-serif;font-weight:800;line-height:0.86;letter-spacing:-0.03em}
+.body{font-family:'Geist Mono',monospace;font-size:20px;line-height:1.5;max-width:760px}
+.foot{font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.15em;opacity:0.5;position:absolute;bottom:48px;left:90px}
+.bounce{animation:bounce 1.8s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(10px)}}
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="scroller">
+    <div id="wrap">
+      <div id="stage">
+
+        <!-- PÁGINA 0 — portada -->
+        <section class="page" style="background:#18181b;color:#fff">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px">
+            <span style="height:9px;width:9px;border-radius:50%;background:#DC2626"></span>
+            <span class="eyebrow" style="color:rgba(255,255,255,.5)">SIGUE DEL FLUJO · MISMOS DATOS · ENIGH / EIA / USDA / SENER</span>
+          </div>
+          <h1 class="font-display" style="font-size:104px">
+            MÉXICO:<br>
+            <span style="background:#DC2626;padding:2px 16px;border-radius:12px;display:inline-block;transform:rotate(-1deg)">ESTO ES PREOCUPANTE</span>
+          </h1>
+          <p class="body" style="color:rgba(255,255,255,.5);margin-top:34px">
+            Seis datos. Ni opiniones ni exageraciones — la misma base del flujo, sin caso individual, llevada a su tamaño real. Uno por pantalla.
+          </p>
+          <div class="bounce" style="position:absolute;bottom:48px;left:90px;display:flex;align-items:center;gap:8px">
+            <span class="eyebrow" style="color:rgba(255,255,255,.4)">DESLIZA</span>
+            <span style="color:rgba(255,255,255,.4)">↓</span>
+          </div>
+        </section>
+
+        <!-- PÁGINA 1 — semana laboral -->
+        <section class="page" style="background:#fff;color:#18181b">
+          <span class="eyebrow" style="color:#DC2626;margin-bottom:20px">TU CALENDARIO · 24% DEL GASTO MENSUAL</span>
+          <div class="num" style="font-size:190px;color:#DC2626">1 SEMANA</div>
+          <p class="body" style="color:#3f3f46;margin-top:28px">
+            Trabajas cuatro semanas al mes. <b style="color:#18181b">Una semana completa</b>, cada mes, nunca fue tuya: ya tenía dueño en Estados Unidos antes de que la cobraras.
+          </p>
+          <div class="foot" style="color:#a1a1aa">24% DE $16,855 = ~7.2 DÍAS DE 30 · ENIGH 2024→26</div>
+        </section>
+
+        <!-- PÁGINA 2 — gas -->
+        <section class="page" style="background:#18181b;color:#fff">
+          <span class="eyebrow" style="color:#16A34A;margin-bottom:20px">GAS NATURAL · TU LUZ, TU ESTUFA</span>
+          <div class="num" style="font-size:220px;color:#16A34A">76%</div>
+          <p class="body" style="color:rgba(255,255,255,.7);margin-top:28px">
+            El gas que hierve tu café llega por un ducto que cruza la frontera. Con él se genera <b style="color:#fff">60% de la luz</b> de todo el país. Cierran la llave en Texas y México se queda a oscuras en horas, no en meses.
+          </p>
+          <div class="foot" style="color:rgba(255,255,255,.4)">EIA / SENER · 6,638 MMPCD RÉCORD 2025</div>
+        </section>
+
+        <!-- PÁGINA 3 — maíz -->
+        <section class="page" style="background:#fff;color:#18181b">
+          <span class="eyebrow" style="color:#2563EB;margin-bottom:20px">MAÍZ · LA TORTILLA QUE TE COMISTE HOY</span>
+          <div class="num" style="font-size:190px;color:#2563EB">1 DE 2</div>
+          <p class="body" style="color:#3f3f46;margin-top:28px">
+            De cada dos tortillas que muerdes, el maíz de una nunca pisó suelo mexicano. El país que <b style="color:#18181b">le dio el maíz al mundo</b> hoy le compra la mitad del suyo a Iowa.
+          </p>
+          <div class="foot" style="color:#a1a1aa">USDA · 52% DEL CONSUMO NACIONAL · 27M TON 2026</div>
+        </section>
+
+        <!-- PÁGINA 4 — fertilizante -->
+        <section class="page" style="background:#18181b;color:#fff">
+          <span class="eyebrow" style="color:#D97706;margin-bottom:20px">FERTILIZANTE · ANTES DE QUE HAYA MAÍZ</span>
+          <div class="num" style="font-size:220px;color:#D97706">72%</div>
+          <p class="body" style="color:rgba(255,255,255,.7);margin-top:28px">
+            Antes de defender "el maíz mexicano", alguien tuvo que sembrarlo. 72 de cada 100 costales de fertilizante que usa el campo cruzaron una frontera primero. Sin ese insumo, no hay cosecha que proteger.
+          </p>
+          <div class="foot" style="color:rgba(255,255,255,.4)">HOY MÁS CHINA/RUSIA (56%) QUE EEUU</div>
+        </section>
+
+        <!-- PÁGINA 5 — gasolina -->
+        <section class="page" style="background:#fff;color:#18181b">
+          <span class="eyebrow" style="color:#DC2626;margin-bottom:20px">GASOLINA · TU TANQUE LLENO</span>
+          <div class="num" style="font-size:190px;color:#DC2626">~45%</div>
+          <p class="body" style="color:#3f3f46;margin-top:28px">
+            Casi la mitad de la gasolina que cargas se refinó fuera de México, con petróleo que salió de aquí. Exportamos el crudo barato. Importamos la gasolina cara. Ese es el negocio.
+          </p>
+          <div class="foot" style="color:#a1a1aa">PEMEX/SENER 2026 · A LA BAJA DESDE 52% (2025)</div>
+        </section>
+
+        <!-- PÁGINA 6 — cierre anual -->
+        <section class="page" style="background:#DC2626;color:#fff">
+          <span class="eyebrow" style="color:rgba(255,255,255,.7);margin-bottom:20px">AL AÑO · POR HOGAR PROMEDIO</span>
+          <div class="num" style="font-size:150px">$48,972</div>
+          <p class="body" style="color:rgba(255,255,255,.9);margin-top:28px">
+            Eso sale de tu casa hacia Estados Unidos cada año. Es <b style="color:#fff">casi 3 meses completos</b> de todo lo que gasta tu familia — comida, luz, renta, internet — regalados, antes de comprar un solo producto con bandera gringa.
+          </p>
+          <div class="foot" style="color:rgba(255,255,255,.6)">$4,081/MES × 12 = $48,972 · ÷ $16,855/MES = 2.9 MESES</div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var DESIGN_WIDTH = 1280;
+  var stage = document.getElementById('stage');
+  var wrap = document.getElementById('wrap');
+
+  function layout(){
+    var scale = window.innerWidth / DESIGN_WIDTH;
+    stage.style.transform = 'scale(' + scale + ')';
+    // altura natural (sin escalar) del stage = suma de páginas
+    var naturalHeight = stage.scrollHeight;
+    wrap.style.height = (naturalHeight * scale) + 'px';
+  }
+
+  window.addEventListener('resize', layout);
+  window.addEventListener('orientationchange', layout);
+  layout();
+  // recalcular tras cargar fuentes, por si cambia el alto
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(layout);
+  }
+  setTimeout(layout, 300);
+})();
+</script>
+</body>
+</html>
