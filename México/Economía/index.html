@@ -254,21 +254,26 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
 
   // Abrir el análisis en un iframe superpuesto: la URL de esta página nunca cambia
   var ANALYSIS_URL = 'https://centralsoluciones.com/M%C3%A9xico/Econom%C3%ADa/DependenciaEEUU';
-  var DESKTOP_WIDTH = 1440; // ancho fijo tipo escritorio: obliga al sitio a mostrar su versión de computadora
+  var DESKTOP_WIDTH = 1440; // ancho de layout tipo escritorio, obliga al sitio a mostrar su versión de computadora
+  var EXTRA_ZOOM = 1.28;    // acerca el contenido para recortar el margen blanco lateral del sitio
   var overlay = document.getElementById('frameOverlay');
   var viewport = document.getElementById('frameViewport');
   var frame = document.getElementById('analysisFrame');
   var closeBtn = document.getElementById('frameClose');
   var frameLoaded = false;
+  var modalPushed = false;
 
   function sizeIframeAsDesktop(){
     var rect = viewport.getBoundingClientRect();
     var panelW = rect.width, panelH = rect.height;
     if (panelW <= 0 || panelH <= 0) return;
-    var scale = panelW / DESKTOP_WIDTH;
+    var fitScale = panelW / DESKTOP_WIDTH;
+    var scale = fitScale * EXTRA_ZOOM;
     frame.style.width = DESKTOP_WIDTH + 'px';
     frame.style.height = (panelH / scale) + 'px';
-    frame.style.transform = 'scale(' + scale + ')';
+    var renderedW = DESKTOP_WIDTH * scale;
+    var offsetX = (panelW - renderedW) / 2; // centra y recorta el excedente por igual en ambos lados
+    frame.style.transform = 'translate(' + offsetX + 'px, 0) scale(' + scale + ')';
   }
 
   function fixOverlayZoom(){
