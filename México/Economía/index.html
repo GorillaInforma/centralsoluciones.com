@@ -55,14 +55,85 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
   box-shadow:0 -2px 14px rgba(0,0,0,.35);
 }
 .analysis-bar.at-bottom .arrow{transform:rotate(180deg)}
+
+/* Overlay con iframe: no navega, no cambia la URL actual */
+.frame-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.frame-overlay.open{display:flex}
+.frame-panel{
+  width:min(1100px, 94vw);
+  height:min(860px, 92vh);
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.frame-topbar{
+  background:#18181b;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 18px;
+  font-family:'Geist Mono',monospace;
+  font-size:12px;
+  letter-spacing:0.1em;
+}
+.frame-topbar span.url{opacity:.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frame-close{
+  background:#DC2626;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  width:30px;
+  height:30px;
+  font-size:16px;
+  cursor:pointer;
+  flex-shrink:0;
+  margin-left:12px;
+}
+.frame-close:hover{background:#B91C1C}
+.frame-panel iframe{flex:1;width:100%;border:none}
+.frame-fallback{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  padding:40px;
+  text-align:center;
+  font-family:'Geist Mono',monospace;
+  color:#3f3f46;
+}
+.frame-fallback a{color:#DC2626;font-weight:700}
 </style>
 </head>
 <body>
 
-  <a class="analysis-bar" id="analysisBar" href="https://centralsoluciones.com/M%C3%A9xico/Econom%C3%ADa/DependenciaEEUU" target="_blank" rel="noopener noreferrer">
+  <button type="button" class="analysis-bar" id="analysisBar">
     <span>Ver Análisis completo</span>
     <span class="arrow">↗</span>
-  </a>
+  </button>
+
+  <div class="frame-overlay" id="frameOverlay">
+    <div class="frame-panel">
+      <div class="frame-topbar">
+        <span class="url">centralsoluciones.com/México/Economía/DependenciaEEUU</span>
+        <button type="button" class="frame-close" id="frameClose" aria-label="Cerrar">✕</button>
+      </div>
+      <iframe id="analysisFrame" src="" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    </div>
+  </div>
 
   <section class="page" style="background:#18181b;color:#fff">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px">
@@ -157,6 +228,27 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
   window.addEventListener('scroll', updateBarPosition, { passive: true });
   window.addEventListener('resize', updateBarPosition);
   window.addEventListener('orientationchange', updateBarPosition);
+
+  // Abrir el análisis en un iframe superpuesto: la URL de esta página nunca cambia
+  var ANALYSIS_URL = 'https://centralsoluciones.com/M%C3%A9xico/Econom%C3%ADa/DependenciaEEUU';
+  var overlay = document.getElementById('frameOverlay');
+  var frame = document.getElementById('analysisFrame');
+  var closeBtn = document.getElementById('frameClose');
+  var frameLoaded = false;
+
+  function openOverlay(){
+    if (!frameLoaded) { frame.src = ANALYSIS_URL; frameLoaded = true; }
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeOverlay(){
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  bar.addEventListener('click', openOverlay);
+  closeBtn.addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) closeOverlay(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeOverlay(); });
 })();
 </script>
 </body>
