@@ -68,14 +68,22 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
 }
 .frame-overlay.open{display:flex}
 .frame-panel{
-  width:min(1100px, 94vw);
-  height:min(860px, 92vh);
+  width:100vw;
+  height:100vh;
   background:#fff;
-  border-radius:14px;
+  border-radius:0;
   overflow:hidden;
   display:flex;
   flex-direction:column;
-  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  box-shadow:none;
+}
+@media (min-width:900px){
+  .frame-panel{
+    width:min(1100px, 94vw);
+    height:min(860px, 92vh);
+    border-radius:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
 }
 .frame-topbar{
   background:#18181b;
@@ -189,11 +197,12 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
 
 <script>
 (function () {
+  var currentZoom = 1;
   function applyZoomAndFit(){
     try {
       var w = document.documentElement.clientWidth;
       var z = w / 1280;
-      if (z > 0 && isFinite(z)) document.body.style.zoom = z;
+      if (z > 0 && isFinite(z)) { document.body.style.zoom = z; currentZoom = z; }
     } catch(e){}
 
     // FIX CORTE: si el texto mide más que el lienzo interior (1280 - 180), lo encogemos
@@ -212,8 +221,8 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
     });
   }
   applyZoomAndFit();
-  window.addEventListener('resize', applyZoomAndFit);
-  window.addEventListener('orientationchange', applyZoomAndFit);
+  window.addEventListener('resize', function(){ applyZoomAndFit(); if (overlay && overlay.classList.contains('open')) fixOverlayZoom(); });
+  window.addEventListener('orientationchange', function(){ applyZoomAndFit(); if (overlay && overlay.classList.contains('open')) fixOverlayZoom(); });
 
   // Franja fija: arriba por defecto, abajo cuando se llega al final, y de regreso arriba al subir
   var bar = document.getElementById('analysisBar');
@@ -236,7 +245,14 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
   var closeBtn = document.getElementById('frameClose');
   var frameLoaded = false;
 
+  function fixOverlayZoom(){
+    // El body tiene "zoom" aplicado para encajar el diseño de 1280px en la pantalla.
+    // Ese zoom se hereda por los descendientes (incluido este overlay), así que lo
+    // cancelamos aquí para que la página cargada en el iframe se vea a tamaño real.
+    overlay.style.zoom = currentZoom > 0 ? (1 / currentZoom) : 1;
+  }
   function openOverlay(){
+    fixOverlayZoom();
     if (!frameLoaded) { frame.src = ANALYSIS_URL; frameLoaded = true; }
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
