@@ -4744,5 +4744,27 @@ function initApp(){
   });
 })();
 </script>
+  <script>
+(function protegerRutasPWA(){
+  const rutasPermitidas = ['/sistema', '/sistemasG'];
+  const rutaValida = rutasPermitidas.some(r => location.pathname.startsWith(r));
+
+  if (rutaValida) return; // Estamos en Botica Central de verdad, no tocar nada
+
+  // Si llegamos hasta acá es porque este HTML (o este bloque de script)
+  // se cargó en una ruta que NO es Botica Central. Deshacemos lo que
+  // el bloque de arriba (registrarManifestPWA) ya haya inyectado:
+
+  document.querySelectorAll(
+    'link[rel="manifest"], link[rel="apple-touch-icon"]'
+  ).forEach(el => el.remove());
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => reg.unregister());
+    });
+  }
+})();
+  </script>
 </body>
 </html>
