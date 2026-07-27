@@ -7,29 +7,36 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Geist:wght@400;500;700&family=Geist+Mono:wght@500;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-snap-type:y mandatory;background:#18181b}
+html{scroll-snap-type:y mandatory;background:#18181b;width:100%;overflow-x:hidden}
 body{
   font-family:'Geist',ui-sans-serif,system-ui,sans-serif;
   width:1280px;
-  /* --- esto es lo que hace todo el trabajo: --- */
-  /* escala el lienzo fijo de 1280px al ancho real de la pantalla, sin JS */
-  zoom: calc(100vw / 1280px); /* división de dos longitudes -> número puro */
+  margin:0;
+  overflow-x:hidden;
 }
 .font-display{font-family:'Syne',sans-serif;font-weight:800}
 .font-body{font-family:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
 
 .page{
-  width:1280px;height:800px;
+  width:1280px;min-width:1280px;height:800px;
   scroll-snap-align:start;scroll-snap-stop:always;
   display:flex;flex-direction:column;justify-content:center;
   padding:0 90px;position:relative;overflow:hidden;
 }
 .eyebrow{font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em}
-.num{font-family:'Syne',sans-serif;font-weight:800;line-height:0.86;letter-spacing:-0.03em;white-space:nowrap}
+.num{
+  font-family:'Syne',sans-serif;font-weight:800;line-height:0.86;letter-spacing:-0.03em;
+  white-space:normal;
+  overflow-wrap:break-word;
+  max-width:100%;
+}
 .body{font-family:'Geist Mono',monospace;font-size:20px;line-height:1.5;max-width:760px}
 .foot{font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.15em;opacity:0.5;position:absolute;bottom:48px;left:90px}
 .bounce{animation:bounce 1.8s infinite}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(10px)}}
+
+/* FIX para que el badge rojo no se corte */
+.font-display span{max-width:100%;white-space:normal;box-sizing:border-box}
 </style>
 </head>
 <body>
@@ -113,16 +120,16 @@ body{
     <div class="foot" style="color:rgba(255,255,255,.6)">$4,081/MES × 12 = $48,972 · ÷ $16,855/MES = 2.9 MESES</div>
   </section>
 
-
 <script>
 (function () {
   function applyZoom() {
     try {
-      var z = window.innerWidth / 1280;
+      var w = document.documentElement.clientWidth;
+      var z = w / 1280;
       if (z > 0 && isFinite(z)) {
         document.body.style.zoom = z;
       }
-    } catch (e) { /* si el navegador no soporta zoom, se queda el CSS */ }
+    } catch (e) {}
   }
   applyZoom();
   window.addEventListener('resize', applyZoom);
