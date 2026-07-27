@@ -7,54 +7,91 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Geist:wght@400;500;700&family=Geist+Mono:wght@500;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-snap-type:y mandatory;background:#18181b;width:100%;overflow-x:hidden}
-body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:0;overflow-x:hidden}
+html{scroll-snap-type:y mandatory;background:#000;width:100%;overflow-x:hidden;height:100%}
+body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:100%;margin:0;overflow-x:hidden}
 .font-display{font-family:'Syne',sans-serif;font-weight:800}
-.page{width:1280px;min-width:1280px;height:800px;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;justify-content:center;padding:0 90px;position:relative;overflow:hidden}
+
+/* Cada slide = pantalla completa formato TikTok (9:16) */
+.page{
+  width:100vw;
+  height:100vh;
+  height:100dvh; /* corrige barras de navegador móvil */
+  min-height:100dvh;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:0 7vw;
+  position:relative;
+  overflow:hidden;
+}
+
+.eyebrow{
+  color:rgba(255,255,255,.5);
+  font-family:'Geist Mono',monospace;
+  font-size:clamp(11px,3.1vw,15px);
+  font-weight:700;
+  letter-spacing:0.18em;
+}
+
 .num{
   font-family:'Syne',sans-serif;font-weight:800;line-height:0.86;letter-spacing:-0.03em;
-  white-space:normal; /* permite que "1 SEMANA" sea 2 líneas */
+  white-space:normal;
   word-break:keep-all;
-  overflow-wrap:normal; /* FIX: que no parta letras */
+  overflow-wrap:normal;
   max-width:100%;
+  font-size:clamp(52px,13vw,170px);
 }
-.body{font-family:'Geist Mono',monospace;font-size:20px;line-height:1.5;max-width:760px}
-.foot{font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.15em;opacity:0.5;position:absolute;bottom:48px;left:90px}
+.num.lg{ font-size:clamp(64px,17.5vw,230px); }
+
+h1.font-display{ font-size:clamp(40px,9vw,100px); line-height:1.05; }
+
+.mega-line{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  line-height:0.86;
+  letter-spacing:-0.03em;
+  font-size:clamp(56px,21vh,230px);
+  white-space:nowrap;
+  margin-top:0.03em;
+}
+.mega-line.hl{
+  background:#DC2626;
+  display:inline-block;
+  padding:0 0.1em;
+  border-radius:0.14em;
+  transform:rotate(-1deg);
+}
+
+.body{font-family:'Geist Mono',monospace;font-size:clamp(14px,4vw,20px);line-height:1.5;max-width:760px}
+.foot{font-family:'Geist Mono',monospace;font-size:clamp(9px,2.6vw,12px);letter-spacing:0.13em;opacity:0.5;position:absolute;bottom:5vh;left:7vw}
 .bounce{animation:bounce 1.8s infinite}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(10px)}}
 .font-display span{white-space:normal;word-break:keep-all;max-width:100%;box-sizing:border-box}
 
-/* Franja fija de análisis completo */
-.analysis-bar{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  z-index:9999;
-  background:#DC2626;
-  color:#fff;
+/* Botón de análisis completo: vive solo dentro del último slide, no flota sobre los demás */
+.analysis-cta{
+  margin-top:36px;
+  align-self:flex-start;
+  background:#fff;
+  color:#DC2626;
   text-decoration:none;
-  display:flex;
+  display:inline-flex;
   align-items:center;
-  justify-content:center;
   gap:10px;
-  padding:14px 0;
+  padding:14px 22px;
+  border:none;
+  border-radius:999px;
   font-family:'Geist Mono',monospace;
   font-weight:700;
-  font-size:14px;
-  letter-spacing:0.12em;
+  font-size:clamp(11px,3vw,14px);
+  letter-spacing:0.1em;
   text-transform:uppercase;
-  box-shadow:0 2px 14px rgba(0,0,0,.35);
-  transition:background 0.15s ease;
+  cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,0,0,.25);
 }
-.analysis-bar:hover{background:#B91C1C}
-.analysis-bar .arrow{font-size:16px;transition:transform 0.15s ease}
-.analysis-bar.at-bottom{
-  top:auto;
-  bottom:0;
-  box-shadow:0 -2px 14px rgba(0,0,0,.35);
-}
-.analysis-bar.at-bottom .arrow{transform:rotate(180deg)}
+.analysis-cta:hover{background:#f4f4f5}
 
 /* Overlay con iframe: no navega, no cambia la URL actual */
 .frame-overlay{
@@ -142,11 +179,6 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
 </head>
 <body>
 
-  <button type="button" class="analysis-bar" id="analysisBar">
-    <span>Ver Análisis completo</span>
-    <span class="arrow">↗</span>
-  </button>
-
   <div class="frame-overlay" id="frameOverlay">
     <div class="frame-panel">
       <div class="frame-topbar">
@@ -159,100 +191,85 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
     </div>
   </div>
 
-  <section class="page" style="background:#18181b;color:#fff">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px">
-      <span style="height:9px;width:9px;border-radius:50%;background:#DC2626"></span>
-      <span class="eyebrow" style="color:rgba(255,255,255,.5);font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">SIGUE DEL FLUJO · MISMOS DATOS · ENIGH / EIA / USDA / SENER</span>
-    </div>
-    <h1 class="font-display" style="font-size:96px">MÉXICO:<br><span style="background:#DC2626;padding:2px 16px;border-radius:12px;display:inline-block;transform:rotate(-1deg)">ESTO ES PREOCUPANTE</span></h1>
-    <p class="body" style="color:rgba(255,255,255,.5);margin-top:34px">Seis datos. Ni opiniones ni exageraciones — la misma base del flujo, sin caso individual, llevada a su tamaño real. Uno por pantalla.</p>
-    <div class="bounce" style="position:absolute;bottom:48px;left:90px;display:flex;align-items:center;gap:8px"><span style="color:rgba(255,255,255,.4);font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">DESLIZA</span><span style="color:rgba(255,255,255,.4)">↓</span></div>
+  <section class="page" style="background:#000;color:#fff">
+    <div class="mega-line">MÉXICO:</div>
+    <div class="mega-line hl">ESTO</div>
+    <div class="mega-line hl">ES</div>
+    <div class="mega-line hl">PREOCUPANTE</div>
+    <div class="bounce" style="position:absolute;bottom:5vh;left:7vw;display:flex;align-items:center;gap:8px"><span style="color:rgba(255,255,255,.4);font-family:'Geist Mono',monospace;font-size:clamp(11px,3.1vw,14px);font-weight:700;letter-spacing:0.2em">DESLIZA</span><span style="color:rgba(255,255,255,.4)">↓</span></div>
   </section>
 
   <section class="page" style="background:#fff;color:#18181b">
-    <span style="color:#DC2626;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">TU CALENDARIO · 24% DEL GASTO MENSUAL</span>
-    <div class="num" style="font-size:160px;color:#DC2626">1 SEMANA</div>
-    <p class="body" style="color:#3f3f46;margin-top:28px">Trabajas cuatro semanas al mes. <b style="color:#18181b">Una semana completa</b>, cada mes, nunca fue tuya: ya tenía dueño en Estados Unidos antes de que la cobraras.</p>
+    <span class="eyebrow" style="color:#DC2626;margin-bottom:20px">TU CALENDARIO · 24% DEL GASTO MENSUAL</span>
+    <div class="num" style="color:#DC2626">1 SEMANA</div>
+    <p class="body" style="color:#3f3f46;margin-top:28px">El dinero que ganas en <b style="color:#18181b">toda una semana entera</b> de trabajo cada mes no es tuyo: es para Estados Unidos, directa o indirectamente. Te muestro por qué.</p>
     <div class="foot" style="color:#a1a1aa">24% DE $16,855 = ~7.2 DÍAS DE 30 · ENIGH 2024→26</div>
   </section>
 
-  <section class="page" style="background:#18181b;color:#fff">
-    <span style="color:#16A34A;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">GAS NATURAL · TU LUZ, TU ESTUFA</span>
-    <div class="num" style="font-size:220px;color:#16A34A">76%</div>
-    <p class="body" style="color:rgba(255,255,255,.7);margin-top:28px">El gas que hierve tu café llega por un ducto que cruza la frontera. Con él se genera <b style="color:#fff">60% de la luz</b> de todo el país. Cierran la llave en Texas y México se queda a oscuras en horas, no en meses.</p>
+  <section class="page" style="background:#000;color:#fff">
+    <span class="eyebrow" style="color:#16A34A;margin-bottom:20px">GAS NATURAL · TU LUZ, TU ESTUFA</span>
+    <div class="num lg" style="color:#16A34A">76%</div>
+    <p class="body" style="color:rgba(255,255,255,.7);margin-top:28px">El gas que calienta tu estufa cruza la frontera por un ducto. Con él se prende <b style="color:#fff">6 de cada 10 focos</b> del país. Si cierran la llave en Texas, México se apaga en horas, no en meses.</p>
     <div class="foot" style="color:rgba(255,255,255,.4)">EIA / SENER · 6,638 MMPCD RÉCORD 2025</div>
   </section>
 
   <section class="page" style="background:#fff;color:#18181b">
-    <span style="color:#2563EB;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">MAÍZ · LA TORTILLA QUE TE COMISTE HOY</span>
-    <div class="num" style="font-size:160px;color:#2563EB">1 DE 2</div>
-    <p class="body" style="color:#3f3f46;margin-top:28px">De cada dos tortillas que muerdes, el maíz de una nunca pisó suelo mexicano. El país que <b style="color:#18181b">le dio el maíz al mundo</b> hoy le compra la mitad del suyo a Iowa.</p>
+    <span class="eyebrow" style="color:#2563EB;margin-bottom:20px">MAÍZ · LA TORTILLA QUE TE COMISTE HOY</span>
+    <div class="num" style="color:#2563EB">1 DE 2</div>
+    <p class="body" style="color:#3f3f46;margin-top:28px">De cada dos tortillas que comes, una se hizo con maíz que nunca pisó suelo mexicano. El país que <b style="color:#18181b">le dio el maíz al mundo</b> hoy depende de Iowa para comer.</p>
     <div class="foot" style="color:#a1a1aa">USDA · 52% DEL CONSUMO NACIONAL · 27M TON 2026</div>
   </section>
 
-  <section class="page" style="background:#18181b;color:#fff">
-    <span style="color:#D97706;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">FERTILIZANTE · ANTES DE QUE HAYA MAÍZ</span>
-    <div class="num" style="font-size:220px;color:#D97706">72%</div>
-    <p class="body" style="color:rgba(255,255,255,.7);margin-top:28px">Antes de defender "el maíz mexicano", alguien tuvo que sembrarlo. 72 de cada 100 costales de fertilizante que usa el campo cruzaron una frontera primero. Sin ese insumo, no hay cosecha que proteger.</p>
+  <section class="page" style="background:#000;color:#fff">
+    <span class="eyebrow" style="color:#D97706;margin-bottom:20px">FERTILIZANTE · ANTES DE QUE HAYA MAÍZ</span>
+    <div class="num lg" style="color:#D97706">72%</div>
+    <p class="body" style="color:rgba(255,255,255,.7);margin-top:28px">Antes de poder decir "maíz mexicano", el campo necesita fertilizante. <b style="color:#fff">72 de cada 100 costales</b> cruzaron una frontera antes de tocar tierra. Sin eso, no hay cosecha que defender.</p>
     <div class="foot" style="color:rgba(255,255,255,.4)">HOY MÁS CHINA/RUSIA (56%) QUE EEUU</div>
   </section>
 
   <section class="page" style="background:#fff;color:#18181b">
-    <span style="color:#DC2626;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">GASOLINA · TU TANQUE LLENO</span>
-    <div class="num" style="font-size:160px;color:#DC2626">45%</div>
-    <p class="body" style="color:#3f3f46;margin-top:28px">Casi la mitad de la gasolina que cargas se refinó fuera de México, con petróleo que salió de aquí. Exportamos el crudo barato. Importamos la gasolina cara. Ese es el negocio.</p>
+    <span class="eyebrow" style="color:#DC2626;margin-bottom:20px">GASOLINA · TU TANQUE LLENO</span>
+    <div class="num" style="color:#DC2626">45%</div>
+    <p class="body" style="color:#3f3f46;margin-top:28px">Casi la mitad de la gasolina que cargas salió de <b style="color:#18181b">tu propio petróleo</b> — pero se refinó fuera. Vendemos el crudo barato y compramos de vuelta la gasolina cara. Así funciona el negocio.</p>
     <div class="foot" style="color:#a1a1aa">PEMEX/SENER 2026 · A LA BAJA DESDE 52% (2025)</div>
   </section>
 
   <section class="page" style="background:#DC2626;color:#fff">
-    <span style="color:rgba(255,255,255,.7);margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">AL AÑO · POR HOGAR PROMEDIO</span>
-    <div class="num" style="font-size:150px">$48,972</div>
-    <p class="body" style="color:rgba(255,255,255,.9);margin-top:28px">Eso sale de tu casa hacia Estados Unidos cada año. Es <b style="color:#fff">casi 3 meses completos</b> de todo lo que gasta tu familia — comida, luz, renta, internet — regalados, antes de comprar un solo producto con bandera gringa.</p>
+    <span class="eyebrow" style="color:rgba(255,255,255,.7);margin-bottom:20px">AL AÑO · POR HOGAR PROMEDIO</span>
+    <div class="num">$48,972</div>
+    <p class="body" style="color:rgba(255,255,255,.9);margin-top:28px">Eso sale de tu casa hacia Estados Unidos cada año. <b style="color:#fff">Casi 3 meses completos</b> de todo lo que gasta tu familia — comida, luz, renta, internet — regalados, antes de comprar un solo producto gringo.</p>
+    <button type="button" class="analysis-cta" id="analysisBar">
+      <span>Ver análisis completo</span>
+      <span class="arrow">↗</span>
+    </button>
     <div class="foot" style="color:rgba(255,255,255,.6)">$4,081/MES × 12 = $48,972 · ÷ $16,855/MES = 2.9 MESES</div>
   </section>
 
 <script>
 (function () {
-  var currentZoom = 1;
-  function applyZoomAndFit(){
-    try {
-      var w = document.documentElement.clientWidth;
-      var z = w / 1280;
-      if (z > 0 && isFinite(z)) { document.body.style.zoom = z; currentZoom = z; }
-    } catch(e){}
-
-    // FIX CORTE: si el texto mide más que el lienzo interior (1280 - 180), lo encogemos
-    var avail = 1280 - 180;
-    document.querySelectorAll('.num, h1.font-display span').forEach(function(el){
-      el.style.fontSize = el.style.fontSize || window.getComputedStyle(el).fontSize;
-      // resetea para medir bien
-      var currentSize = parseFloat(window.getComputedStyle(el).fontSize);
-      el.style.fontSize = currentSize + 'px';
-      var iter = 0;
-      while(el.scrollWidth > avail && iter < 20){
-        currentSize = currentSize * 0.95;
-        el.style.fontSize = currentSize + 'px';
-        iter++;
-      }
+  function fitText(){
+    document.querySelectorAll('.page').forEach(function(page){
+      var cs = getComputedStyle(page);
+      var padL = parseFloat(cs.paddingLeft) || 0;
+      var padR = parseFloat(cs.paddingRight) || 0;
+      var innerW = page.clientWidth - padL - padR;
+      page.querySelectorAll('.num, .mega-line, h1.font-display, h1.font-display span').forEach(function(el){
+        var size = parseFloat(getComputedStyle(el).fontSize);
+        var iter = 0;
+        while (el.scrollWidth > innerW && iter < 40 && size > 10) {
+          size = size * 0.96;
+          el.style.fontSize = size + 'px';
+          iter++;
+        }
+      });
     });
   }
-  applyZoomAndFit();
-  window.addEventListener('resize', function(){ applyZoomAndFit(); if (overlay && overlay.classList.contains('open')) { fixOverlayZoom(); sizeIframeAsDesktop(); } });
-  window.addEventListener('orientationchange', function(){ applyZoomAndFit(); if (overlay && overlay.classList.contains('open')) { fixOverlayZoom(); sizeIframeAsDesktop(); } });
+  fitText();
+  window.addEventListener('resize', fitText);
+  window.addEventListener('orientationchange', fitText);
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitText); }
 
-  // Franja fija: arriba por defecto, abajo cuando se llega al final, y de regreso arriba al subir
   var bar = document.getElementById('analysisBar');
-  function updateBarPosition(){
-    var scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-    var viewportH = window.innerHeight;
-    var fullH = document.documentElement.scrollHeight;
-    var nearBottom = (scrollY + viewportH) >= (fullH - 40);
-    bar.classList.toggle('at-bottom', nearBottom);
-  }
-  updateBarPosition();
-  window.addEventListener('scroll', updateBarPosition, { passive: true });
-  window.addEventListener('resize', updateBarPosition);
-  window.addEventListener('orientationchange', updateBarPosition);
 
   // Abrir el análisis en un iframe superpuesto: la URL de esta página nunca cambia
   var ANALYSIS_URL = 'https://centralsoluciones.com/M%C3%A9xico/Econom%C3%ADa/DependenciaEEUU';
@@ -264,8 +281,6 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
   var closeBtn = document.getElementById('frameClose');
   var frameLoaded = false;
 
-  // Meta viewport: se relaja para permitir pellizco (pinch-zoom) SOLO mientras
-  // el overlay está abierto; al cerrar se restaura para no afectar las slides.
   var viewportMeta = document.querySelector('meta[name="viewport"]');
   var viewportDefault = viewportMeta.getAttribute('content');
   var viewportZoomable = 'width=device-width, initial-scale=1';
@@ -279,29 +294,24 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
     frame.style.width = DESKTOP_WIDTH + 'px';
     frame.style.height = (panelH / scale) + 'px';
     var renderedW = DESKTOP_WIDTH * scale;
-    var offsetX = (panelW - renderedW) / 2; // centra y recorta el excedente por igual en ambos lados
+    var offsetX = (panelW - renderedW) / 2;
     frame.style.transform = 'translate(' + offsetX + 'px, 0) scale(' + scale + ')';
   }
 
-  function fixOverlayZoom(){
-    // El body tiene "zoom" aplicado para encajar el diseño de 1280px en la pantalla.
-    // Ese zoom se hereda por los descendientes (incluido este overlay), así que lo
-    // cancelamos aquí para que la página cargada en el iframe se vea a tamaño real.
-    overlay.style.zoom = currentZoom > 0 ? (1 / currentZoom) : 1;
-  }
   function openOverlay(){
     overlay.classList.add('open');
-    fixOverlayZoom();
     if (!frameLoaded) { frame.src = ANALYSIS_URL; frameLoaded = true; }
     sizeIframeAsDesktop();
     document.body.style.overflow = 'hidden';
-    viewportMeta.setAttribute('content', viewportZoomable); // habilita pellizco (pinch-to-zoom)
+    viewportMeta.setAttribute('content', viewportZoomable);
   }
   function closeOverlay(){
     overlay.classList.remove('open');
     document.body.style.overflow = '';
-    viewportMeta.setAttribute('content', viewportDefault); // restaura el diseño original de las slides
+    viewportMeta.setAttribute('content', viewportDefault);
   }
+  window.addEventListener('resize', function(){ if (overlay.classList.contains('open')) sizeIframeAsDesktop(); });
+  window.addEventListener('orientationchange', function(){ if (overlay.classList.contains('open')) sizeIframeAsDesktop(); });
   bar.addEventListener('click', openOverlay);
   closeBtn.addEventListener('click', closeOverlay);
   overlay.addEventListener('click', function(e){ if (e.target === overlay) closeOverlay(); });
