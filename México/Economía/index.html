@@ -115,6 +115,7 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
   position:relative;
   overflow:hidden;
   background:#fff;
+  touch-action:pinch-zoom;
 }
 .frame-viewport iframe{
   position:absolute;
@@ -122,6 +123,7 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
   left:0;
   border:none;
   transform-origin:0 0;
+  touch-action:pinch-zoom;
 }
 .frame-fallback{
   flex:1;
@@ -261,7 +263,12 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
   var frame = document.getElementById('analysisFrame');
   var closeBtn = document.getElementById('frameClose');
   var frameLoaded = false;
-  var modalPushed = false;
+
+  // Meta viewport: se relaja para permitir pellizco (pinch-zoom) SOLO mientras
+  // el overlay está abierto; al cerrar se restaura para no afectar las slides.
+  var viewportMeta = document.querySelector('meta[name="viewport"]');
+  var viewportDefault = viewportMeta.getAttribute('content');
+  var viewportZoomable = 'width=device-width, initial-scale=1';
 
   function sizeIframeAsDesktop(){
     var rect = viewport.getBoundingClientRect();
@@ -288,10 +295,12 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:
     if (!frameLoaded) { frame.src = ANALYSIS_URL; frameLoaded = true; }
     sizeIframeAsDesktop();
     document.body.style.overflow = 'hidden';
+    viewportMeta.setAttribute('content', viewportZoomable); // habilita pellizco (pinch-to-zoom)
   }
   function closeOverlay(){
     overlay.classList.remove('open');
     document.body.style.overflow = '';
+    viewportMeta.setAttribute('content', viewportDefault); // restaura el diseño original de las slides
   }
   bar.addEventListener('click', openOverlay);
   closeBtn.addEventListener('click', closeOverlay);
