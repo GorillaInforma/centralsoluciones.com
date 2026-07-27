@@ -7,38 +7,16 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Geist:wght@400;500;700&family=Geist+Mono:wght@500;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-snap-type:y mandatory;background:#18181b;width:100%;overflow-x:hidden;scroll-padding-top:48px;scroll-padding-bottom:48px}
-body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:100%;overflow-x:hidden;background:#18181b}
-
-/* FRANJA PERSISTENTE */
-#cta-banner{
-  position:fixed;left:0;right:0;height:48px;z-index:9999;
-  background:rgba(15,15,16,0.92);backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(255,255,255,.1);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.12em;
-  transition:all .4s cubic-bezier(.16,1,.3,1);
-}
-#cta-banner.top{top:0;bottom:auto}
-#cta-banner.bottom{top:auto;bottom:0;border-bottom:none;border-top:1px solid rgba(255,255,255,.1)}
-#cta-banner a{
-  background:#DC2626;color:#fff;text-decoration:none;
-  padding:8px 18px;border-radius:999px;font-weight:700;
-  display:inline-flex;align-items:center;gap:8px;
-  text-transform:uppercase;
-}
-#canvas{width:1280px;margin:0 auto;transform-origin:top left}
+html{scroll-snap-type:y mandatory;background:#18181b;width:100%;overflow-x:hidden}
+body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:1280px;margin:0;overflow-x:hidden}
 .font-display{font-family:'Syne',sans-serif;font-weight:800}
-.page{
-  width:1280px;min-width:1280px;height:800px;
-  scroll-snap-align:start;scroll-snap-stop:always;
-  display:flex;flex-direction:column;justify-content:center;
-  padding:90px 90px;position:relative;overflow:hidden;
-}
-.eyebrow{font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em}
+.page{width:1280px;min-width:1280px;height:800px;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;justify-content:center;padding:0 90px;position:relative;overflow:hidden}
 .num{
   font-family:'Syne',sans-serif;font-weight:800;line-height:0.86;letter-spacing:-0.03em;
-  white-space:normal;word-break:keep-all;overflow-wrap:normal;max-width:100%;
+  white-space:normal; /* permite que "1 SEMANA" sea 2 líneas */
+  word-break:keep-all;
+  overflow-wrap:normal; /* FIX: que no parta letras */
+  max-width:100%;
 }
 .body{font-family:'Geist Mono',monospace;font-size:20px;line-height:1.5;max-width:760px}
 .foot{font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.15em;opacity:0.5;position:absolute;bottom:48px;left:90px}
@@ -46,133 +24,139 @@ body{font-family:'Geist',ui-sans-serif,system-ui,sans-serif;width:100%;overflow-
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(10px)}}
 .font-display span{white-space:normal;word-break:keep-all;max-width:100%;box-sizing:border-box}
 
-/* MODAL ANALISIS */
-#analysis-modal{display:none;position:fixed;inset:0;z-index:10000;background:#0a0a0a}
-#analysis-modal header{height:48px;background:#18181b;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-family:'Geist Mono',monospace;font-size:13px;border-bottom:1px solid rgba(255,255,255,.1)}
-#analysis-modal iframe{width:100%;height:calc(100% - 48px);border:none;background:#fff}
-#close-modal{background:#DC2626;color:#fff;border:none;padding:6px 14px;border-radius:999px;font-weight:700;cursor:pointer}
+/* Franja fija de análisis completo */
+.analysis-bar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  z-index:9999;
+  background:#DC2626;
+  color:#fff;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:14px 0;
+  font-family:'Geist Mono',monospace;
+  font-weight:700;
+  font-size:14px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  box-shadow:0 2px 14px rgba(0,0,0,.35);
+  transition:background 0.15s ease;
+}
+.analysis-bar:hover{background:#B91C1C}
+.analysis-bar .arrow{font-size:16px;transition:transform 0.15s ease}
+.analysis-bar.at-bottom{
+  top:auto;
+  bottom:0;
+  box-shadow:0 -2px 14px rgba(0,0,0,.35);
+}
+.analysis-bar.at-bottom .arrow{transform:rotate(180deg)}
 </style>
 </head>
 <body>
 
-<div id="cta-banner" class="top">
-  <a id="cta-link" href="https://centralsoluciones.com/México/Economía/DependenciaEEUU">ver Análisis completo →</a>
-</div>
+  <a class="analysis-bar" id="analysisBar" href="https://centralsoluciones.com/M%C3%A9xico/Econom%C3%ADa/DependenciaEEUU" target="_blank" rel="noopener noreferrer">
+    <span>Ver Análisis completo</span>
+    <span class="arrow">↗</span>
+  </a>
 
-<div id="canvas">
   <section class="page" style="background:#18181b;color:#fff">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px">
       <span style="height:9px;width:9px;border-radius:50%;background:#DC2626"></span>
-      <span class="eyebrow" style="color:rgba(255,255,255,.5)">SIGUE DEL FLUJO · MISMOS DATOS · ENIGH / EIA / USDA / SENER</span>
+      <span class="eyebrow" style="color:rgba(255,255,255,.5);font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">SIGUE DEL FLUJO · MISMOS DATOS · ENIGH / EIA / USDA / SENER</span>
     </div>
     <h1 class="font-display" style="font-size:96px">MÉXICO:<br><span style="background:#DC2626;padding:2px 16px;border-radius:12px;display:inline-block;transform:rotate(-1deg)">ESTO ES PREOCUPANTE</span></h1>
     <p class="body" style="color:rgba(255,255,255,.5);margin-top:34px">Seis datos. Ni opiniones ni exageraciones — la misma base del flujo, sin caso individual, llevada a su tamaño real. Uno por pantalla.</p>
-    <div class="bounce" style="position:absolute;bottom:48px;left:90px;display:flex;align-items:center;gap:8px"><span class="eyebrow" style="color:rgba(255,255,255,.4)">DESLIZA</span><span style="color:rgba(255,255,255,.4)">↓</span></div>
+    <div class="bounce" style="position:absolute;bottom:48px;left:90px;display:flex;align-items:center;gap:8px"><span style="color:rgba(255,255,255,.4);font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">DESLIZA</span><span style="color:rgba(255,255,255,.4)">↓</span></div>
   </section>
 
   <section class="page" style="background:#fff;color:#18181b">
-    <span class="eyebrow" style="color:#DC2626;margin-bottom:20px">TU CALENDARIO · 24% DEL GASTO MENSUAL</span>
+    <span style="color:#DC2626;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">TU CALENDARIO · 24% DEL GASTO MENSUAL</span>
     <div class="num" style="font-size:160px;color:#DC2626">1 SEMANA</div>
     <p class="body" style="color:#3f3f46;margin-top:28px">Trabajas cuatro semanas al mes. <b style="color:#18181b">Una semana completa</b>, cada mes, nunca fue tuya: ya tenía dueño en Estados Unidos antes de que la cobraras.</p>
     <div class="foot" style="color:#a1a1aa">24% DE $16,855 = ~7.2 DÍAS DE 30 · ENIGH 2024→26</div>
   </section>
 
   <section class="page" style="background:#18181b;color:#fff">
-    <span class="eyebrow" style="color:#16A34A;margin-bottom:20px">GAS NATURAL · TU LUZ, TU ESTUFA</span>
+    <span style="color:#16A34A;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">GAS NATURAL · TU LUZ, TU ESTUFA</span>
     <div class="num" style="font-size:220px;color:#16A34A">76%</div>
     <p class="body" style="color:rgba(255,255,255,.7);margin-top:28px">El gas que hierve tu café llega por un ducto que cruza la frontera. Con él se genera <b style="color:#fff">60% de la luz</b> de todo el país. Cierran la llave en Texas y México se queda a oscuras en horas, no en meses.</p>
     <div class="foot" style="color:rgba(255,255,255,.4)">EIA / SENER · 6,638 MMPCD RÉCORD 2025</div>
   </section>
 
   <section class="page" style="background:#fff;color:#18181b">
-    <span class="eyebrow" style="color:#2563EB;margin-bottom:20px">MAÍZ · LA TORTILLA QUE TE COMISTE HOY</span>
+    <span style="color:#2563EB;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">MAÍZ · LA TORTILLA QUE TE COMISTE HOY</span>
     <div class="num" style="font-size:160px;color:#2563EB">1 DE 2</div>
     <p class="body" style="color:#3f3f46;margin-top:28px">De cada dos tortillas que muerdes, el maíz de una nunca pisó suelo mexicano. El país que <b style="color:#18181b">le dio el maíz al mundo</b> hoy le compra la mitad del suyo a Iowa.</p>
     <div class="foot" style="color:#a1a1aa">USDA · 52% DEL CONSUMO NACIONAL · 27M TON 2026</div>
   </section>
 
   <section class="page" style="background:#18181b;color:#fff">
-    <span class="eyebrow" style="color:#D97706;margin-bottom:20px">FERTILIZANTE · ANTES DE QUE HAYA MAÍZ</span>
+    <span style="color:#D97706;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">FERTILIZANTE · ANTES DE QUE HAYA MAÍZ</span>
     <div class="num" style="font-size:220px;color:#D97706">72%</div>
     <p class="body" style="color:rgba(255,255,255,.7);margin-top:28px">Antes de defender "el maíz mexicano", alguien tuvo que sembrarlo. 72 de cada 100 costales de fertilizante que usa el campo cruzaron una frontera primero. Sin ese insumo, no hay cosecha que proteger.</p>
     <div class="foot" style="color:rgba(255,255,255,.4)">HOY MÁS CHINA/RUSIA (56%) QUE EEUU</div>
   </section>
 
   <section class="page" style="background:#fff;color:#18181b">
-    <span class="eyebrow" style="color:#DC2626;margin-bottom:20px">GASOLINA · TU TANQUE LLENO</span>
+    <span style="color:#DC2626;margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">GASOLINA · TU TANQUE LLENO</span>
     <div class="num" style="font-size:160px;color:#DC2626">~45%</div>
     <p class="body" style="color:#3f3f46;margin-top:28px">Casi la mitad de la gasolina que cargas se refinó fuera de México, con petróleo que salió de aquí. Exportamos el crudo barato. Importamos la gasolina cara. Ese es el negocio.</p>
     <div class="foot" style="color:#a1a1aa">PEMEX/SENER 2026 · A LA BAJA DESDE 52% (2025)</div>
   </section>
 
   <section class="page" style="background:#DC2626;color:#fff">
-    <span class="eyebrow" style="color:rgba(255,255,255,.7);margin-bottom:20px">AL AÑO · POR HOGAR PROMEDIO</span>
+    <span style="color:rgba(255,255,255,.7);margin-bottom:20px;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.2em">AL AÑO · POR HOGAR PROMEDIO</span>
     <div class="num" style="font-size:150px">$48,972</div>
     <p class="body" style="color:rgba(255,255,255,.9);margin-top:28px">Eso sale de tu casa hacia Estados Unidos cada año. Es <b style="color:#fff">casi 3 meses completos</b> de todo lo que gasta tu familia — comida, luz, renta, internet — regalados, antes de comprar un solo producto con bandera gringa.</p>
     <div class="foot" style="color:rgba(255,255,255,.6)">$4,081/MES × 12 = $48,972 · ÷ $16,855/MES = 2.9 MESES</div>
   </section>
-</div>
-
-<div id="analysis-modal">
-  <header><span>Análisis completo — Central Soluciones</span><button id="close-modal">Cerrar ✕</button></header>
-  <iframe id="analysis-iframe" src=""></iframe>
-</div>
 
 <script>
-(function(){
-  const canvas = document.getElementById('canvas');
-  const banner = document.getElementById('cta-banner');
-  const lastPage = document.querySelector('.page:last-child');
-  const ctaLink = document.getElementById('cta-link');
-  const modal = document.getElementById('analysis-modal');
-  const iframe = document.getElementById('analysis-iframe');
-  const closeBtn = document.getElementById('close-modal');
-
+(function () {
   function applyZoomAndFit(){
-    try{
+    try {
       var w = document.documentElement.clientWidth;
       var z = w / 1280;
-      canvas.style.zoom = (z>0 && z<1 && isFinite(z)) ? z : 1;
-    }catch(e){}
+      if (z > 0 && isFinite(z)) document.body.style.zoom = z;
+    } catch(e){}
+
+    // FIX CORTE: si el texto mide más que el lienzo interior (1280 - 180), lo encogemos
     var avail = 1280 - 180;
     document.querySelectorAll('.num, h1.font-display span').forEach(function(el){
-      if(!el.dataset.orig) el.dataset.orig = el.style.fontSize || window.getComputedStyle(el).fontSize;
-      var size = parseFloat(el.dataset.orig);
-      el.style.fontSize = size + 'px';
-      var i=0;
-      while(el.scrollWidth > avail && i<25){
-        size *= 0.95;
-        el.style.fontSize = size + 'px';
-        i++;
+      el.style.fontSize = el.style.fontSize || window.getComputedStyle(el).fontSize;
+      // resetea para medir bien
+      var currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+      el.style.fontSize = currentSize + 'px';
+      var iter = 0;
+      while(el.scrollWidth > avail && iter < 20){
+        currentSize = currentSize * 0.95;
+        el.style.fontSize = currentSize + 'px';
+        iter++;
       }
     });
   }
-
-  function updateBanner(){
-    var rect = lastPage.getBoundingClientRect();
-    if(rect.top < window.innerHeight*0.6){
-      banner.classList.remove('top'); banner.classList.add('bottom');
-    }else{
-      banner.classList.remove('bottom'); banner.classList.add('top');
-    }
-  }
-
-  ctaLink.addEventListener('click', function(e){
-    e.preventDefault();
-    iframe.src = this.href;
-    modal.style.display = 'block';
-    document.documentElement.style.overflow='hidden';
-  });
-  closeBtn.addEventListener('click', function(){
-    modal.style.display='none'; iframe.src=''; document.documentElement.style.overflow='';
-  });
-  modal.addEventListener('click', function(e){ if(e.target===modal) closeBtn.click(); });
-
   applyZoomAndFit();
-  updateBanner();
-  window.addEventListener('resize', function(){ applyZoomAndFit(); updateBanner(); });
-  window.addEventListener('orientationchange', function(){ applyZoomAndFit(); updateBanner(); });
-  window.addEventListener('scroll', updateBanner, {passive:true});
+  window.addEventListener('resize', applyZoomAndFit);
+  window.addEventListener('orientationchange', applyZoomAndFit);
+
+  // Franja fija: arriba por defecto, abajo cuando se llega al final, y de regreso arriba al subir
+  var bar = document.getElementById('analysisBar');
+  function updateBarPosition(){
+    var scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    var viewportH = window.innerHeight;
+    var fullH = document.documentElement.scrollHeight;
+    var nearBottom = (scrollY + viewportH) >= (fullH - 40);
+    bar.classList.toggle('at-bottom', nearBottom);
+  }
+  updateBarPosition();
+  window.addEventListener('scroll', updateBarPosition, { passive: true });
+  window.addEventListener('resize', updateBarPosition);
+  window.addEventListener('orientationchange', updateBarPosition);
 })();
 </script>
 </body>
