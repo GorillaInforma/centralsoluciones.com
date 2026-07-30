@@ -1,0 +1,36 @@
+CARPETA "mascotas" COMPLETA — LISTA PARA GITHUB
+=================================================
+
+Estructura final (así debe quedar en tu repo, dentro de la carpeta "mascotas"):
+
+mascotas/
+  index.html          <- tu app (214 KB, antes 3.9 MB)
+  manifest.json        <- corregido: start_url ahora apunta a "index.html"
+  sw.js                 <- corregido: antes se llamaba "sw-1.js", renombrado
+                           a "sw.js" porque así lo busca index.html
+  icon-192.png
+  icon-512.png
+  img/
+    img-01.webp ... img-19.webp (imágenes extraídas del código)
+
+QUÉ CAMBIÉ Y POR QUÉ
+---------------------
+1. manifest.json: el "start_url" decía "./gobierno-mascotas-final-notif.html"
+   (el nombre viejo del archivo). Lo actualicé a "./index.html".
+
+2. sw-1.js -> renombrado a sw.js: tu index.html registra el service worker
+   con navigator.serviceWorker.register("sw.js"), así que el archivo debe
+   llamarse exactamente "sw.js" (no "sw-1.js") para que lo encuentre.
+   También actualicé la línea que abría "gobierno-mascotas-final-notif.html"
+   al hacer clic en una notificación, para que ahora abra "index.html".
+
+3. icon-192.png / icon-512.png: sin cambios, solo incluidos en la carpeta.
+
+CÓMO SUBIRLO
+------------
+1. Ve a tu repo "centralsoluciones.com" en GitHub, carpeta "mascotas".
+2. Sube/reemplaza TODOS estos archivos ahí, manteniendo la estructura
+   (la carpeta img/ va DENTRO de mascotas/, al mismo nivel que index.html).
+3. Borra el "sw-1.js" viejo si quedó subido (ya no se usa, el nombre correcto es sw.js).
+4. Commit y push. Vercel redeploya solo.
+5. Abre centralsoluciones.com/mascotas
