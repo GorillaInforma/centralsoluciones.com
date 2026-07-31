@@ -5,3 +5,10 @@
   ]
 }
 
+{
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/comentario", "destination": "/comentario/index.html" },
+    { "source": "/comentario/firma", "destination": "/comentario/firma/index.html" }
+  ]
+}
