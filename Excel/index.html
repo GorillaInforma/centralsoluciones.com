@@ -1,1 +1,977 @@
-m
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro — Capturador de Datos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --ink:#16232E;
+    --ink-soft:#3A4A57;
+    --paper:#ECEAE2;
+    --paper-raised:#F7F5EE;
+    --line:#D3CFC0;
+    --brass:#9C7A3C;
+    --brass-dark:#7C5F2B;
+    --seal:#7A2E2E;
+    --ok:#4B6A50;
+    --ok-bg:#E4E9E1;
+    --danger-bg:#EFE0DD;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif; font-weight:600; margin:0;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  button{font-family:inherit; cursor:pointer;}
+  input, select{font-family:'IBM Plex Sans', sans-serif;}
+
+  /* ---------- Login ---------- */
+  #loginScreen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .ledger-card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-left:6px solid var(--ink);
+    box-shadow:0 1px 0 var(--line), 0 12px 30px -18px rgba(22,35,46,0.4);
+    max-width:380px;
+    width:100%;
+    padding:36px 32px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--brass-dark);
+    margin-bottom:6px;
+  }
+  .ledger-card h1{font-size:26px; margin-bottom:22px; line-height:1.15;}
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:.04em;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    padding:10px 11px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:14px;
+    color:var(--ink);
+    border-radius:2px;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:2px solid var(--brass);
+    outline-offset:1px;
+    border-color:var(--brass);
+  }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:11px 18px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper-raised);
+    font-size:13px; font-weight:500;
+    letter-spacing:.02em;
+    border-radius:2px;
+    transition:transform .08s ease, background .15s ease;
+  }
+  .btn:hover{background:var(--brass-dark); border-color:var(--brass-dark);}
+  .btn:active{transform:translateY(1px);}
+  .btn-outline{
+    background:transparent; color:var(--ink); border:1px solid var(--ink);
+  }
+  .btn-outline:hover{background:var(--ink); color:var(--paper-raised);}
+  .btn-block{width:100%;}
+  .btn-danger{background:var(--seal); border-color:var(--seal); color:#fff;}
+  .btn-danger:hover{background:#5f2222; border-color:#5f2222;}
+  .msg{font-size:13px; margin-top:14px; padding:10px 12px; border-radius:2px;}
+  .msg-error{background:var(--danger-bg); color:var(--seal);}
+  .msg-ok{background:var(--ok-bg); color:var(--ok);}
+
+  /* ---------- App shell ---------- */
+  #app{display:none; min-height:100vh; grid-template-columns:230px 1fr;}
+  #app.active{display:grid;}
+  .sidebar{
+    background:var(--ink);
+    color:var(--paper);
+    padding:26px 18px;
+    display:flex; flex-direction:column;
+    position:relative;
+  }
+  .sidebar::after{
+    content:"";
+    position:absolute; top:0; right:0; bottom:0; width:6px;
+    background:repeating-linear-gradient(180deg, var(--brass) 0 8px, transparent 8px 16px);
+    opacity:.55;
+  }
+  .brand{margin-bottom:30px;}
+  .brand .eyebrow{color:var(--brass);}
+  .brand h1{font-size:20px; color:var(--paper-raised);}
+  .who{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:#B9C2C9;
+    margin-top:6px;
+  }
+  .who b{color:var(--paper-raised);}
+  nav{display:flex; flex-direction:column; gap:2px; margin-top:10px;}
+  nav button{
+    text-align:left;
+    background:transparent; border:none; color:#C9D0D5;
+    padding:10px 10px;
+    font-size:13.5px;
+    border-radius:2px;
+    border-left:2px solid transparent;
+  }
+  nav button:hover{background:rgba(255,255,255,0.06); color:#fff;}
+  nav button.active{
+    background:rgba(156,122,60,0.18);
+    color:#fff;
+    border-left:2px solid var(--brass);
+    font-weight:500;
+  }
+  .sidebar-footer{margin-top:auto; padding-top:16px;}
+  .sync-dot{
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--ok); margin-right:6px;
+  }
+  .sync-dot.busy{background:var(--brass); animation:pulse 1s infinite;}
+  .sync-dot.err{background:var(--seal);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .sync-label{font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:#9AA6AD;}
+
+  main{padding:36px 44px; max-width:1000px;}
+  .page-head{margin-bottom:26px;}
+  .page-head h2{font-size:24px;}
+  .page-head p{color:var(--ink-soft); font-size:13.5px; margin-top:6px; max-width:60ch;}
+
+  .panel{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    padding:24px;
+    margin-bottom:22px;
+  }
+  .panel h3{font-size:14px; text-transform:uppercase; letter-spacing:.06em; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); margin-bottom:16px;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th{
+    text-align:left; font-family:'IBM Plex Mono', monospace; font-size:11px;
+    text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft);
+    padding:8px 10px; border-bottom:2px solid var(--ink);
+  }
+  td{padding:10px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(156,122,60,0.05);}
+  .badge{
+    display:inline-block; padding:2px 8px; border-radius:20px;
+    font-size:11px; font-family:'IBM Plex Mono', monospace;
+  }
+  .badge-admin{background:#DDD3B8; color:var(--brass-dark);}
+  .badge-editor{background:var(--ok-bg); color:var(--ok);}
+  .badge-lector{background:#DDE1E6; color:var(--ink-soft);}
+  .badge-active{background:var(--ok-bg); color:var(--ok);}
+  .badge-inactive{background:var(--danger-bg); color:var(--seal);}
+
+  .row-actions button{
+    font-size:12px; padding:5px 10px; margin-right:6px;
+  }
+
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:640px){.form-grid{grid-template-columns:1fr;} main{padding:24px 18px;} #app{grid-template-columns:1fr;} .sidebar{padding:18px;}}
+
+  .field-row{display:flex; gap:8px; margin-bottom:8px; align-items:center;}
+  .field-row input, .field-row select{flex:1;}
+  .remove-x{
+    background:none; border:none; color:var(--seal); font-size:16px; padding:2px 8px;
+  }
+
+  /* Historial / sello */
+  .history-item{
+    display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);
+  }
+  .history-item:last-child{border-bottom:none;}
+  .seal{
+    flex:0 0 auto;
+    width:56px; height:56px; border-radius:50%;
+    border:2px solid var(--seal);
+    display:flex; align-items:center; justify-content:center;
+    transform:rotate(-8deg);
+    color:var(--seal);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px; text-align:center; line-height:1.2;
+    padding:4px;
+  }
+  .history-body{flex:1;}
+  .history-date{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--brass-dark); margin-bottom:2px;}
+  .history-msg{font-size:14px; color:var(--ink);}
+  .history-author{font-size:12px; color:var(--ink-soft); margin-top:3px;}
+
+  .last-update-banner{
+    background:var(--ink); color:var(--paper-raised);
+    padding:18px 22px; margin-bottom:22px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  .last-update-banner .eyebrow{color:var(--brass); margin-bottom:4px;}
+  .last-update-banner .value{font-family:'IBM Plex Mono', monospace; font-size:15px;}
+
+  .empty-state{
+    text-align:center; padding:40px 20px; color:var(--ink-soft); font-size:13.5px;
+  }
+
+  .config-warning{
+    background:var(--danger-bg); color:var(--seal); border:1px solid var(--seal);
+    padding:16px 20px; margin:24px; font-size:13.5px; line-height:1.6;
+  }
+  .config-warning code{background:rgba(0,0,0,0.06); padding:1px 5px; border-radius:2px;}
+
+  .toast{
+    position:fixed; bottom:24px; right:24px; background:var(--ink); color:#fff;
+    padding:12px 18px; border-radius:2px; font-size:13px; box-shadow:0 8px 20px -8px rgba(0,0,0,.5);
+    z-index:999; max-width:320px;
+  }
+  .toast.err{background:var(--seal);}
+
+  .lock-note{
+    display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace; margin-top:6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== CONFIG WARNING (se oculta si CONFIG está completo) ============== -->
+<div id="configWarning" class="config-warning" style="display:none;">
+  ⚠ Falta configurar el acceso a GitHub. Abre este archivo HTML en un editor de texto,
+  busca el objeto <code>CONFIG</code> cerca del final del archivo y completa
+  <code>GITHUB_TOKEN</code>, <code>OWNER</code>, <code>REPO</code> y <code>FILE_PATH</code>
+  con los datos de tu repositorio. Recuerda: el token queda visible en este archivo,
+  así que compártelo solo con tu equipo de confianza y usa un token con permisos
+  limitados solo a este repositorio.
+</div>
+
+<!-- ============== LOGIN ============== -->
+<div id="loginScreen">
+  <div class="ledger-card">
+    <div class="eyebrow">Registro · Libro de Captura</div>
+    <h1>Iniciar sesión</h1>
+    <div class="field">
+      <label for="loginUser">Usuario</label>
+      <input id="loginUser" type="text" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="loginPass">Contraseña</label>
+      <input id="loginPass" type="password" autocomplete="current-password">
+    </div>
+    <button class="btn btn-block" onclick="handleLogin()">Entrar</button>
+    <div id="loginMsg"></div>
+    <div class="lock-note">🔒 Este libro solo permite agregar y corregir registros — nunca borrarlos.</div>
+  </div>
+</div>
+
+<!-- ============== APP ============== -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="eyebrow">Libro de Captura</div>
+      <h1>Registro</h1>
+      <div class="who">Sesión: <b id="whoUser">—</b><br><span id="whoRole"></span></div>
+    </div>
+    <nav id="navMenu"></nav>
+    <div class="sidebar-footer">
+      <div><span id="syncDot" class="sync-dot"></span><span class="sync-label" id="syncLabel">sincronizado</span></div>
+      <button class="btn btn-outline btn-block" style="margin-top:14px; font-size:12px;" onclick="handleLogout()">Cerrar sesión</button>
+    </div>
+  </aside>
+  <main id="mainContent"></main>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIGURACIÓN — completa esto antes de subir el archivo / abrirlo
+   ========================================================================= */
+const CONFIG = {
+  GITHUB_TOKEN: "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",
+  OWNER: "GorillaInforma",
+  REPO: "centralsoluciones.com",
+  FILE_PATH: "Excel/datos.xlsx",
+  BRANCH: "main"
+};
+
+/* =========================================================================
+   ESTADO EN MEMORIA
+   ========================================================================= */
+let workbook = null;      // libro de Excel (SheetJS)
+let currentFileSha = null; // sha del archivo en GitHub (null = aún no existe)
+let currentUser = null;    // {usuario, rol}
+let editingRowId = null;   // id de fila en edición (null = alta nueva)
+
+const SHEETS = { USUARIOS: "Usuarios", CATEGORIAS: "Categorias", DATOS: "Datos" };
+
+/* =========================================================================
+   ARRANQUE
+   ========================================================================= */
+window.addEventListener("DOMContentLoaded", async () => {
+  if (!CONFIG.GITHUB_TOKEN || CONFIG.GITHUB_TOKEN.startsWith("PEGA_AQUI")) {
+    document.getElementById("configWarning").style.display = "block";
+    return;
+  }
+  await loadWorkbookFromGitHub();
+});
+
+/* =========================================================================
+   GITHUB API
+   ========================================================================= */
+const API_BASE = `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/contents/${encodeURIComponent(CONFIG.FILE_PATH)}`;
+function ghHeaders(){
+  return {
+    "Authorization": `Bearer ${CONFIG.GITHUB_TOKEN}`,
+    "Accept": "application/vnd.github+json"
+  };
+}
+
+async function loadWorkbookFromGitHub(){
+  setSync("busy", "cargando…");
+  try{
+    const res = await fetch(`${API_BASE}?ref=${CONFIG.BRANCH}`, { headers: ghHeaders() });
+    if (res.status === 404){
+      // el archivo aún no existe -> libro nuevo con admin por defecto
+      workbook = buildFreshWorkbook();
+      currentFileSha = null;
+      setSync("ok", "aún no existe en GitHub (se creará al guardar)");
+      return;
+    }
+    if (!res.ok) throw new Error(`GitHub respondió ${res.status}`);
+    const data = await res.json();
+    currentFileSha = data.sha;
+    const bytes = base64ToArrayBuffer(data.content);
+    workbook = XLSX.read(bytes, { type: "array" });
+    ensureSheets();
+    setSync("ok", "sincronizado");
+  }catch(err){
+    console.error(err);
+    setSync("err", "error de conexión — reintenta");
+    toast("No se pudo conectar con GitHub: " + err.message, true);
+  }
+}
+
+async function saveWorkbookToGitHub(commitMessage){
+  setSync("busy", "guardando…");
+  try{
+    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const base64Content = arrayBufferToBase64(wbout);
+    const body = {
+      message: commitMessage,
+      content: base64Content,
+      branch: CONFIG.BRANCH
+    };
+    if (currentFileSha) body.sha = currentFileSha;
+
+    const res = await fetch(API_BASE, {
+      method: "PUT",
+      headers: { ...ghHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok){
+      const errBody = await res.json().catch(()=>({}));
+      throw new Error(errBody.message || `GitHub respondió ${res.status}`);
+    }
+    const data = await res.json();
+    currentFileSha = data.content.sha;
+    setSync("ok", "sincronizado");
+    return true;
+  }catch(err){
+    console.error(err);
+    setSync("err", "no se guardó — revisa conexión/token");
+    toast("No se pudo guardar en GitHub: " + err.message, true);
+    return false;
+  }
+}
+
+async function fetchHistory(){
+  const res = await fetch(
+    `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/commits?path=${encodeURIComponent(CONFIG.FILE_PATH)}&sha=${CONFIG.BRANCH}&per_page=50`,
+    { headers: ghHeaders() }
+  );
+  if (!res.ok) throw new Error(`GitHub respondió ${res.status}`);
+  return res.json();
+}
+
+/* =========================================================================
+   LIBRO NUEVO / HOJAS
+   ========================================================================= */
+function buildFreshWorkbook(){
+  const wb = XLSX.utils.book_new();
+  const usuarios = XLSX.utils.json_to_sheet([
+    { usuario: "admin", password: "admin123", rol: "Admin", activo: "Si" }
+  ]);
+  const categorias = XLSX.utils.json_to_sheet([
+    { nombre: "Gastos", campos_json: JSON.stringify([
+        {nombre:"Fecha", tipo:"fecha"},
+        {nombre:"Monto", tipo:"numero"},
+        {nombre:"Descripcion", tipo:"texto"}
+      ]) },
+    { nombre: "Inventario", campos_json: JSON.stringify([
+        {nombre:"Producto", tipo:"texto"},
+        {nombre:"Cantidad", tipo:"numero"},
+        {nombre:"Ubicacion", tipo:"texto"}
+      ]) }
+  ]);
+  const datos = XLSX.utils.json_to_sheet([], { header: ["id","categoria","campos_json","capturado_por","fecha_captura","editado_por","fecha_edicion"] });
+  XLSX.utils.book_append_sheet(wb, usuarios, SHEETS.USUARIOS);
+  XLSX.utils.book_append_sheet(wb, categorias, SHEETS.CATEGORIAS);
+  XLSX.utils.book_append_sheet(wb, datos, SHEETS.DATOS);
+  return wb;
+}
+
+function ensureSheets(){
+  Object.values(SHEETS).forEach(name => {
+    if (!workbook.Sheets[name]){
+      workbook.SheetNames.push(name);
+      workbook.Sheets[name] = XLSX.utils.json_to_sheet([]);
+    }
+  });
+}
+
+function readSheet(name){
+  return XLSX.utils.sheet_to_json(workbook.Sheets[name], { defval: "" });
+}
+function writeSheet(name, rows){
+  workbook.Sheets[name] = XLSX.utils.json_to_sheet(rows, {
+    header: rows.length ? Object.keys(rows[0]) : undefined
+  });
+}
+
+/* =========================================================================
+   AUTENTICACIÓN
+   ========================================================================= */
+function handleLogin(){
+  const usuario = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value;
+  const msgEl = document.getElementById("loginMsg");
+  msgEl.innerHTML = "";
+
+  if (!workbook){
+    msgEl.innerHTML = `<div class="msg msg-error">Aún cargando datos, intenta de nuevo en un momento.</div>`;
+    return;
+  }
+  const usuarios = readSheet(SHEETS.USUARIOS);
+  const found = usuarios.find(u => u.usuario === usuario && String(u.password) === pass);
+  if (!found){
+    msgEl.innerHTML = `<div class="msg msg-error">Usuario o contraseña incorrectos.</div>`;
+    return;
+  }
+  if (String(found.activo).toLowerCase() !== "si"){
+    msgEl.innerHTML = `<div class="msg msg-error">Este usuario está desactivado. Contacta al administrador.</div>`;
+    return;
+  }
+  currentUser = { usuario: found.usuario, rol: found.rol };
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").classList.add("active");
+  document.getElementById("whoUser").textContent = currentUser.usuario;
+  document.getElementById("whoRole").innerHTML = roleBadge(currentUser.rol);
+  buildNav();
+  navigateTo("capturar");
+}
+
+function handleLogout(){
+  currentUser = null;
+  document.getElementById("app").classList.remove("active");
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("loginUser").value = "";
+  document.getElementById("loginPass").value = "";
+  document.getElementById("loginMsg").innerHTML = "";
+}
+
+function roleBadge(rol){
+  const cls = rol === "Admin" ? "badge-admin" : rol === "Editor" ? "badge-editor" : "badge-lector";
+  return `<span class="badge ${cls}">${rol}</span>`;
+}
+
+/* =========================================================================
+   NAVEGACIÓN
+   ========================================================================= */
+function buildNav(){
+  const items = [
+    { id: "capturar", label: "Capturar", roles: ["Admin","Editor"] },
+    { id: "datos", label: "Ver datos", roles: ["Admin","Editor","Solo-lectura"] },
+    { id: "historial", label: "Historial", roles: ["Admin","Editor","Solo-lectura"] },
+    { id: "categorias", label: "Categorías", roles: ["Admin"] },
+    { id: "usuarios", label: "Usuarios", roles: ["Admin"] }
+  ];
+  const nav = document.getElementById("navMenu");
+  nav.innerHTML = "";
+  items.filter(i => i.roles.includes(currentUser.rol)).forEach(i => {
+    const btn = document.createElement("button");
+    btn.textContent = i.label;
+    btn.id = "nav-" + i.id;
+    btn.onclick = () => navigateTo(i.id);
+    nav.appendChild(btn);
+  });
+}
+
+function setActiveNav(id){
+  document.querySelectorAll("#navMenu button").forEach(b => b.classList.remove("active"));
+  const el = document.getElementById("nav-" + id);
+  if (el) el.classList.add("active");
+}
+
+function navigateTo(id){
+  setActiveNav(id);
+  editingRowId = null;
+  if (id === "capturar") renderCapturar();
+  if (id === "datos") renderDatos();
+  if (id === "historial") renderHistorial();
+  if (id === "categorias") renderCategorias();
+  if (id === "usuarios") renderUsuarios();
+}
+
+/* =========================================================================
+   VISTA: CAPTURAR
+   ========================================================================= */
+function renderCapturar(){
+  const categorias = readSheet(SHEETS.CATEGORIAS);
+  const main = document.getElementById("mainContent");
+  main.innerHTML = `
+    <div class="page-head">
+      <h2>Capturar registro</h2>
+      <p>Elige una categoría y completa los campos. Cada envío queda guardado de forma permanente en el historial.</p>
+    </div>
+    <div class="panel">
+      <h3>Categoría</h3>
+      <select id="catSelect" class="field" style="width:100%; padding:10px; border:1px solid var(--line);">
+        <option value="">— selecciona —</option>
+        ${categorias.map(c => `<option value="${escapeAttr(c.nombre)}">${escapeHtml(c.nombre)}</option>`).join("")}
+      </select>
+    </div>
+    <div id="dynamicFormWrap"></div>
+  `;
+  document.getElementById("catSelect").addEventListener("change", (e) => {
+    renderDynamicForm(e.target.value, categorias);
+  });
+}
+
+function renderDynamicForm(catName, categorias){
+  const wrap = document.getElementById("dynamicFormWrap");
+  if (!catName){ wrap.innerHTML = ""; return; }
+  const cat = categorias.find(c => c.nombre === catName);
+  let campos = [];
+  try{ campos = JSON.parse(cat.campos_json || "[]"); }catch(e){ campos = []; }
+
+  wrap.innerHTML = `
+    <div class="panel">
+      <h3>Datos — ${escapeHtml(catName)}</h3>
+      <div class="form-grid" id="dynFields">
+        ${campos.map(f => renderFieldInput(f)).join("")}
+      </div>
+      <button class="btn" style="margin-top:18px;" onclick="submitCaptura('${escapeAttr(catName)}')">Guardar registro</button>
+      <div id="capturaMsg"></div>
+    </div>
+  `;
+}
+
+function renderFieldInput(f, value=""){
+  const id = "f_" + f.nombre.replace(/\s+/g,"_");
+  if (f.tipo === "numero"){
+    return `<div class="field"><label>${escapeHtml(f.nombre)}</label><input type="number" step="any" id="${id}" value="${escapeAttr(value)}"></div>`;
+  }
+  if (f.tipo === "fecha"){
+    return `<div class="field"><label>${escapeHtml(f.nombre)}</label><input type="date" id="${id}" value="${escapeAttr(value)}"></div>`;
+  }
+  return `<div class="field"><label>${escapeHtml(f.nombre)}</label><input type="text" id="${id}" value="${escapeAttr(value)}"></div>`;
+}
+
+async function submitCaptura(catName){
+  const categorias = readSheet(SHEETS.CATEGORIAS);
+  const cat = categorias.find(c => c.nombre === catName);
+  let campos = [];
+  try{ campos = JSON.parse(cat.campos_json || "[]"); }catch(e){ campos = []; }
+
+  const valores = {};
+  for (const f of campos){
+    const id = "f_" + f.nombre.replace(/\s+/g,"_");
+    valores[f.nombre] = document.getElementById(id).value;
+  }
+
+  const datos = readSheet(SHEETS.DATOS);
+  const now = new Date().toISOString();
+
+  if (editingRowId){
+    const idx = datos.findIndex(d => d.id === editingRowId);
+    if (idx >= 0){
+      datos[idx].campos_json = JSON.stringify(valores);
+      datos[idx].editado_por = currentUser.usuario;
+      datos[idx].fecha_edicion = now;
+    }
+    writeSheet(SHEETS.DATOS, datos);
+    const ok = await saveWorkbookToGitHub(`Editado registro ${editingRowId} (${catName}) por ${currentUser.usuario}`);
+    if (ok){ toast("Registro actualizado."); editingRowId = null; navigateTo("datos"); }
+    return;
+  }
+
+  const newRow = {
+    id: "R" + Date.now().toString(36).toUpperCase(),
+    categoria: catName,
+    campos_json: JSON.stringify(valores),
+    capturado_por: currentUser.usuario,
+    fecha_captura: now,
+    editado_por: "",
+    fecha_edicion: ""
+  };
+  datos.push(newRow);
+  writeSheet(SHEETS.DATOS, datos);
+  const ok = await saveWorkbookToGitHub(`Agregado registro ${newRow.id} (${catName}) por ${currentUser.usuario}`);
+  if (ok){
+    document.getElementById("capturaMsg").innerHTML = `<div class="msg msg-ok">Registro guardado y sincronizado con GitHub.</div>`;
+    document.getElementById("catSelect").value = "";
+    document.getElementById("dynamicFormWrap").innerHTML = "";
+  }
+}
+
+/* =========================================================================
+   VISTA: VER DATOS
+   ========================================================================= */
+function renderDatos(){
+  const datos = readSheet(SHEETS.DATOS);
+  const main = document.getElementById("mainContent");
+  const canEdit = ["Admin","Editor"].includes(currentUser.rol);
+
+  main.innerHTML = `
+    <div class="page-head">
+      <h2>Registros capturados</h2>
+      <p>Ningún registro puede eliminarse desde esta app — solo agregarse o corregirse. Cada corrección queda en el historial.</p>
+    </div>
+    <div class="panel">
+      ${datos.length === 0 ? `<div class="empty-state">Todavía no hay registros.</div>` : `
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Categoría</th><th>Datos</th><th>Capturó</th><th>Fecha</th><th>Última edición</th>${canEdit ? "<th></th>" : ""}
+        </tr></thead>
+        <tbody>
+          ${datos.map(d => `
+            <tr>
+              <td class="mono">${escapeHtml(d.id)}</td>
+              <td>${escapeHtml(d.categoria)}</td>
+              <td>${formatCampos(d.campos_json)}</td>
+              <td>${escapeHtml(d.capturado_por)}</td>
+              <td class="mono">${formatDate(d.fecha_captura)}</td>
+              <td class="mono">${d.fecha_edicion ? formatDate(d.fecha_edicion) + " · " + escapeHtml(d.editado_por) : "—"}</td>
+              ${canEdit ? `<td class="row-actions"><button class="btn btn-outline" onclick="editRow('${escapeAttr(d.id)}')">Editar</button></td>` : ""}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>`}
+    </div>
+  `;
+}
+
+function formatCampos(json){
+  try{
+    const obj = JSON.parse(json || "{}");
+    return Object.entries(obj).map(([k,v]) => `<b>${escapeHtml(k)}:</b> ${escapeHtml(String(v))}`).join(" · ");
+  }catch(e){ return ""; }
+}
+
+function editRow(id){
+  const datos = readSheet(SHEETS.DATOS);
+  const row = datos.find(d => d.id === id);
+  if (!row) return;
+  const categorias = readSheet(SHEETS.CATEGORIAS);
+  editingRowId = id;
+  navigateTo("capturar");
+  setTimeout(() => {
+    document.getElementById("catSelect").value = row.categoria;
+    renderDynamicForm(row.categoria, categorias);
+    let valores = {};
+    try{ valores = JSON.parse(row.campos_json || "{}"); }catch(e){}
+    const cat = categorias.find(c => c.nombre === row.categoria);
+    let campos = [];
+    try{ campos = JSON.parse(cat.campos_json || "[]"); }catch(e){}
+    campos.forEach(f => {
+      const elId = "f_" + f.nombre.replace(/\s+/g,"_");
+      const el = document.getElementById(elId);
+      if (el) el.value = valores[f.nombre] || "";
+    });
+    document.getElementById("dynamicFormWrap").querySelector("h3").textContent = "Editando " + id + " — " + row.categoria;
+  }, 30);
+}
+
+/* =========================================================================
+   VISTA: HISTORIAL
+   ========================================================================= */
+async function renderHistorial(){
+  const main = document.getElementById("mainContent");
+  main.innerHTML = `
+    <div class="page-head">
+      <h2>Historial de cambios</h2>
+      <p>Cada guardado queda registrado como una entrada permanente — esto es lo que GitHub guarda para el archivo.</p>
+    </div>
+    <div class="empty-state">Cargando historial…</div>
+  `;
+  try{
+    const commits = await fetchHistory();
+    if (!commits.length){
+      main.innerHTML = `
+        <div class="page-head"><h2>Historial de cambios</h2></div>
+        <div class="empty-state">Aún no hay historial — el archivo no se ha guardado en GitHub todavía.</div>`;
+      return;
+    }
+    const last = commits[0];
+    main.innerHTML = `
+      <div class="page-head">
+        <h2>Historial de cambios</h2>
+        <p>Cada guardado queda registrado como una entrada permanente en GitHub.</p>
+      </div>
+      <div class="last-update-banner">
+        <div>
+          <div class="eyebrow">Última actualización</div>
+          <div class="value">${formatDate(last.commit.author.date)}</div>
+        </div>
+        <div>
+          <div class="eyebrow">Por</div>
+          <div class="value">${escapeHtml(last.commit.author.name)}</div>
+        </div>
+      </div>
+      <div class="panel">
+        ${commits.map(c => `
+          <div class="history-item">
+            <div class="seal">SELLADO<br>${formatDateShort(c.commit.author.date)}</div>
+            <div class="history-body">
+              <div class="history-date">${formatDate(c.commit.author.date)}</div>
+              <div class="history-msg">${escapeHtml(c.commit.message)}</div>
+              <div class="history-author">por ${escapeHtml(c.commit.author.name)} · <span class="mono">${c.sha.slice(0,7)}</span></div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }catch(err){
+    main.innerHTML = `<div class="page-head"><h2>Historial de cambios</h2></div><div class="msg msg-error">No se pudo cargar el historial: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+/* =========================================================================
+   VISTA: CATEGORÍAS (Admin)
+   ========================================================================= */
+let tempFieldRows = [];
+
+function renderCategorias(){
+  const categorias = readSheet(SHEETS.CATEGORIAS);
+  tempFieldRows = [{ nombre:"", tipo:"texto" }];
+  const main = document.getElementById("mainContent");
+  main.innerHTML = `
+    <div class="page-head">
+      <h2>Categorías de registro</h2>
+      <p>Define qué tipos de datos se pueden capturar y qué campos tiene cada uno.</p>
+    </div>
+    <div class="panel">
+      <h3>Categorías existentes</h3>
+      ${categorias.length === 0 ? `<div class="empty-state">Aún no hay categorías.</div>` : `
+      <table>
+        <thead><tr><th>Nombre</th><th>Campos</th></tr></thead>
+        <tbody>
+          ${categorias.map(c => {
+            let campos = [];
+            try{ campos = JSON.parse(c.campos_json || "[]"); }catch(e){}
+            return `<tr><td>${escapeHtml(c.nombre)}</td><td>${campos.map(f => `${escapeHtml(f.nombre)} <span class="mono" style="color:var(--ink-soft)">(${f.tipo})</span>`).join(", ")}</td></tr>`;
+          }).join("")}
+        </tbody>
+      </table>`}
+    </div>
+    <div class="panel">
+      <h3>Nueva categoría / actualizar existente</h3>
+      <div class="field">
+        <label>Nombre de la categoría</label>
+        <input id="newCatName" type="text" placeholder="Ej. Mantenimiento">
+      </div>
+      <label style="display:block; font-size:12px; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); margin-bottom:8px;">Campos</label>
+      <div id="fieldRowsWrap"></div>
+      <button class="btn btn-outline" onclick="addFieldRow()" style="margin-top:6px; font-size:12px;">+ Agregar campo</button>
+      <br><button class="btn" style="margin-top:18px;" onclick="submitCategoria()">Guardar categoría</button>
+      <div id="catMsg"></div>
+    </div>
+  `;
+  renderFieldRows();
+}
+
+function renderFieldRows(){
+  const wrap = document.getElementById("fieldRowsWrap");
+  wrap.innerHTML = tempFieldRows.map((f, i) => `
+    <div class="field-row">
+      <input type="text" placeholder="Nombre del campo" value="${escapeAttr(f.nombre)}" onchange="tempFieldRows[${i}].nombre=this.value">
+      <select onchange="tempFieldRows[${i}].tipo=this.value">
+        <option value="texto" ${f.tipo==="texto"?"selected":""}>Texto</option>
+        <option value="numero" ${f.tipo==="numero"?"selected":""}>Número</option>
+        <option value="fecha" ${f.tipo==="fecha"?"selected":""}>Fecha</option>
+      </select>
+      <button class="remove-x" onclick="removeFieldRow(${i})">✕</button>
+    </div>
+  `).join("");
+}
+function addFieldRow(){ tempFieldRows.push({nombre:"", tipo:"texto"}); renderFieldRows(); }
+function removeFieldRow(i){ tempFieldRows.splice(i,1); renderFieldRows(); }
+
+async function submitCategoria(){
+  const nombre = document.getElementById("newCatName").value.trim();
+  const msgEl = document.getElementById("catMsg");
+  if (!nombre){ msgEl.innerHTML = `<div class="msg msg-error">Escribe un nombre de categoría.</div>`; return; }
+  const campos = tempFieldRows.filter(f => f.nombre.trim() !== "");
+  if (!campos.length){ msgEl.innerHTML = `<div class="msg msg-error">Agrega al menos un campo.</div>`; return; }
+
+  const categorias = readSheet(SHEETS.CATEGORIAS);
+  const idx = categorias.findIndex(c => c.nombre === nombre);
+  if (idx >= 0){
+    categorias[idx].campos_json = JSON.stringify(campos);
+  } else {
+    categorias.push({ nombre, campos_json: JSON.stringify(campos) });
+  }
+  writeSheet(SHEETS.CATEGORIAS, categorias);
+  const ok = await saveWorkbookToGitHub(`Categoría "${nombre}" creada/actualizada por ${currentUser.usuario}`);
+  if (ok){ toast("Categoría guardada."); renderCategorias(); }
+}
+
+/* =========================================================================
+   VISTA: USUARIOS (Admin)
+   ========================================================================= */
+function renderUsuarios(){
+  const usuarios = readSheet(SHEETS.USUARIOS);
+  const main = document.getElementById("mainContent");
+  main.innerHTML = `
+    <div class="page-head">
+      <h2>Usuarios y permisos</h2>
+      <p>Los usuarios no se eliminan, solo se desactivan — así el historial de quién capturó qué se mantiene íntegro.</p>
+    </div>
+    <div class="panel">
+      <h3>Usuarios</h3>
+      <table>
+        <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          ${usuarios.map((u,i) => `
+            <tr>
+              <td>${escapeHtml(u.usuario)}</td>
+              <td>${roleBadge(u.rol)}</td>
+              <td><span class="badge ${String(u.activo).toLowerCase()==='si' ? 'badge-active':'badge-inactive'}">${String(u.activo).toLowerCase()==='si' ? 'Activo':'Inactivo'}</span></td>
+              <td class="row-actions"><button class="btn btn-outline" onclick="toggleUsuario(${i})">${String(u.activo).toLowerCase()==='si' ? 'Desactivar':'Reactivar'}</button></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>Agregar usuario</h3>
+      <div class="form-grid">
+        <div class="field"><label>Usuario</label><input id="nuUser" type="text"></div>
+        <div class="field"><label>Contraseña</label><input id="nuPass" type="text"></div>
+        <div class="field"><label>Rol</label>
+          <select id="nuRol">
+            <option value="Admin">Admin</option>
+            <option value="Editor" selected>Editor</option>
+            <option value="Solo-lectura">Solo-lectura</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" style="margin-top:14px;" onclick="submitUsuario()">Agregar usuario</button>
+      <div id="userMsg"></div>
+    </div>
+  `;
+}
+
+async function toggleUsuario(i){
+  const usuarios = readSheet(SHEETS.USUARIOS);
+  const u = usuarios[i];
+  u.activo = String(u.activo).toLowerCase() === "si" ? "No" : "Si";
+  writeSheet(SHEETS.USUARIOS, usuarios);
+  const ok = await saveWorkbookToGitHub(`Usuario "${u.usuario}" ${u.activo === "Si" ? "reactivado" : "desactivado"} por ${currentUser.usuario}`);
+  if (ok){ toast("Estado actualizado."); renderUsuarios(); }
+}
+
+async function submitUsuario(){
+  const usuario = document.getElementById("nuUser").value.trim();
+  const password = document.getElementById("nuPass").value;
+  const rol = document.getElementById("nuRol").value;
+  const msgEl = document.getElementById("userMsg");
+  if (!usuario || !password){ msgEl.innerHTML = `<div class="msg msg-error">Completa usuario y contraseña.</div>`; return; }
+
+  const usuarios = readSheet(SHEETS.USUARIOS);
+  if (usuarios.some(u => u.usuario === usuario)){
+    msgEl.innerHTML = `<div class="msg msg-error">Ese usuario ya existe.</div>`;
+    return;
+  }
+  usuarios.push({ usuario, password, rol, activo: "Si" });
+  writeSheet(SHEETS.USUARIOS, usuarios);
+  const ok = await saveWorkbookToGitHub(`Usuario "${usuario}" agregado por ${currentUser.usuario} (rol ${rol})`);
+  if (ok){ toast("Usuario agregado."); renderUsuarios(); }
+}
+
+/* =========================================================================
+   UTILIDADES
+   ========================================================================= */
+function setSync(state, label){
+  const dot = document.getElementById("syncDot");
+  const lbl = document.getElementById("syncLabel");
+  if (!dot) return;
+  dot.className = "sync-dot" + (state === "busy" ? " busy" : state === "err" ? " err" : "");
+  lbl.textContent = label;
+}
+
+function toast(msg, isErr=false){
+  const t = document.createElement("div");
+  t.className = "toast" + (isErr ? " err" : "");
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4200);
+}
+
+function formatDate(iso){
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d)) return String(iso);
+  return d.toLocaleString('es-MX', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function formatDateShort(iso){
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'2-digit' });
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
+
+function base64ToArrayBuffer(base64){
+  const clean = base64.replace(/\n/g, "");
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for (let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+function arrayBufferToBase64(buffer){
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const chunk = 0x8000;
+  for (let i=0; i<bytes.length; i+=chunk){
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
+  }
+  return btoa(binary);
+}
+</script>
+</body>
+</html>
