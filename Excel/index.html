@@ -106,6 +106,12 @@
   .msg{font-size:13px; margin-top:14px; padding:10px 12px; border-radius:2px;}
   .msg-error{background:var(--danger-bg); color:var(--seal);}
   .msg-ok{background:var(--ok-bg); color:var(--ok);}
+  .link-toggle{
+    display:block; width:100%; text-align:center; margin-top:16px;
+    background:none; border:none; color:var(--ink-soft); font-size:12.5px;
+    text-decoration:underline; padding:4px;
+  }
+  .link-toggle:hover{color:var(--ink);}
 
   /* ---------- App shell ---------- */
   #app{display:none; min-height:100vh; grid-template-columns:230px 1fr;}
@@ -249,40 +255,49 @@
   }
   .toast.err{background:var(--seal);}
 
-  .lock-note{
-    display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft);
-    font-family:'IBM Plex Mono', monospace; margin-top:6px;
-  }
 </style>
 </head>
 <body>
 
 <!-- ============== CONFIG WARNING (se oculta si CONFIG está completo) ============== -->
 <div id="configWarning" class="config-warning" style="display:none;">
-  ⚠ Falta configurar el acceso a GitHub. Abre este archivo HTML en un editor de texto,
-  busca el objeto <code>CONFIG</code> cerca del final del archivo y completa
-  <code>GITHUB_TOKEN</code>, <code>OWNER</code>, <code>REPO</code> y <code>FILE_PATH</code>
-  con los datos de tu repositorio. Recuerda: el token queda visible en este archivo,
-  así que compártelo solo con tu equipo de confianza y usa un token con permisos
-  limitados solo a este repositorio.
+  Configuración pendiente. Complete <code>GITHUB_TOKEN</code>, <code>OWNER</code>, <code>REPO</code>
+  y <code>FILE_PATH</code> en el objeto <code>CONFIG</code> del archivo.
 </div>
 
 <!-- ============== LOGIN ============== -->
 <div id="loginScreen">
   <div class="ledger-card">
-    <div class="eyebrow">Registro · Libro de Captura</div>
-    <h1>Iniciar sesión</h1>
-    <div class="field">
-      <label for="loginUser">Usuario</label>
-      <input id="loginUser" type="text" autocomplete="username">
+    <div class="eyebrow" id="authEyebrow">Acceso</div>
+    <h1 id="authTitle">Iniciar sesión</h1>
+
+    <div id="loginForm">
+      <div class="field">
+        <label for="loginUser">Usuario</label>
+        <input id="loginUser" type="text" autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="loginPass">Contraseña</label>
+        <input id="loginPass" type="password" autocomplete="current-password">
+      </div>
+      <button class="btn btn-block" onclick="handleLogin()">Entrar</button>
+      <div id="loginMsg"></div>
+      <button class="link-toggle" onclick="showAuthView('register')">Crear una cuenta</button>
     </div>
-    <div class="field">
-      <label for="loginPass">Contraseña</label>
-      <input id="loginPass" type="password" autocomplete="current-password">
+
+    <div id="registerForm" style="display:none;">
+      <div class="field">
+        <label for="regUser">Usuario</label>
+        <input id="regUser" type="text" autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="regPass">Contraseña</label>
+        <input id="regPass" type="password" autocomplete="new-password">
+      </div>
+      <button class="btn btn-block" onclick="handleRegister()">Crear cuenta</button>
+      <div id="registerMsg"></div>
+      <button class="link-toggle" onclick="showAuthView('login')">Ya tengo una cuenta</button>
     </div>
-    <button class="btn btn-block" onclick="handleLogin()">Entrar</button>
-    <div id="loginMsg"></div>
-    <div class="lock-note">🔒 Este libro solo permite agregar y corregir registros — nunca borrarlos.</div>
   </div>
 </div>
 
@@ -491,6 +506,43 @@ function handleLogin(){
   navigateTo("capturar");
 }
 
+function showAuthView(view){
+  document.getElementById("loginForm").style.display = view === "login" ? "block" : "none";
+  document.getElementById("registerForm").style.display = view === "register" ? "block" : "none";
+  document.getElementById("authTitle").textContent = view === "login" ? "Iniciar sesión" : "Crear cuenta";
+  document.getElementById("loginMsg").innerHTML = "";
+  document.getElementById("registerMsg").innerHTML = "";
+}
+
+async function handleRegister(){
+  const usuario = document.getElementById("regUser").value.trim();
+  const password = document.getElementById("regPass").value;
+  const msgEl = document.getElementById("registerMsg");
+  msgEl.innerHTML = "";
+
+  if (!workbook){
+    msgEl.innerHTML = `<div class="msg msg-error">Cargando datos, intente de nuevo en un momento.</div>`;
+    return;
+  }
+  if (!usuario || !password){
+    msgEl.innerHTML = `<div class="msg msg-error">Complete usuario y contraseña.</div>`;
+    return;
+  }
+  const usuarios = readSheet(SHEETS.USUARIOS);
+  if (usuarios.some(u => u.usuario === usuario)){
+    msgEl.innerHTML = `<div class="msg msg-error">Ese usuario ya existe.</div>`;
+    return;
+  }
+  usuarios.push({ usuario, password, rol: "Solo-lectura", activo: "No" });
+  writeSheet(SHEETS.USUARIOS, usuarios);
+  const ok = await saveWorkbookToGitHub(`Cuenta "${usuario}" registrada, pendiente de activación`);
+  if (ok){
+    msgEl.innerHTML = `<div class="msg msg-ok">Cuenta creada. Un administrador debe activarla antes de poder ingresar.</div>`;
+    document.getElementById("regUser").value = "";
+    document.getElementById("regPass").value = "";
+  }
+}
+
 function handleLogout(){
   currentUser = null;
   document.getElementById("app").classList.remove("active");
@@ -552,7 +604,6 @@ function renderCapturar(){
   main.innerHTML = `
     <div class="page-head">
       <h2>Capturar registro</h2>
-      <p>Elige una categoría y completa los campos. Cada envío queda guardado de forma permanente en el historial.</p>
     </div>
     <div class="panel">
       <h3>Categoría</h3>
@@ -656,7 +707,6 @@ function renderDatos(){
   main.innerHTML = `
     <div class="page-head">
       <h2>Registros capturados</h2>
-      <p>Ningún registro puede eliminarse desde esta app — solo agregarse o corregirse. Cada corrección queda en el historial.</p>
     </div>
     <div class="panel">
       ${datos.length === 0 ? `<div class="empty-state">Todavía no hay registros.</div>` : `
@@ -721,7 +771,6 @@ async function renderHistorial(){
   main.innerHTML = `
     <div class="page-head">
       <h2>Historial de cambios</h2>
-      <p>Cada guardado queda registrado como una entrada permanente — esto es lo que GitHub guarda para el archivo.</p>
     </div>
     <div class="empty-state">Cargando historial…</div>
   `;
@@ -737,7 +786,6 @@ async function renderHistorial(){
     main.innerHTML = `
       <div class="page-head">
         <h2>Historial de cambios</h2>
-        <p>Cada guardado queda registrado como una entrada permanente en GitHub.</p>
       </div>
       <div class="last-update-banner">
         <div>
@@ -779,7 +827,6 @@ function renderCategorias(){
   main.innerHTML = `
     <div class="page-head">
       <h2>Categorías de registro</h2>
-      <p>Define qué tipos de datos se pueden capturar y qué campos tiene cada uno.</p>
     </div>
     <div class="panel">
       <h3>Categorías existentes</h3>
@@ -856,7 +903,6 @@ function renderUsuarios(){
   main.innerHTML = `
     <div class="page-head">
       <h2>Usuarios y permisos</h2>
-      <p>Los usuarios no se eliminan, solo se desactivan — así el historial de quién capturó qué se mantiene íntegro.</p>
     </div>
     <div class="panel">
       <h3>Usuarios</h3>
