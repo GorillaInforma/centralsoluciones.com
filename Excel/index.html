@@ -34,7 +34,6 @@
   button{font-family:inherit; cursor:pointer;}
   input, select{font-family:'IBM Plex Sans', sans-serif;}
 
-  /* ---------- Login ---------- */
   #loginScreen{
     min-height:100vh;
     display:flex;
@@ -113,7 +112,6 @@
   }
   .link-toggle:hover{color:var(--ink);}
 
-  /* ---------- App shell ---------- */
   #app{display:none; min-height:100vh; grid-template-columns:230px 1fr;}
   #app.active{display:grid;}
   .sidebar{
@@ -209,7 +207,6 @@
     background:none; border:none; color:var(--seal); font-size:16px; padding:2px 8px;
   }
 
-  /* Historial / sello */
   .history-item{
     display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);
   }
@@ -259,13 +256,11 @@
 </head>
 <body>
 
-<!-- ============== CONFIG WARNING (se oculta si CONFIG está completo) ============== -->
 <div id="configWarning" class="config-warning" style="display:none;">
-  Configuración pendiente. Complete <code>GITHUB_TOKEN</code>, <code>OWNER</code>, <code>REPO</code>
-  y <code>FILE_PATH</code> en el objeto <code>CONFIG</code> del archivo.
+  No se pudo conectar con el servidor. Verifica que las variables de entorno estén configuradas en Vercel
+  (<code>GITHUB_TOKEN</code>, <code>GITHUB_OWNER</code>, <code>GITHUB_REPO</code>, <code>GITHUB_FILE_PATH</code>, <code>GITHUB_BRANCH</code>).
 </div>
 
-<!-- ============== LOGIN ============== -->
 <div id="loginScreen">
   <div class="ledger-card">
     <div class="eyebrow" id="authEyebrow">Acceso</div>
@@ -301,7 +296,6 @@
   </div>
 </div>
 
-<!-- ============== APP ============== -->
 <div id="app">
   <aside class="sidebar">
     <div class="brand">
@@ -320,60 +314,36 @@
 
 <script>
 /* =========================================================================
-   CONFIGURACIÓN — completa esto antes de subir el archivo / abrirlo
+   Ya NO hay token ni datos de GitHub aquí. Todo se llama vía /api/github,
+   que corre en el servidor de Vercel y usa Environment Variables privadas.
    ========================================================================= */
-const CONFIG = {
-  GITHUB_TOKEN: "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",
-  OWNER: "GorillaInforma",
-  REPO: "centralsoluciones.com",
-  FILE_PATH: "Excel/datos.xlsx",
-  BRANCH: "main"
-};
 
-/* =========================================================================
-   ESTADO EN MEMORIA
-   ========================================================================= */
-let workbook = null;      // libro de Excel (SheetJS)
-let currentFileSha = null; // sha del archivo en GitHub (null = aún no existe)
-let currentUser = null;    // {usuario, rol}
-let editingRowId = null;   // id de fila en edición (null = alta nueva)
+let workbook = null;
+let currentFileSha = null;
+let currentUser = null;
+let editingRowId = null;
 
 const SHEETS = { USUARIOS: "Usuarios", CATEGORIAS: "Categorias", DATOS: "Datos" };
+const PROXY = "/api/github";
 
-/* =========================================================================
-   ARRANQUE
-   ========================================================================= */
 window.addEventListener("DOMContentLoaded", async () => {
-  if (!CONFIG.GITHUB_TOKEN || CONFIG.GITHUB_TOKEN.startsWith("PEGA_AQUI")) {
-    document.getElementById("configWarning").style.display = "block";
-    return;
-  }
   await loadWorkbookFromGitHub();
 });
-
-/* =========================================================================
-   GITHUB API
-   ========================================================================= */
-const API_BASE = `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/contents/${encodeURIComponent(CONFIG.FILE_PATH)}`;
-function ghHeaders(){
-  return {
-    "Authorization": `Bearer ${CONFIG.GITHUB_TOKEN}`,
-    "Accept": "application/vnd.github+json"
-  };
-}
 
 async function loadWorkbookFromGitHub(){
   setSync("busy", "cargando…");
   try{
-    const res = await fetch(`${API_BASE}?ref=${CONFIG.BRANCH}`, { headers: ghHeaders() });
+    const res = await fetch(PROXY);
     if (res.status === 404){
-      // el archivo aún no existe -> libro nuevo con admin por defecto
       workbook = buildFreshWorkbook();
       currentFileSha = null;
       setSync("ok", "aún no existe en GitHub (se creará al guardar)");
       return;
     }
-    if (!res.ok) throw new Error(`GitHub respondió ${res.status}`);
+    if (!res.ok){
+      const errBody = await res.json().catch(()=>({}));
+      throw new Error(errBody.error || `Servidor respondió ${res.status}`);
+    }
     const data = await res.json();
     currentFileSha = data.sha;
     const bytes = base64ToArrayBuffer(data.content);
@@ -383,7 +353,8 @@ async function loadWorkbookFromGitHub(){
   }catch(err){
     console.error(err);
     setSync("err", "error de conexión — reintenta");
-    toast("No se pudo conectar con GitHub: " + err.message, true);
+    document.getElementById("configWarning").style.display = "block";
+    toast("No se pudo conectar: " + err.message, true);
   }
 }
 
@@ -392,21 +363,17 @@ async function saveWorkbookToGitHub(commitMessage){
   try{
     const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const base64Content = arrayBufferToBase64(wbout);
-    const body = {
-      message: commitMessage,
-      content: base64Content,
-      branch: CONFIG.BRANCH
-    };
+    const body = { message: commitMessage, content: base64Content };
     if (currentFileSha) body.sha = currentFileSha;
 
-    const res = await fetch(API_BASE, {
+    const res = await fetch(PROXY, {
       method: "PUT",
-      headers: { ...ghHeaders(), "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
     if (!res.ok){
       const errBody = await res.json().catch(()=>({}));
-      throw new Error(errBody.message || `GitHub respondió ${res.status}`);
+      throw new Error(errBody.error || errBody.message || `Servidor respondió ${res.status}`);
     }
     const data = await res.json();
     currentFileSha = data.content.sha;
@@ -414,24 +381,21 @@ async function saveWorkbookToGitHub(commitMessage){
     return true;
   }catch(err){
     console.error(err);
-    setSync("err", "no se guardó — revisa conexión/token");
-    toast("No se pudo guardar en GitHub: " + err.message, true);
+    setSync("err", "no se guardó — revisa conexión");
+    toast("No se pudo guardar: " + err.message, true);
     return false;
   }
 }
 
 async function fetchHistory(){
-  const res = await fetch(
-    `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/commits?path=${encodeURIComponent(CONFIG.FILE_PATH)}&sha=${CONFIG.BRANCH}&per_page=50`,
-    { headers: ghHeaders() }
-  );
-  if (!res.ok) throw new Error(`GitHub respondió ${res.status}`);
+  const res = await fetch(`${PROXY}?action=history`);
+  if (!res.ok){
+    const errBody = await res.json().catch(()=>({}));
+    throw new Error(errBody.error || `Servidor respondió ${res.status}`);
+  }
   return res.json();
 }
 
-/* =========================================================================
-   LIBRO NUEVO / HOJAS
-   ========================================================================= */
 function buildFreshWorkbook(){
   const wb = XLSX.utils.book_new();
   const usuarios = XLSX.utils.json_to_sheet([
@@ -474,9 +438,6 @@ function writeSheet(name, rows){
   });
 }
 
-/* =========================================================================
-   AUTENTICACIÓN
-   ========================================================================= */
 function handleLogin(){
   const usuario = document.getElementById("loginUser").value.trim();
   const pass = document.getElementById("loginPass").value;
@@ -557,9 +518,6 @@ function roleBadge(rol){
   return `<span class="badge ${cls}">${rol}</span>`;
 }
 
-/* =========================================================================
-   NAVEGACIÓN
-   ========================================================================= */
 function buildNav(){
   const items = [
     { id: "capturar", label: "Capturar", roles: ["Admin","Editor"] },
@@ -595,9 +553,6 @@ function navigateTo(id){
   if (id === "usuarios") renderUsuarios();
 }
 
-/* =========================================================================
-   VISTA: CAPTURAR
-   ========================================================================= */
 function renderCapturar(){
   const categorias = readSheet(SHEETS.CATEGORIAS);
   const main = document.getElementById("mainContent");
@@ -696,9 +651,6 @@ async function submitCaptura(catName){
   }
 }
 
-/* =========================================================================
-   VISTA: VER DATOS
-   ========================================================================= */
 function renderDatos(){
   const datos = readSheet(SHEETS.DATOS);
   const main = document.getElementById("mainContent");
@@ -763,9 +715,6 @@ function editRow(id){
   }, 30);
 }
 
-/* =========================================================================
-   VISTA: HISTORIAL
-   ========================================================================= */
 async function renderHistorial(){
   const main = document.getElementById("mainContent");
   main.innerHTML = `
@@ -815,9 +764,6 @@ async function renderHistorial(){
   }
 }
 
-/* =========================================================================
-   VISTA: CATEGORÍAS (Admin)
-   ========================================================================= */
 let tempFieldRows = [];
 
 function renderCategorias(){
@@ -894,9 +840,6 @@ async function submitCategoria(){
   if (ok){ toast("Categoría guardada."); renderCategorias(); }
 }
 
-/* =========================================================================
-   VISTA: USUARIOS (Admin)
-   ========================================================================= */
 function renderUsuarios(){
   const usuarios = readSheet(SHEETS.USUARIOS);
   const main = document.getElementById("mainContent");
@@ -966,9 +909,6 @@ async function submitUsuario(){
   if (ok){ toast("Usuario agregado."); renderUsuarios(); }
 }
 
-/* =========================================================================
-   UTILIDADES
-   ========================================================================= */
 function setSync(state, label){
   const dot = document.getElementById("syncDot");
   const lbl = document.getElementById("syncLabel");
