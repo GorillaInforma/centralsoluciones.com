@@ -141,6 +141,18 @@
   }
   .caja-datos-cuenta div{ margin-bottom:6px; }
   .caja-datos-cuenta strong{ color:var(--navy); }
+  .barra-progreso-track{
+    width:100%;height:8px;background:var(--border);
+    border-radius:6px;overflow:hidden;
+  }
+  .barra-progreso-relleno{
+    height:100%;width:0%;background:var(--accent);
+    border-radius:6px;transition:width 0.25s ease-out;
+  }
+  .barra-progreso-texto{
+    font-size:12.5px;color:var(--text-muted);
+    margin:8px 0 0;text-align:center;
+  }
   input.campo{
     width:100%;padding:12px 14px;
     border:1px solid var(--border);border-radius:9px;
@@ -582,6 +594,12 @@
   <div class="pantalla" id="pantalla-bienvenida">
     <h2>Mensajería</h2>
     <p id="texto-bienvenida">Preparando tu cuenta en este dispositivo…</p>
+    <div id="progreso-cuenta" style="display:none;width:100%;">
+      <div class="barra-progreso-track">
+        <div class="barra-progreso-relleno" id="barra-progreso-relleno"></div>
+      </div>
+      <p class="barra-progreso-texto" id="barra-progreso-texto">0%</p>
+    </div>
     <div id="form-login-existente" style="display:none;width:100%;">
       <div class="grupo-campo">
         <label class="etiqueta">Usuario</label>
@@ -1334,8 +1352,46 @@ function formatearNumeroUsuario(n){
   return String(n).padStart(4,"0");
 }
 
+/* ===== BARRA DE PROGRESO (creación de cuenta) ===== */
+
+let intervaloProgresoCuenta = null;
+let progresoCuentaActual = 0;
+
+function iniciarBarraProgresoCuenta(){
+  progresoCuentaActual = 0;
+  actualizarBarraProgresoCuenta(0);
+  $("progreso-cuenta").style.display = "block";
+  if(intervaloProgresoCuenta) clearInterval(intervaloProgresoCuenta);
+  intervaloProgresoCuenta = setInterval(() => {
+    // Avanza rápido al inicio y se frena cerca del 90%, donde espera
+    // a que la creación real termine (no sabemos cuánto tardará Firestore).
+    const restante = 90 - progresoCuentaActual;
+    const incremento = Math.max(restante * 0.08, 0.5);
+    progresoCuentaActual = Math.min(progresoCuentaActual + incremento, 90);
+    actualizarBarraProgresoCuenta(progresoCuentaActual);
+  }, 150);
+}
+
+function actualizarBarraProgresoCuenta(valor){
+  const entero = Math.round(valor);
+  $("barra-progreso-relleno").style.width = entero + "%";
+  $("barra-progreso-texto").textContent = entero + "%";
+}
+
+function completarBarraProgresoCuenta(){
+  if(intervaloProgresoCuenta){ clearInterval(intervaloProgresoCuenta); intervaloProgresoCuenta = null; }
+  actualizarBarraProgresoCuenta(100);
+  setTimeout(() => { $("progreso-cuenta").style.display = "none"; }, 250);
+}
+
+function detenerBarraProgresoCuenta(){
+  if(intervaloProgresoCuenta){ clearInterval(intervaloProgresoCuenta); intervaloProgresoCuenta = null; }
+  $("progreso-cuenta").style.display = "none";
+}
+
 async function crearCuentaNueva(){
   try{
+    iniciarBarraProgresoCuenta();
     const password = idAleatorio(9);
     const configRef = db.collection("config").doc("app");
     const resultado = await conTiempoLimite(db.runTransaction(async tx => {
@@ -1366,12 +1422,9 @@ async function crearCuentaNueva(){
     }
     cuenta = {username, password, rol};
     await guardarIdentidadDispositivo(username);
-    $("texto-bienvenida").textContent = "Tu cuenta quedó lista en este dispositivo.";
-    $("bienvenida-usuario").textContent = username;
-    $("bienvenida-clave").textContent = password;
-    $("datos-cuenta-nueva").style.display = "block";
-    $("btn-continuar").addEventListener("click", entrarAplicacion);
-  }catch(e){ mostrarErrorArranque(e); }
+    completarBarraProgresoCuenta();
+    entrarAplicacion();
+  }catch(e){ detenerBarraProgresoCuenta(); mostrarErrorArranque(e); }
 }
 
 /* ===== ENTRADA A LA APP ===== */
