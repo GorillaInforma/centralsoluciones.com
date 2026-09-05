@@ -269,6 +269,13 @@
     color:var(--text-muted);font-size:12.5px;font-style:italic;
     max-width:90%;text-align:center;
   }
+  .icono-swipe-responder{
+    position:absolute;left:-34px;top:50%;
+    transform:translateY(-50%);
+    opacity:0;color:var(--accent);
+    pointer-events:none;
+    transition:opacity 0.1s;
+  }
   .pie-burbuja{ display:flex;align-items:center;justify-content:flex-end;gap:3px;margin-top:3px; }
   .pie-burbuja .hora{ font-size:10.5px;opacity:0.75; }
   .palomitas{ display:flex;align-items:center;opacity:0.75; }
@@ -300,11 +307,14 @@
   .barra-grabacion{
     display:none;
     align-items:center;gap:10px;
-    padding:8px 16px;
-    background:#FFF3F3;
-    border-top:1px solid #FFCDD2;
+    padding:12px 16px;
+    background:#fff;
+    border-top:1px solid var(--border);
     flex-shrink:0;
-    font-size:13px;color:var(--danger);font-weight:500;
+    font-size:13px;color:var(--text);font-weight:500;
+    touch-action:none;
+    position:relative;
+    overflow:hidden;
   }
   .barra-grabacion.activa{ display:flex; }
   .punto-grabacion{
@@ -314,7 +324,47 @@
     flex-shrink:0;
   }
   @keyframes parpadeo{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-  .tiempo-grabacion{ font-variant-numeric:tabular-nums; }
+  .tiempo-grabacion{ font-variant-numeric:tabular-nums;color:var(--danger);font-weight:600;flex-shrink:0; }
+  .pista-cancelar{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:4px;
+    color:var(--text-muted);font-size:13px;
+    cursor:pointer;
+  }
+  .pista-cancelar svg{ width:16px;height:16px;flex-shrink:0; }
+
+  /* Revisión de nota de audio antes de enviar */
+  .barra-revision-audio{
+    display:none;
+    align-items:center;gap:8px;
+    padding:10px 12px;
+    border-top:1px solid var(--border);
+    background:#fff;flex-shrink:0;
+  }
+  .barra-revision-audio.activa{ display:flex; }
+  .btn-circular.peligro{ background:#FFEBEE;color:var(--danger); }
+  .pildora-revision-audio{
+    flex:1;min-width:0;display:flex;align-items:center;gap:10px;
+    background:var(--bg);border-radius:20px;padding:7px 14px;
+  }
+  .btn-play-revision{
+    background:none;border:none;color:var(--navy);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    width:22px;height:22px;padding:0;flex-shrink:0;
+  }
+  .btn-play-revision svg{ width:20px;height:20px; }
+  .onda-revision-audio{
+    flex:1;min-width:0;display:flex;align-items:center;gap:2.5px;overflow:hidden;height:18px;
+  }
+  .onda-revision-audio span{
+    width:2.5px;border-radius:2px;background:var(--accent);opacity:0.55;flex-shrink:0;
+  }
+  .onda-revision-audio span:nth-child(4n+1){ height:60%; }
+  .onda-revision-audio span:nth-child(4n+2){ height:100%; }
+  .onda-revision-audio span:nth-child(4n+3){ height:35%; }
+  .onda-revision-audio span:nth-child(4n){ height:75%; }
+  .tiempo-revision-audio{
+    font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;flex-shrink:0;
+  }
 
   .barra-entrada{
     display:flex;align-items:center;gap:8px;
@@ -393,6 +443,44 @@
     transform:translateY(20px);transition:transform 0.25s;
   }
   #modal-clave.visible .modal-caja{ transform:translateY(0); }
+
+  /* Modal de confirmación genérico */
+  #modal-confirmar{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.55);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:1000;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.2s;
+  }
+  #modal-confirmar.visible{ opacity:1;pointer-events:auto; }
+  #modal-confirmar .modal-caja{
+    background:#fff;border-radius:20px 20px 0 0;
+    padding:28px 24px 36px;
+    width:100%;max-width:480px;
+    display:flex;flex-direction:column;gap:14px;
+    transform:translateY(20px);transition:transform 0.25s;
+  }
+  #modal-confirmar.visible .modal-caja{ transform:translateY(0); }
+
+  /* Modal de aviso genérico */
+  #modal-aviso{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.55);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:1000;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.2s;
+  }
+  #modal-aviso.visible{ opacity:1;pointer-events:auto; }
+  #modal-aviso .modal-caja{
+    background:#fff;border-radius:20px 20px 0 0;
+    padding:28px 24px 36px;
+    width:100%;max-width:480px;
+    display:flex;flex-direction:column;gap:14px;
+    transform:translateY(20px);transition:transform 0.25s;
+  }
+  #modal-aviso.visible .modal-caja{ transform:translateY(0); }
 
   /* Modal acciones de mensaje */
   #modal-acciones{
@@ -549,12 +637,34 @@
     <!-- Indicador de grabación -->
     <div class="barra-grabacion" id="barra-grabacion">
       <div class="punto-grabacion"></div>
-      <span>Grabando…</span>
       <span class="tiempo-grabacion" id="tiempo-grabacion">0:00</span>
-      <span style="flex:1;"></span>
-      <button class="btn-secundario" id="btn-cancelar-grabacion" style="padding:4px 8px;font-size:13px;">Cancelar</button>
+      <div class="pista-cancelar" id="pista-cancelar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        <span>Desliza para cancelar</span>
+      </div>
     </div>
-    <div class="barra-entrada">
+    <!-- Revisión de nota de audio antes de enviar -->
+    <div class="barra-revision-audio" id="barra-revision-audio">
+      <button class="btn-circular peligro" id="btn-descartar-audio" aria-label="Descartar nota de audio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
+      <div class="pildora-revision-audio" id="pildora-revision-audio">
+        <button class="btn-play-revision" id="btn-play-revision-audio" aria-label="Reproducir">
+          <svg id="icono-play-revision" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="onda-revision-audio">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <span class="tiempo-revision-audio" id="tiempo-revision-audio">0:00</span>
+      </div>
+      <button class="btn-circular enviar" id="btn-enviar-revision-audio" aria-label="Enviar nota de audio">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg>
+      </button>
+    </div>
+    <audio id="audio-revision" style="display:none;"></audio>
+    <div class="barra-entrada" id="barra-entrada">
       <button class="btn-circular" id="btn-adjuntar" aria-label="Adjuntar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.5l-8.5 8.5a4.5 4.5 0 01-6.4-6.4l9-9a3 3 0 014.2 4.2l-9 9a1.5 1.5 0 01-2.1-2.1l8-8"/></svg>
       </button>
@@ -669,6 +779,25 @@
   </div>
 </div>
 
+<!-- MODAL DE CONFIRMACIÓN GENÉRICO (reemplaza a confirm() del navegador) -->
+<div id="modal-confirmar">
+  <div class="modal-caja">
+    <p class="modal-titulo" id="confirmar-titulo">Confirmar</p>
+    <p class="modal-desc" id="confirmar-mensaje"></p>
+    <button class="btn-primario" id="btn-confirmar-aceptar" style="background:var(--danger);">Aceptar</button>
+    <button class="btn-secundario" id="btn-confirmar-cancelar" style="align-self:center;">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL DE AVISO GENÉRICO (reemplaza a alert() del navegador) -->
+<div id="modal-aviso">
+  <div class="modal-caja">
+    <p class="modal-titulo" id="aviso-titulo">Aviso</p>
+    <p class="modal-desc" id="aviso-mensaje"></p>
+    <button class="btn-primario" id="btn-aviso-cerrar">Entendido</button>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -690,7 +819,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
 
-const LIMITE_ADJUNTO = 700000;
+const LIMITE_ADJUNTO = 900000;
 
 let cuenta = null;
 let conversacionAbiertaId = null;
@@ -707,6 +836,8 @@ let trozosAudio = [];
 let timerGrabacion = null;
 let segundosGrabacion = 0;
 let streamGrabacion = null;
+let audioBlobPendiente = null;
+let audioUrlPendiente = null;
 let timerEscribiendo = null;
 let respuestaActiva = null;
 let edicionActiva = null;
@@ -1460,13 +1591,16 @@ function cerrarBarraContexto(){
 }
 $("btn-cerrar-contexto").addEventListener("click", cerrarBarraContexto);
 
-function iniciarRespuesta(){
-  if(!mensajeContextual) return;
-  const m = mensajeContextual.data;
+function responderAMensaje(mid, m){
   edicionActiva = null;
-  respuestaActiva = {id:mensajeContextual.id, autor:m.autor, tipo:m.tipo, contenido:previsualizarContenido(m)};
+  respuestaActiva = {id:mid, autor:m.autor, tipo:m.tipo, contenido:previsualizarContenido(m)};
   mostrarBarraContexto("Respondiendo a "+(m.autor===cuenta.username ? "ti mismo" : m.autor), respuestaActiva.contenido);
   $("campo-texto").focus();
+}
+
+function iniciarRespuesta(){
+  if(!mensajeContextual) return;
+  responderAMensaje(mensajeContextual.id, mensajeContextual.data);
 }
 
 function iniciarEdicion(){
@@ -1480,25 +1614,132 @@ function iniciarEdicion(){
   $("campo-texto").focus();
 }
 
-function eliminarMensajeActivo(){
+/* ===== CONFIRMACIÓN PERSONALIZADA (reemplaza confirm() del navegador) ===== */
+
+function confirmarAccion(mensaje, titulo="Confirmar"){
+  return new Promise(resolve => {
+    $("confirmar-titulo").textContent = titulo;
+    $("confirmar-mensaje").textContent = mensaje;
+    const modal = $("modal-confirmar");
+    const btnAceptar = $("btn-confirmar-aceptar");
+    const btnCancelar = $("btn-confirmar-cancelar");
+    const limpiar = () => {
+      modal.classList.remove("visible");
+      btnAceptar.removeEventListener("click", onAceptar);
+      btnCancelar.removeEventListener("click", onCancelar);
+      modal.removeEventListener("click", onFondo);
+    };
+    const onAceptar = () => { limpiar(); resolve(true); };
+    const onCancelar = () => { limpiar(); resolve(false); };
+    const onFondo = e => { if(e.target===modal){ limpiar(); resolve(false); } };
+    btnAceptar.addEventListener("click", onAceptar);
+    btnCancelar.addEventListener("click", onCancelar);
+    modal.addEventListener("click", onFondo);
+    modal.classList.add("visible");
+  });
+}
+
+async function eliminarMensajeActivo(){
   if(!mensajeContextual || !conversacionAbiertaId) return;
-  if(!confirm("¿Eliminar este mensaje?")) return;
+  const ok = await confirmarAccion("¿Eliminar este mensaje?", "Eliminar mensaje");
+  if(!ok) return;
   const mid = mensajeContextual.id;
   db.collection("conversaciones").doc(conversacionAbiertaId).collection("mensajes").doc(mid)
     .update({eliminado:true, contenido:"", nombreArchivo:null}).catch(()=>{});
 }
 
+function avisar(mensaje, titulo="Aviso"){
+  return new Promise(resolve => {
+    $("aviso-titulo").textContent = titulo;
+    $("aviso-mensaje").textContent = mensaje;
+    const modal = $("modal-aviso");
+    const btnCerrar = $("btn-aviso-cerrar");
+    const limpiar = () => {
+      modal.classList.remove("visible");
+      btnCerrar.removeEventListener("click", onCerrar);
+      modal.removeEventListener("click", onFondo);
+    };
+    const onCerrar = () => { limpiar(); resolve(); };
+    const onFondo = e => { if(e.target===modal){ limpiar(); resolve(); } };
+    btnCerrar.addEventListener("click", onCerrar);
+    modal.addEventListener("click", onFondo);
+    modal.classList.add("visible");
+  });
+}
+
 function habilitarInteraccionBurbuja(div, mid, m){
+  const UMBRAL_SWIPE = 56;
+  const MAX_SWIPE = 72;
   let temporizador = null;
+  let iconoSwipe = null;
+  let inicioX = 0, inicioY = 0;
+  let deslizando = false;
+  let punteroActivo = null;
+
   const iniciar = () => { temporizador = setTimeout(() => abrirMenuAcciones(mid, m), 450); };
   const cancelar = () => clearTimeout(temporizador);
+
+  const obtenerIconoSwipe = () => {
+    if(!iconoSwipe){
+      iconoSwipe = document.createElement("span");
+      iconoSwipe.className = "icono-swipe-responder";
+      iconoSwipe.innerHTML = SVG_RESPONDER;
+      div.appendChild(iconoSwipe);
+    }
+    return iconoSwipe;
+  };
+
+  const restablecer = () => {
+    div.style.transition = "transform 0.2s";
+    div.style.transform = "";
+    if(iconoSwipe) iconoSwipe.style.opacity = "0";
+    setTimeout(() => { div.style.transition = ""; }, 200);
+  };
+
   div.style.userSelect = "none";
   div.style.webkitUserSelect = "none";
-  div.addEventListener("pointerdown", iniciar);
-  div.addEventListener("pointerup", cancelar);
-  div.addEventListener("pointerleave", cancelar);
-  div.addEventListener("pointercancel", cancelar);
-  div.addEventListener("contextmenu", e => { e.preventDefault(); cancelar(); abrirMenuAcciones(mid, m); });
+
+  div.addEventListener("pointerdown", e => {
+    if(m.tipo==="sistema" || m.eliminado) return;
+    iniciar();
+    inicioX = e.clientX; inicioY = e.clientY;
+    deslizando = false;
+    punteroActivo = e.pointerId;
+  });
+
+  div.addEventListener("pointermove", e => {
+    if(punteroActivo===null || e.pointerId!==punteroActivo) return;
+    const dx = e.clientX - inicioX;
+    const dy = e.clientY - inicioY;
+    if(!deslizando){
+      if(Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy)*1.3) return;
+      if(dx <= 0) return; // solo deslizar hacia la derecha, como WhatsApp
+      deslizando = true;
+      cancelar();
+      div.setPointerCapture(punteroActivo);
+    }
+    const distancia = Math.min(Math.max(dx,0), MAX_SWIPE);
+    div.style.transform = "translateX("+distancia+"px)";
+    const icono = obtenerIconoSwipe();
+    icono.style.opacity = Math.min(distancia/UMBRAL_SWIPE, 1);
+  });
+
+  const finalizar = e => {
+    if(punteroActivo===null || (e.pointerId!==undefined && e.pointerId!==punteroActivo)){ cancelar(); return; }
+    cancelar();
+    if(deslizando){
+      const dx = e.clientX!==undefined ? e.clientX - inicioX : 0;
+      restablecer();
+      if(dx >= UMBRAL_SWIPE) responderAMensaje(mid, m);
+    }
+    deslizando = false;
+    punteroActivo = null;
+  };
+
+  div.addEventListener("pointerup", finalizar);
+  div.addEventListener("pointerleave", e => { if(!deslizando) cancelar(); });
+  div.addEventListener("pointercancel", finalizar);
+  div.addEventListener("contextmenu", e => { e.preventDefault(); cancelar(); if(!deslizando) abrirMenuAcciones(mid, m); });
 }
 
 function construirBurbuja(m, mid){
@@ -1592,7 +1833,16 @@ function configurarConversacion(){
   $("input-imagen").addEventListener("change", manejarImagen);
   $("input-documento").addEventListener("change", manejarDocumento);
   $("btn-audio").addEventListener("click", iniciarGrabacion);
-  $("btn-cancelar-grabacion").addEventListener("click", cancelarGrabacion);
+  $("pista-cancelar").addEventListener("click", cancelarGrabacion);
+  habilitarDeslizarParaCancelar();
+  $("btn-descartar-audio").addEventListener("click", descartarAudioRevisado);
+  $("btn-play-revision-audio").addEventListener("click", alternarReproduccionRevision);
+  $("btn-enviar-revision-audio").addEventListener("click", enviarAudioRevisado);
+  $("audio-revision").addEventListener("timeupdate", actualizarTiempoRevision);
+  $("audio-revision").addEventListener("ended", () => {
+    $("icono-play-revision").innerHTML = '<path d="M8 5v14l11-7z"/>';
+    $("tiempo-revision-audio").textContent = formatearTiempoGrabacion(Math.round($("audio-revision").duration||0));
+  });
   $("btn-ir-cuenta").addEventListener("click", () => mostrarPantalla("vista-cuenta"));
   $("btn-ir-cuenta-2").addEventListener("click", () => mostrarPantalla("vista-cuenta"));
 }
@@ -1647,7 +1897,7 @@ function manejarImagen(e){
       canvas.width = img.width*escala; canvas.height = img.height*escala;
       canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
       const base64 = canvas.toDataURL("image/jpeg", 0.65);
-      if(base64.length > LIMITE_ADJUNTO){ alert("La imagen es demasiado grande incluso comprimida."); return; }
+      if(base64.length > LIMITE_ADJUNTO){ avisar("La imagen es demasiado grande incluso comprimida."); return; }
       enviarMensaje("imagen", base64);
     };
     img.src = ev.target.result;
@@ -1662,7 +1912,7 @@ function manejarDocumento(e){
   const lector = new FileReader();
   lector.onload = ev => {
     const base64 = ev.target.result;
-    if(base64.length > LIMITE_ADJUNTO){ alert("El documento supera el tamaño máximo (~500 KB)."); return; }
+    if(base64.length > LIMITE_ADJUNTO){ avisar("El documento supera el tamaño máximo (~650 KB)."); return; }
     enviarMensaje("documento", base64, archivo.name);
   };
   lector.readAsDataURL(archivo);
@@ -1687,6 +1937,7 @@ async function iniciarGrabacion(){
     grabador.onstop = finalizarGrabacion;
     grabador.start();
     // Mostrar barra de grabación
+    $("barra-grabacion").style.transform = "";
     $("barra-grabacion").classList.add("activa");
     $("btn-audio").classList.add("grabando");
     segundosGrabacion = 0;
@@ -1696,7 +1947,7 @@ async function iniciarGrabacion(){
       $("tiempo-grabacion").textContent = formatearTiempoGrabacion(segundosGrabacion);
     }, 1000);
   }catch(err){
-    alert("No se pudo acceder al micrófono. Revisa los permisos.");
+    avisar("No se pudo acceder al micrófono. Revisa los permisos.");
   }
 }
 
@@ -1721,16 +1972,119 @@ function cancelarGrabacion(){
   trozosAudio = [];
 }
 
+/* Deslizar la barra de grabación hacia la izquierda para cancelar */
+function habilitarDeslizarParaCancelar(){
+  const UMBRAL_CANCELAR = 90;
+  const barra = $("barra-grabacion");
+  let inicioX = 0, inicioY = 0, deslizando = false, punteroActivo = null;
+
+  barra.addEventListener("pointerdown", e => {
+    inicioX = e.clientX; inicioY = e.clientY;
+    deslizando = false;
+    punteroActivo = e.pointerId;
+  });
+
+  barra.addEventListener("pointermove", e => {
+    if(punteroActivo===null || e.pointerId!==punteroActivo) return;
+    const dx = e.clientX - inicioX;
+    const dy = e.clientY - inicioY;
+    if(!deslizando){
+      if(Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy)*1.3 || dx >= 0) return;
+      deslizando = true;
+      barra.setPointerCapture(punteroActivo);
+    }
+    const distancia = Math.max(dx, -140);
+    barra.style.transform = "translateX("+distancia+"px)";
+    barra.style.opacity = String(Math.max(1 - Math.abs(distancia)/140, 0.3));
+  });
+
+  const finalizar = e => {
+    if(punteroActivo===null) return;
+    if(deslizando){
+      const dx = e.clientX!==undefined ? e.clientX - inicioX : 0;
+      if(Math.abs(dx) >= UMBRAL_CANCELAR){
+        cancelarGrabacion();
+      }else{
+        barra.style.transition = "transform 0.2s, opacity 0.2s";
+        barra.style.transform = "";
+        barra.style.opacity = "";
+        setTimeout(() => { barra.style.transition = ""; }, 200);
+      }
+    }
+    deslizando = false;
+    punteroActivo = null;
+  };
+  barra.addEventListener("pointerup", finalizar);
+  barra.addEventListener("pointercancel", finalizar);
+}
+
 function finalizarGrabacion(){
   if(streamGrabacion) streamGrabacion.getTracks().forEach(t => t.stop());
   $("barra-grabacion").classList.remove("activa");
   $("btn-audio").classList.remove("grabando");
+  if(trozosAudio.length===0) return; // se canceló antes de generar datos
   const blob = new Blob(trozosAudio, {type:"audio/webm"});
+  mostrarRevisionAudio(blob);
+}
+
+/* ===== REVISIÓN DE NOTA DE AUDIO ANTES DE ENVIAR ===== */
+
+function mostrarRevisionAudio(blob){
+  audioBlobPendiente = blob;
+  if(audioUrlPendiente) URL.revokeObjectURL(audioUrlPendiente);
+  audioUrlPendiente = URL.createObjectURL(blob);
+  const audio = $("audio-revision");
+  audio.src = audioUrlPendiente;
+  audio.currentTime = 0;
+  $("icono-play-revision").innerHTML = '<path d="M8 5v14l11-7z"/>';
+  $("tiempo-revision-audio").textContent = formatearTiempoGrabacion(segundosGrabacion);
+  $("barra-entrada").style.display = "none";
+  $("barra-revision-audio").classList.add("activa");
+}
+
+function ocultarRevisionAudio(){
+  const audio = $("audio-revision");
+  audio.pause();
+  audio.removeAttribute("src");
+  audio.load();
+  if(audioUrlPendiente){ URL.revokeObjectURL(audioUrlPendiente); audioUrlPendiente = null; }
+  audioBlobPendiente = null;
+  trozosAudio = [];
+  $("barra-revision-audio").classList.remove("activa");
+  $("barra-entrada").style.display = "";
+}
+
+function descartarAudioRevisado(){
+  ocultarRevisionAudio();
+}
+
+function alternarReproduccionRevision(){
+  const audio = $("audio-revision");
+  if(audio.paused){
+    audio.play();
+    $("icono-play-revision").innerHTML = '<path d="M7 5h3v14H7zM14 5h3v14h-3z"/>';
+  }else{
+    audio.pause();
+    $("icono-play-revision").innerHTML = '<path d="M8 5v14l11-7z"/>';
+  }
+}
+
+function actualizarTiempoRevision(){
+  const audio = $("audio-revision");
+  if(!audio.paused){
+    $("tiempo-revision-audio").textContent = formatearTiempoGrabacion(Math.floor(audio.currentTime));
+  }
+}
+
+function enviarAudioRevisado(){
+  if(!audioBlobPendiente) return;
+  const blob = audioBlobPendiente;
   const lector = new FileReader();
   lector.onload = ev => {
     const base64 = ev.target.result;
-    if(base64.length > LIMITE_ADJUNTO){ alert("La nota de audio es demasiado larga. Intenta una más breve."); return; }
+    if(base64.length > LIMITE_ADJUNTO){ avisar("La nota de audio es demasiado larga. Intenta una más breve."); return; }
     enviarMensaje("audio", base64);
+    ocultarRevisionAudio();
   };
   lector.readAsDataURL(blob);
 }
