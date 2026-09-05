@@ -43,6 +43,55 @@
       box-shadow:0 0 24px rgba(0,0,0,0.06);
     }
   }
+  @media (min-width:860px){
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      min-height:100dvh;
+    }
+    #app{
+      width:100%;
+      max-width:1100px;
+      height:90vh;
+      height:90dvh;
+      border-radius:14px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.18);
+    }
+    #app.dividido{
+      flex-direction:row;
+      overflow:hidden;
+    }
+    #app.dividido #vista-lista{
+      display:flex !important;
+      width:340px;
+      flex-shrink:0;
+      border-right:1px solid var(--border);
+      height:100%;
+    }
+    #app.dividido #vista-conversacion,
+    #app.dividido #vista-cuenta,
+    #app.dividido #panel-vacio{
+      flex:1;
+      display:none;
+      height:100%;
+      min-width:0;
+    }
+    #app.dividido #vista-conversacion.activa,
+    #app.dividido #vista-cuenta.activa,
+    #app.dividido #panel-vacio.activa{
+      display:flex;
+    }
+    #app.dividido #btn-atras-conv{
+      display:none;
+    }
+  }
+  #panel-vacio{
+    align-items:center;justify-content:center;
+    color:var(--text-muted);font-size:14px;
+    text-align:center;padding:32px;
+  }
   .pantalla{
     display:none;
     flex-direction:column;
@@ -423,28 +472,15 @@
       </div>
 
       <div class="tarjeta">
-        <h3>Vincular este dispositivo a otra cuenta</h3>
-        <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px;">Normalmente no necesitas esto: el dispositivo se identifica solo. Úsalo únicamente si quieres que este dispositivo pase a representar otra cuenta ya existente.</p>
-        <button class="btn-secundario" id="btn-mostrar-vinculo">Vincular una cuenta existente</button>
-        <div id="form-vinculo" style="display:none;">
-          <div class="grupo-campo">
-            <label class="etiqueta">Usuario</label>
-            <input class="campo" id="vinculo-usuario" type="text" autocomplete="off">
-          </div>
-          <div class="grupo-campo">
-            <label class="etiqueta">Contraseña</label>
-            <input class="campo" id="vinculo-clave" type="password" autocomplete="off">
-          </div>
-          <p class="mensaje-error" id="vinculo-error" style="display:none;"></p>
-          <button class="btn-primario" id="btn-confirmar-vinculo">Vincular y reiniciar</button>
-        </div>
-      </div>
-
-      <div class="tarjeta">
         <h3>Sesión</h3>
         <button class="btn-secundario" id="btn-cerrar-sesion" style="color:var(--danger);">Olvidar cuenta en este dispositivo</button>
       </div>
     </div>
+  </div>
+
+  <!-- PANEL VACÍO (solo visible en modo dividido, cuando no hay conversación seleccionada) -->
+  <div class="pantalla" id="panel-vacio">
+    <p>Selecciona una conversación de la lista para comenzar a chatear.</p>
   </div>
 
 </div>
@@ -483,7 +519,24 @@ const $ = (id) => document.getElementById(id);
 function mostrarPantalla(id){
   document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
   $(id).classList.add("activa");
+  actualizarLayout();
+  if(id !== "pantalla-carga" && id !== "pantalla-bienvenida" && id !== "panel-vacio"){
+    localStorage.setItem("mensajeria_pantalla_actual", id);
+  }
 }
+
+function actualizarLayout(){
+  if(!cuenta) return;
+  const dividido = window.matchMedia("(min-width:860px)").matches && cuenta.rol === "propietario";
+  $("app").classList.toggle("dividido", dividido);
+  if(dividido){
+    const principalActivo = $("vista-conversacion").classList.contains("activa") || $("vista-cuenta").classList.contains("activa");
+    $("panel-vacio").classList.toggle("activa", !principalActivo);
+  }else{
+    $("panel-vacio").classList.remove("activa");
+  }
+}
+window.addEventListener("resize", actualizarLayout);
 
 function idAleatorio(longitud, soloDigitos=false){
   const chars = soloDigitos ? "0123456789" : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -556,6 +609,8 @@ async function guardarIdentidadDispositivo(username){
 
 function olvidarIdentidadDispositivo(){
   localStorage.removeItem("mensajeria_cuenta");
+  localStorage.removeItem("mensajeria_ultima_conv");
+  localStorage.removeItem("mensajeria_pantalla_actual");
   document.cookie = "mensajeria_usuario=; max-age=0; path=/";
   guardarUsuarioEnIndexedDB("");
 }
@@ -641,14 +696,19 @@ async function crearCuentaNueva(){
 
 /* ---------- Entrar a la aplicación ---------- */
 function entrarAplicacion(){
+  const pantallaGuardada = localStorage.getItem("mensajeria_pantalla_actual");
   if(cuenta.rol === "propietario"){
-    mostrarPantalla("vista-lista");
     escucharListaChats();
+    const ultima = localStorage.getItem("mensajeria_ultima_conv");
+    if(ultima) abrirConversacion(ultima);
+    else mostrarPantalla("vista-lista");
+    if(pantallaGuardada === "vista-cuenta") mostrarPantalla("vista-cuenta");
   }else{
     conversacionAbiertaId = cuenta.username;
     $("titulo-conversacion").textContent = "Mensajería";
-    mostrarPantalla("vista-conversacion");
     escucharMensajes(conversacionAbiertaId);
+    cargarBorrador(conversacionAbiertaId);
+    mostrarPantalla(pantallaGuardada === "vista-cuenta" ? "vista-cuenta" : "vista-conversacion");
   }
   configurarNotificaciones();
   configurarCuenta();
@@ -704,17 +764,20 @@ function escucharListaChats(){
 
 function abrirConversacion(id){
   conversacionAbiertaId = id;
+  localStorage.setItem("mensajeria_ultima_conv", id);
   $("titulo-conversacion").textContent = id;
   primeraCargaMensajes = true;
   elementosMensaje.clear();
   $("mensajes").innerHTML = "";
   mostrarPantalla("vista-conversacion");
   escucharMensajes(id);
+  cargarBorrador(id);
 }
 
 $("btn-atras-conv").addEventListener("click", () => {
   if(desuscribirMensajes) desuscribirMensajes();
   conversacionAbiertaId = null;
+  localStorage.removeItem("mensajeria_ultima_conv");
   if(cuenta && cuenta.rol === "propietario"){
     mostrarPantalla("vista-lista");
   }
@@ -809,6 +872,7 @@ function configurarConversacion(){
   $("campo-texto").addEventListener("keydown", (e) => {
     if(e.key === "Enter") enviarTexto();
   });
+  $("campo-texto").addEventListener("input", guardarBorrador);
 
   $("btn-adjuntar").addEventListener("click", () => {
     $("menu-adjuntos").classList.toggle("abierto");
@@ -835,7 +899,24 @@ async function enviarTexto(){
   const texto = campo.value.trim();
   if(!texto) return;
   campo.value = "";
+  borrarBorrador();
   await enviarMensaje("texto", texto);
+}
+
+function claveBorrador(id){
+  return "mensajeria_borrador_" + id;
+}
+function cargarBorrador(id){
+  $("campo-texto").value = localStorage.getItem(claveBorrador(id)) || "";
+}
+function guardarBorrador(){
+  if(!conversacionAbiertaId) return;
+  const texto = $("campo-texto").value;
+  if(texto) localStorage.setItem(claveBorrador(conversacionAbiertaId), texto);
+  else localStorage.removeItem(claveBorrador(conversacionAbiertaId));
+}
+function borrarBorrador(){
+  if(conversacionAbiertaId) localStorage.removeItem(claveBorrador(conversacionAbiertaId));
 }
 
 function manejarImagen(e){
@@ -955,25 +1036,6 @@ function configurarCuenta(){
     location.reload();
   });
 
-  $("btn-mostrar-vinculo").addEventListener("click", () => {
-    $("form-vinculo").style.display = $("form-vinculo").style.display === "block" ? "none" : "block";
-  });
-  $("btn-confirmar-vinculo").addEventListener("click", vincularCuentaExistente);
-}
-
-async function vincularCuentaExistente(){
-  const usuario = $("vinculo-usuario").value.trim();
-  const clave = $("vinculo-clave").value;
-  $("vinculo-error").style.display = "none";
-  if(!usuario || !clave) return;
-  const snap = await db.collection("cuentas").doc(usuario).get();
-  if(!snap.exists || snap.data().password !== clave){
-    $("vinculo-error").textContent = "Usuario o contraseña incorrectos.";
-    $("vinculo-error").style.display = "block";
-    return;
-  }
-  await guardarIdentidadDispositivo(usuario);
-  location.reload();
 }
 
 async function cambiarClave(){
