@@ -849,6 +849,9 @@ let segundosGrabacion = 0;
 let streamGrabacion = null;
 let audioBlobPendiente = null;
 let audioUrlPendiente = null;
+let estabaGrabandoAntesPulsacion = false;
+let marcaPulsacionAudio = 0;
+const UMBRAL_MANTENER_AUDIO = 350; // ms: por debajo de esto se considera un "toque" (alternar), por encima "mantener presionado"
 let timerEscribiendo = null;
 let respuestaActiva = null;
 let edicionActiva = null;
@@ -1866,7 +1869,9 @@ function configurarConversacion(){
   });
   $("input-imagen").addEventListener("change", manejarImagen);
   $("input-documento").addEventListener("change", manejarDocumento);
-  $("btn-audio").addEventListener("click", iniciarGrabacion);
+  $("btn-audio").addEventListener("pointerdown", manejarPointerDownAudio);
+  $("btn-audio").addEventListener("pointerup", manejarPointerUpAudio);
+  $("btn-audio").addEventListener("pointercancel", manejarPointerUpAudio);
   $("pista-cancelar").addEventListener("click", cancelarGrabacion);
   habilitarDeslizarParaCancelar();
   $("btn-descartar-audio").addEventListener("click", descartarAudioRevisado);
@@ -1959,6 +1964,26 @@ function formatearTiempoGrabacion(seg){
   const m = Math.floor(seg/60);
   const s = seg%60;
   return m+":"+(s<10?"0"+s:s);
+}
+
+/* Permite que el botón de micrófono funcione tanto con un toque (alternar
+   inicio/fin) como manteniéndolo presionado (grabar mientras se sostiene). */
+function manejarPointerDownAudio(e){
+  e.preventDefault();
+  estabaGrabandoAntesPulsacion = !!(grabador && grabador.state==="recording");
+  marcaPulsacionAudio = Date.now();
+  if(!estabaGrabandoAntesPulsacion) iniciarGrabacion();
+}
+
+function manejarPointerUpAudio(){
+  if(!grabador || grabador.state!=="recording") return;
+  const transcurrido = Date.now() - marcaPulsacionAudio;
+  // Si ya estaba grabando (segundo toque) o si se mantuvo presionado
+  // el tiempo suficiente, se detiene. Un toque corto para iniciar deja
+  // la grabación en curso hasta un segundo toque.
+  if(estabaGrabandoAntesPulsacion || transcurrido >= UMBRAL_MANTENER_AUDIO){
+    detenerGrabacion();
+  }
 }
 
 async function iniciarGrabacion(){
