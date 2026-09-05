@@ -643,11 +643,18 @@ async function leerIdentidadDispositivo(){
 }
 
 /* ---------- Arranque ---------- */
+function conTiempoLimite(promesa, ms=10000){
+  return Promise.race([
+    promesa,
+    new Promise((_, reject) => setTimeout(() => reject(Object.assign(new Error("tiempo-agotado"), {code:"tiempo-agotado"})), ms))
+  ]);
+}
+
 async function iniciar(){
   try{
     const username = await leerIdentidadDispositivo();
     if(username){
-      const snap = await db.collection("cuentas").doc(username).get();
+      const snap = await conTiempoLimite(db.collection("cuentas").doc(username).get());
       if(snap.exists){
         cuenta = snap.data();
         await guardarIdentidadDispositivo(username); // reforzar en los tres almacenes
@@ -657,7 +664,7 @@ async function iniciar(){
     }
     mostrarPantalla("pantalla-bienvenida");
     configurarBienvenida();
-    const configSnap = await db.collection("config").doc("app").get();
+    const configSnap = await conTiempoLimite(db.collection("config").doc("app").get());
     if(!configSnap.exists){
       // Esta app nunca se ha usado: se crea la primera cuenta (queda como admin) automáticamente
       $("texto-bienvenida").textContent = "Creando tu cuenta…";
@@ -682,7 +689,7 @@ async function iniciarSesionExistente(){
   $("login-error").style.display = "none";
   if(!usuario || !clave) return;
   try{
-    const snap = await db.collection("cuentas").doc(usuario).get();
+    const snap = await conTiempoLimite(db.collection("cuentas").doc(usuario).get());
     if(!snap.exists || snap.data().password !== clave){
       $("login-error").textContent = "Usuario o contraseña incorrectos.";
       $("login-error").style.display = "block";
@@ -692,7 +699,10 @@ async function iniciarSesionExistente(){
     await guardarIdentidadDispositivo(usuario);
     entrarAplicacion();
   }catch(e){
-    $("login-error").textContent = "Error al conectar. Intenta de nuevo.";
+    console.error(e);
+    $("login-error").textContent = e && e.code === "tiempo-agotado"
+      ? "Se agotó el tiempo de espera al conectar. Revisa tu internet."
+      : "Error al conectar (" + (e && e.code ? e.code : "error") + "). Intenta de nuevo.";
     $("login-error").style.display = "block";
   }
 }
@@ -700,7 +710,11 @@ async function iniciarSesionExistente(){
 function mostrarErrorArranque(e){
   console.error(e);
   mostrarPantalla("pantalla-bienvenida");
-  $("texto-bienvenida").textContent = "No se pudo conectar (" + (e && e.code ? e.code : "error") + "). Revisa las reglas de Firestore o tu conexión.";
+  const codigo = e && e.code ? e.code : "error";
+  const mensaje = codigo === "tiempo-agotado"
+    ? "Se agotó el tiempo esperando respuesta de Firestore (10s). Probablemente es tu conexión o un bloqueo de red, no las reglas."
+    : "No se pudo conectar (" + codigo + "). Revisa las reglas de Firestore o tu conexión.";
+  $("texto-bienvenida").textContent = mensaje;
 }
 
 async function crearCuentaNueva(){
@@ -708,26 +722,26 @@ async function crearCuentaNueva(){
     const username = "user" + idAleatorio(6, true);
     const password = idAleatorio(9);
     const configRef = db.collection("config").doc("app");
-    const configSnap = await configRef.get();
+    const configSnap = await conTiempoLimite(configRef.get());
     let rol = "usuario";
     if(!configSnap.exists){
       rol = "propietario";
-      await configRef.set({ ownerUsername: username });
+      await conTiempoLimite(configRef.set({ ownerUsername: username }));
     }
     const nuevaCuenta = { username, password, rol, creado: firebase.firestore.FieldValue.serverTimestamp() };
-    await db.collection("cuentas").doc(username).set(nuevaCuenta);
+    await conTiempoLimite(db.collection("cuentas").doc(username).set(nuevaCuenta));
 
     if(rol === "usuario"){
-      await db.collection("conversaciones").doc(username).set({
+      await conTiempoLimite(db.collection("conversaciones").doc(username).set({
         participante: username,
         ultimoMensaje: "Se ha conectado a la aplicación.",
         ultimoAutor: "sistema",
         ultimaFecha: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      await db.collection("conversaciones").doc(username).collection("mensajes").add({
+      }));
+      await conTiempoLimite(db.collection("conversaciones").doc(username).collection("mensajes").add({
         autor: "sistema", tipo: "sistema", contenido: "Se ha conectado a la aplicación.",
         fecha: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      }));
     }
 
     cuenta = { username, password, rol };
