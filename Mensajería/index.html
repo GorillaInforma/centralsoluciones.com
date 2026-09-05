@@ -366,6 +366,20 @@
   <div class="pantalla" id="pantalla-bienvenida">
     <h2>Mensajería</h2>
     <p id="texto-bienvenida">Preparando tu cuenta en este dispositivo…</p>
+
+    <div id="form-login-existente" style="display:none;width:100%;">
+      <div class="grupo-campo">
+        <label class="etiqueta">Usuario</label>
+        <input class="campo" id="login-usuario" type="text" autocomplete="off">
+      </div>
+      <div class="grupo-campo">
+        <label class="etiqueta">Contraseña</label>
+        <input class="campo" id="login-clave" type="password" autocomplete="off">
+      </div>
+      <p class="mensaje-error" id="login-error" style="display:none;"></p>
+      <button class="btn-primario" id="btn-confirmar-login">Iniciar sesión</button>
+    </div>
+
     <div id="datos-cuenta-nueva" style="display:none;width:100%;">
       <div class="caja-datos-cuenta">
         <div><strong>Usuario:</strong> <span id="bienvenida-usuario"></span></div>
@@ -473,7 +487,7 @@
 
       <div class="tarjeta">
         <h3>Sesión</h3>
-        <button class="btn-secundario" id="btn-cerrar-sesion" style="color:var(--danger);">Olvidar cuenta en este dispositivo</button>
+        <button class="btn-secundario" id="btn-cerrar-sesion">Cerrar sesión</button>
       </div>
     </div>
   </div>
@@ -642,9 +656,44 @@ async function iniciar(){
       }
     }
     mostrarPantalla("pantalla-bienvenida");
-    await crearCuentaNueva();
+    configurarBienvenida();
+    const configSnap = await db.collection("config").doc("app").get();
+    if(!configSnap.exists){
+      // Esta app nunca se ha usado: se crea la primera cuenta (queda como admin) automáticamente
+      $("texto-bienvenida").textContent = "Creando tu cuenta…";
+      await crearCuentaNueva();
+    }else{
+      // La app ya se ha usado antes: nunca se crea una cuenta sola, hay que iniciar sesión
+      $("texto-bienvenida").textContent = "Inicia sesión con tu cuenta.";
+      $("form-login-existente").style.display = "block";
+    }
   }catch(e){
     mostrarErrorArranque(e);
+  }
+}
+
+function configurarBienvenida(){
+  $("btn-confirmar-login").addEventListener("click", iniciarSesionExistente);
+}
+
+async function iniciarSesionExistente(){
+  const usuario = $("login-usuario").value.trim();
+  const clave = $("login-clave").value;
+  $("login-error").style.display = "none";
+  if(!usuario || !clave) return;
+  try{
+    const snap = await db.collection("cuentas").doc(usuario).get();
+    if(!snap.exists || snap.data().password !== clave){
+      $("login-error").textContent = "Usuario o contraseña incorrectos.";
+      $("login-error").style.display = "block";
+      return;
+    }
+    cuenta = snap.data();
+    await guardarIdentidadDispositivo(usuario);
+    entrarAplicacion();
+  }catch(e){
+    $("login-error").textContent = "Error al conectar. Intenta de nuevo.";
+    $("login-error").style.display = "block";
   }
 }
 
