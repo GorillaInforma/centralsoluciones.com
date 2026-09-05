@@ -732,6 +732,26 @@ function mostrarErrorArranque(e){
     ? "Se agotó el tiempo esperando respuesta de Firestore (10s). Probablemente es tu conexión o un bloqueo de red, no las reglas."
     : "No se pudo conectar (" + codigo + "). Revisa las reglas de Firestore o tu conexión.";
   $("texto-bienvenida").textContent = mensaje;
+
+  // Botón de rescate: mostrar el formulario de inicio de sesión manual
+  // sin esperar otra llamada a Firestore (el usuario ya tiene sus credenciales guardadas)
+  let btnRescate = $("btn-rescate-error");
+  if(!btnRescate){
+    btnRescate = document.createElement("button");
+    btnRescate.id = "btn-rescate-error";
+    btnRescate.className = "btn-secundario";
+    btnRescate.textContent = "Tengo cuenta — iniciar sesión";
+    btnRescate.style.marginTop = "8px";
+    btnRescate.addEventListener("click", () => {
+      $("texto-bienvenida").textContent = "Inicia sesión con tu cuenta.";
+      $("form-login-existente").style.display = "block";
+      btnRescate.style.display = "none";
+      // Asegurarse de que el listener del botón de login esté activo
+      $("btn-confirmar-login").onclick = iniciarSesionExistente;
+    });
+    $("pantalla-bienvenida").appendChild(btnRescate);
+  }
+  btnRescate.style.display = "";
 }
 
 async function crearCuentaNueva(){
