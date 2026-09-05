@@ -1206,11 +1206,15 @@ function leerUsuarioDeCookie(){
 
 async function guardarIdentidadDispositivo(username){
   localStorage.setItem("mensajeria_cuenta", JSON.stringify({username}));
+  localStorage.setItem("mensajeria_dispositivo_registrado", "true");
   guardarUsuarioEnCookie(username);
   await guardarUsuarioEnIndexedDB(username);
 }
 
 function olvidarIdentidadDispositivo(){
+  // OJO: "mensajeria_dispositivo_registrado" NO se borra a propósito.
+  // Ese dispositivo ya tuvo una cuenta, así que al cerrar sesión debe
+  // pedir login manual, no crear una cuenta nueva automáticamente.
   localStorage.removeItem("mensajeria_cuenta");
   localStorage.removeItem("mensajeria_ultima_conv");
   localStorage.removeItem("mensajeria_pantalla_actual");
@@ -1256,11 +1260,14 @@ async function iniciar(){
     }
     mostrarPantalla("pantalla-bienvenida");
     configurarBienvenida();
-    const configSnap = await conTiempoLimite(db.collection("config").doc("app").get());
-    if(!configSnap.exists){
+    const dispositivoYaRegistrado = localStorage.getItem("mensajeria_dispositivo_registrado") === "true";
+    if(!dispositivoYaRegistrado){
+      // Este dispositivo nunca ha tenido una cuenta: crear una nueva,
+      // sin importar si ya existen cuentas de otros dispositivos.
       $("texto-bienvenida").textContent = "Creando tu cuenta…";
       await crearCuentaNueva();
     }else{
+      // Este dispositivo ya tuvo cuenta antes (cerró sesión): pedir login manual.
       $("texto-bienvenida").textContent = "Inicia sesión con tu cuenta.";
       $("form-login-existente").style.display = "block";
     }
