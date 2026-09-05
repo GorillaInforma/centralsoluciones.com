@@ -38,100 +38,61 @@
     overflow:hidden;
   }
   @media (min-width:600px){
-    #app{
-      max-width:520px;
-      box-shadow:0 0 24px rgba(0,0,0,0.06);
-    }
+    #app{ max-width:520px; box-shadow:0 0 24px rgba(0,0,0,0.06); }
   }
   @media (min-width:860px){
     body{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-      min-height:100dvh;
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;min-height:100dvh;
     }
     #app{
-      width:100%;
-      max-width:1100px;
-      height:90vh;
-      height:90dvh;
+      width:100%;max-width:1100px;
+      height:90vh;height:90dvh;
       border-radius:14px;
       box-shadow:0 10px 40px rgba(0,0,0,0.18);
     }
-    #app.dividido{
-      flex-direction:row;
-      overflow:hidden;
-    }
+    #app.dividido{ flex-direction:row;overflow:hidden; }
     #app.dividido #vista-lista{
-      display:flex !important;
-      width:340px;
-      flex-shrink:0;
-      border-right:1px solid var(--border);
-      height:100%;
+      display:flex !important;width:340px;flex-shrink:0;
+      border-right:1px solid var(--border);height:100%;
     }
     #app.dividido #vista-conversacion,
     #app.dividido #vista-cuenta,
     #app.dividido #panel-vacio{
-      flex:1;
-      display:none;
-      height:100%;
-      min-width:0;
+      flex:1;display:none;height:100%;min-width:0;
     }
     #app.dividido #vista-conversacion.activa,
     #app.dividido #vista-cuenta.activa,
-    #app.dividido #panel-vacio.activa{
-      display:flex;
-    }
-    #app.dividido #btn-atras-conv{
-      display:none;
-    }
+    #app.dividido #panel-vacio.activa{ display:flex; }
+    #app.dividido #btn-atras-conv{ display:none; }
   }
   #panel-vacio{
     align-items:center;justify-content:center;
     color:var(--text-muted);font-size:14px;
     text-align:center;padding:32px;
   }
-  .pantalla{
-    display:none;
-    flex-direction:column;
-    height:100%;
-  }
-  .pantalla.activa{display:flex;}
+  .pantalla{ display:none;flex-direction:column;height:100%; }
+  .pantalla.activa{ display:flex; }
 
   /* Encabezado */
   header.barra{
-    background:var(--navy);
-    color:#fff;
+    background:var(--navy);color:#fff;
     padding:14px 16px;
-    display:flex;
-    align-items:center;
-    gap:12px;
+    display:flex;align-items:center;gap:12px;
     flex-shrink:0;
   }
-  header.barra h1{
-    font-size:18px;
-    font-weight:600;
-    margin:0;
-    flex:1;
-    letter-spacing:0.2px;
-  }
+  header.barra h1{ font-size:18px;font-weight:600;margin:0;flex:1;letter-spacing:0.2px; }
   .icono-btn{
-    background:transparent;
-    border:none;
-    color:#fff;
-    padding:6px;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    background:transparent;border:none;color:#fff;
+    padding:6px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
     border-radius:8px;
   }
-  .icono-btn:hover{background:rgba(255,255,255,0.12);}
-  .icono-btn svg{width:22px;height:22px;}
+  .icono-btn:hover{ background:rgba(255,255,255,0.12); }
+  .icono-btn svg{ width:22px;height:22px; }
 
-  /* Carga inicial */
-  #pantalla-carga{align-items:center;justify-content:center;gap:14px;}
+  /* Carga */
+  #pantalla-carga{ align-items:center;justify-content:center;gap:14px; }
   .spinner{
     width:34px;height:34px;
     border:3px solid var(--border);
@@ -139,218 +100,288 @@
     border-radius:50%;
     animation:girar 0.8s linear infinite;
   }
-  @keyframes girar{to{transform:rotate(360deg);}}
-  #pantalla-carga p{color:var(--text-muted);font-size:14px;}
+  @keyframes girar{ to{ transform:rotate(360deg); } }
+  #pantalla-carga p{ color:var(--text-muted);font-size:14px; }
 
   /* Bienvenida */
-  #pantalla-bienvenida{align-items:center;justify-content:center;padding:32px;text-align:center;gap:18px;}
-  #pantalla-bienvenida h2{margin:0;font-size:22px;font-weight:600;}
-  #pantalla-bienvenida p{color:var(--text-muted);font-size:14px;margin:0;line-height:1.5;}
-  .btn-primario{
-    background:var(--navy);
-    color:#fff;
-    border:none;
-    padding:13px 20px;
-    border-radius:10px;
-    font-size:15px;
-    font-weight:600;
-    cursor:pointer;
-    width:100%;
+  #pantalla-bienvenida{
+    align-items:center;justify-content:center;
+    padding:32px;text-align:center;gap:18px;
   }
-  .btn-primario:hover{background:var(--navy-dark);}
+  #pantalla-bienvenida h2{ margin:0;font-size:22px;font-weight:600; }
+  #pantalla-bienvenida p{ color:var(--text-muted);font-size:14px;margin:0;line-height:1.5; }
+  .btn-primario{
+    background:var(--navy);color:#fff;border:none;
+    padding:13px 20px;border-radius:10px;
+    font-size:15px;font-weight:600;cursor:pointer;width:100%;
+  }
+  .btn-primario:hover{ background:var(--navy-dark); }
   .btn-secundario{
-    background:transparent;
-    color:var(--accent);
-    border:none;
-    font-size:14px;
-    cursor:pointer;
-    padding:8px;
+    background:transparent;color:var(--accent);border:none;
+    font-size:14px;cursor:pointer;padding:8px;
   }
   .caja-datos-cuenta{
-    background:var(--bg);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:16px;
-    width:100%;
-    text-align:left;
-    font-size:14px;
+    background:var(--bg);border:1px solid var(--border);
+    border-radius:10px;padding:16px;width:100%;
+    text-align:left;font-size:14px;
   }
-  .caja-datos-cuenta div{margin-bottom:6px;}
-  .caja-datos-cuenta strong{color:var(--navy);}
-
+  .caja-datos-cuenta div{ margin-bottom:6px; }
+  .caja-datos-cuenta strong{ color:var(--navy); }
   input.campo{
-    width:100%;
-    padding:12px 14px;
-    border:1px solid var(--border);
-    border-radius:9px;
-    font-size:15px;
-    color:var(--text);
-    background:#fff;
+    width:100%;padding:12px 14px;
+    border:1px solid var(--border);border-radius:9px;
+    font-size:15px;color:var(--text);background:#fff;
   }
-  input.campo:focus{outline:2px solid var(--accent);outline-offset:1px;}
-  label.etiqueta{font-size:13px;color:var(--text-muted);display:block;margin-bottom:5px;text-align:left;}
-  .grupo-campo{width:100%;text-align:left;margin-bottom:12px;}
-  .mensaje-error{color:var(--danger);font-size:13px;margin:0;}
-  .mensaje-ok{color:var(--ok);font-size:13px;margin:0;}
+  input.campo:focus{ outline:2px solid var(--accent);outline-offset:1px; }
+  label.etiqueta{ font-size:13px;color:var(--text-muted);display:block;margin-bottom:5px;text-align:left; }
+  .grupo-campo{ width:100%;text-align:left;margin-bottom:12px; }
+  .mensaje-error{ color:var(--danger);font-size:13px;margin:0; }
+  .mensaje-ok{ color:var(--ok);font-size:13px;margin:0; }
 
-  /* Lista de chats */
-  #lista-chats{flex:1;overflow-y:auto;}
-  .fila-chat{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:12px 16px;
-    border-bottom:1px solid var(--border);
-    cursor:pointer;
+  /* Modal de permisos */
+  #modal-permisos{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.55);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:999;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.2s;
   }
-  .fila-chat:hover{background:var(--bg);}
-  .avatar{
-    width:46px;height:46px;
-    border-radius:50%;
-    background:var(--accent);
-    color:#fff;
+  #modal-permisos.visible{ opacity:1;pointer-events:auto; }
+  .modal-caja{
+    background:#fff;
+    border-radius:20px 20px 0 0;
+    padding:28px 24px 36px;
+    width:100%;max-width:480px;
+    display:flex;flex-direction:column;gap:18px;
+    transform:translateY(20px);
+    transition:transform 0.25s;
+  }
+  #modal-permisos.visible .modal-caja{ transform:translateY(0); }
+  .modal-titulo{ font-size:18px;font-weight:700;color:var(--navy);margin:0; }
+  .modal-desc{ font-size:14px;color:var(--text-muted);margin:0;line-height:1.5; }
+  .lista-permisos{ display:flex;flex-direction:column;gap:10px; }
+  .item-permiso{
+    display:flex;align-items:center;gap:14px;
+    background:var(--bg);border-radius:10px;padding:12px 14px;
+  }
+  .item-permiso .icono-permiso{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--navy);color:#fff;
     display:flex;align-items:center;justify-content:center;
-    font-weight:600;font-size:17px;
     flex-shrink:0;
   }
-  .info-chat{flex:1;min-width:0;}
-  .info-chat .nombre{font-weight:600;font-size:15px;}
+  .item-permiso .icono-permiso svg{ width:18px;height:18px; }
+  .item-permiso .texto-permiso{ flex:1; }
+  .item-permiso .texto-permiso strong{ display:block;font-size:14px;margin-bottom:2px; }
+  .item-permiso .texto-permiso span{ font-size:12.5px;color:var(--text-muted); }
+  .item-permiso .estado-permiso{
+    font-size:11.5px;font-weight:600;
+    padding:3px 8px;border-radius:20px;
+    background:#E8F5E9;color:var(--ok);
+    flex-shrink:0;
+  }
+  .item-permiso .estado-permiso.pendiente{ background:#FFF3E0;color:#E65100; }
+  .item-permiso .estado-permiso.denegado{ background:#FFEBEE;color:var(--danger); }
+
+  /* Lista de chats */
+  #lista-chats{ flex:1;overflow-y:auto; }
+  .fila-chat{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--border);
+    cursor:pointer;
+  }
+  .fila-chat:hover{ background:var(--bg); }
+  .avatar{
+    width:46px;height:46px;border-radius:50%;
+    background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:600;font-size:17px;flex-shrink:0;
+  }
+  .info-chat{ flex:1;min-width:0; }
+  .info-chat .nombre{ font-weight:600;font-size:15px; }
   .info-chat .previa{
     color:var(--text-muted);font-size:13px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .meta-chat{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-  .hora-chat{font-size:12px;color:var(--text-muted);}
+  .meta-chat{ display:flex;flex-direction:column;align-items:flex-end;gap:6px; }
+  .hora-chat{ font-size:12px;color:var(--text-muted); }
   .badge-noleido{
     background:var(--accent);color:#fff;
     font-size:11px;font-weight:700;
     min-width:18px;height:18px;border-radius:9px;
-    display:flex;align-items:center;justify-content:center;
-    padding:0 5px;
+    display:flex;align-items:center;justify-content:center;padding:0 5px;
   }
-  #estado-vacio{
-    padding:40px 24px;text-align:center;color:var(--text-muted);font-size:14px;
-  }
+  #estado-vacio{ padding:40px 24px;text-align:center;color:var(--text-muted);font-size:14px; }
 
   /* Conversación */
-  #vista-conversacion header.barra .nombre-conv{font-size:16px;font-weight:600;}
+  #vista-conversacion header.barra .nombre-conv{ font-size:16px;font-weight:600; }
   #mensajes{
-    flex:1;
-    overflow-y:auto;
+    flex:1;overflow-y:auto;
     padding:14px 12px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+    display:flex;flex-direction:column;gap:4px;
     background:var(--bg);
   }
+
+  /* Separador de fecha */
+  .separador-fecha{
+    align-self:center;
+    background:rgba(0,0,0,0.08);
+    color:var(--text-muted);
+    font-size:11.5px;font-weight:600;
+    padding:3px 12px;border-radius:20px;
+    margin:8px 0 4px;
+    letter-spacing:0.3px;
+  }
+
   .burbuja{
-    max-width:75%;
-    padding:9px 12px;
+    max-width:75%;padding:9px 12px;
     border-radius:12px;
-    font-size:14.5px;
-    line-height:1.4;
-    word-wrap:break-word;
+    font-size:14.5px;line-height:1.4;word-wrap:break-word;
   }
   .burbuja.propio{
     align-self:flex-end;
-    background:var(--accent);
-    color:#fff;
+    background:var(--accent);color:#fff;
     border-bottom-right-radius:3px;
+    margin-bottom:2px;
   }
   .burbuja.ajeno{
     align-self:flex-start;
-    background:#fff;
-    border:1px solid var(--border);
+    background:#fff;border:1px solid var(--border);
     border-bottom-left-radius:3px;
+    margin-bottom:2px;
   }
   .burbuja.sistema{
-    align-self:center;
-    background:transparent;
-    color:var(--text-muted);
-    font-size:12.5px;
-    font-style:italic;
-    max-width:90%;
-    text-align:center;
+    align-self:center;background:transparent;
+    color:var(--text-muted);font-size:12.5px;font-style:italic;
+    max-width:90%;text-align:center;
   }
-  .burbuja .hora{
-    display:block;font-size:10.5px;margin-top:3px;opacity:0.75;text-align:right;
-  }
-  .burbuja img.adjunto{max-width:100%;border-radius:8px;display:block;margin-top:2px;}
-  .burbuja audio{max-width:100%;margin-top:2px;}
+  .burbuja .hora{ display:block;font-size:10.5px;margin-top:3px;opacity:0.75;text-align:right; }
+  .burbuja img.adjunto{ max-width:100%;border-radius:8px;display:block;margin-top:2px; }
+  .burbuja audio{ max-width:100%;margin-top:2px; }
   .burbuja a.archivo{
     display:flex;align-items:center;gap:8px;
     color:inherit;text-decoration:none;
     background:rgba(0,0,0,0.05);
     padding:8px 10px;border-radius:8px;margin-top:2px;
   }
-  .burbuja.propio a.archivo{background:rgba(255,255,255,0.18);}
+  .burbuja.propio a.archivo{ background:rgba(255,255,255,0.18); }
+
+  /* Indicador de grabación */
+  .barra-grabacion{
+    display:none;
+    align-items:center;gap:10px;
+    padding:8px 16px;
+    background:#FFF3F3;
+    border-top:1px solid #FFCDD2;
+    flex-shrink:0;
+    font-size:13px;color:var(--danger);font-weight:500;
+  }
+  .barra-grabacion.activa{ display:flex; }
+  .punto-grabacion{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--danger);
+    animation:parpadeo 1s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  @keyframes parpadeo{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .tiempo-grabacion{ font-variant-numeric:tabular-nums; }
 
   .barra-entrada{
     display:flex;align-items:center;gap:8px;
     padding:10px 12px;
     border-top:1px solid var(--border);
-    background:#fff;
-    flex-shrink:0;
-    position:relative;
+    background:#fff;flex-shrink:0;position:relative;
   }
   .barra-entrada input[type=text]{
-    flex:1;
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:10px 15px;
-    font-size:14.5px;
+    flex:1;border:1px solid var(--border);
+    border-radius:20px;padding:10px 15px;font-size:14.5px;
   }
-  .barra-entrada input[type=text]:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .barra-entrada input[type=text]:focus{ outline:2px solid var(--accent);outline-offset:1px; }
   .btn-circular{
     width:40px;height:40px;border-radius:50%;
     border:none;background:var(--bg);color:var(--navy);
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;flex-shrink:0;
   }
-  .btn-circular.enviar{background:var(--navy);color:#fff;}
-  .btn-circular.grabando{background:var(--danger);color:#fff;}
-  .btn-circular svg{width:20px;height:20px;}
+  .btn-circular.enviar{ background:var(--navy);color:#fff; }
+  .btn-circular.grabando{ background:var(--danger);color:#fff; }
+  .btn-circular svg{ width:20px;height:20px; }
 
   .menu-adjuntos{
-    position:absolute;
-    bottom:58px;left:12px;
-    background:#fff;
-    border:1px solid var(--border);
-    border-radius:12px;
-    box-shadow:0 4px 18px rgba(0,0,0,0.12);
-    display:none;
-    overflow:hidden;
+    position:absolute;bottom:58px;left:12px;
+    background:#fff;border:1px solid var(--border);
+    border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.12);
+    display:none;overflow:hidden;flex-direction:column;
   }
-  .menu-adjuntos.abierto{display:flex;}
+  .menu-adjuntos.abierto{ display:flex; }
   .opcion-adjunto{
     display:flex;align-items:center;gap:10px;
-    padding:12px 16px;
-    font-size:14px;
-    cursor:pointer;
+    padding:12px 16px;font-size:14px;cursor:pointer;
     border-bottom:1px solid var(--border);
     background:none;border:none;text-align:left;width:100%;color:var(--text);
   }
-  .opcion-adjunto:last-child{border-bottom:none;}
-  .opcion-adjunto:hover{background:var(--bg);}
-  .opcion-adjunto svg{width:19px;height:19px;color:var(--accent);}
+  .opcion-adjunto:last-child{ border-bottom:none; }
+  .opcion-adjunto:hover{ background:var(--bg); }
+  .opcion-adjunto svg{ width:19px;height:19px;color:var(--accent); }
 
   /* Cuenta */
-  #vista-cuenta .contenido-cuenta{padding:20px;overflow-y:auto;flex:1;}
+  #vista-cuenta .contenido-cuenta{ padding:20px;overflow-y:auto;flex:1; }
   .tarjeta{
-    background:var(--bg);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:16px;
-    margin-bottom:18px;
+    background:var(--bg);border:1px solid var(--border);
+    border-radius:12px;padding:16px;margin-bottom:18px;
   }
-  .tarjeta h3{margin:0 0 12px;font-size:14px;color:var(--navy);}
-  .fila-dato{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14.5px;}
-  .fila-dato span.valor{font-weight:600;}
-  .toggle-clave{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;}
-  .notif-estado{font-size:13px;color:var(--text-muted);margin-top:8px;}
+  .tarjeta h3{ margin:0 0 12px;font-size:14px;color:var(--navy); }
+  .fila-dato{ display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14.5px; }
+  .fila-dato span.valor{ font-weight:600; }
+  .toggle-clave{ background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer; }
+  .notif-estado{ font-size:13px;color:var(--text-muted);margin-top:8px; }
 
-  ::-webkit-scrollbar{width:6px;}
-  ::-webkit-scrollbar-thumb{background:#D0D4DA;border-radius:3px;}
+  /* Botón editar inline */
+  .btn-editar-inline{
+    background:none;border:none;padding:4px;cursor:pointer;
+    color:var(--text-muted);display:inline-flex;align-items:center;
+    border-radius:6px;margin-left:6px;
+  }
+  .btn-editar-inline:hover{ color:var(--accent);background:rgba(47,102,144,0.08); }
+  .btn-editar-inline svg{ width:15px;height:15px; }
+
+  /* Mini-modal edición contraseña */
+  #modal-clave{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.55);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:999;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.2s;
+  }
+  #modal-clave.visible{ opacity:1;pointer-events:auto; }
+  #modal-clave .modal-caja{
+    background:#fff;border-radius:20px 20px 0 0;
+    padding:28px 24px 36px;
+    width:100%;max-width:480px;
+    display:flex;flex-direction:column;gap:14px;
+    transform:translateY(20px);transition:transform 0.25s;
+  }
+  #modal-clave.visible .modal-caja{ transform:translateY(0); }
+
+  /* Fila de permiso en Cuenta */
+  .fila-permiso{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:8px 0;border-bottom:1px solid var(--border);
+  }
+  .fila-permiso:last-child{ border-bottom:none; }
+  .fila-permiso .nombre-permiso{ font-size:14px; }
+  .fila-permiso .chip-estado{
+    font-size:11.5px;font-weight:600;
+    padding:3px 10px;border-radius:20px;
+    background:#E8F5E9;color:var(--ok);
+  }
+  .fila-permiso .chip-estado.pendiente{ background:#FFF3E0;color:#E65100; }
+  .fila-permiso .chip-estado.denegado{ background:#FFEBEE;color:var(--danger); }
+
+  ::-webkit-scrollbar{ width:6px; }
+  ::-webkit-scrollbar-thumb{ background:#D0D4DA;border-radius:3px; }
 </style>
 </head>
 <body>
@@ -366,7 +397,6 @@
   <div class="pantalla" id="pantalla-bienvenida">
     <h2>Mensajería</h2>
     <p id="texto-bienvenida">Preparando tu cuenta en este dispositivo…</p>
-
     <div id="form-login-existente" style="display:none;width:100%;">
       <div class="grupo-campo">
         <label class="etiqueta">Usuario</label>
@@ -379,7 +409,6 @@
       <p class="mensaje-error" id="login-error" style="display:none;"></p>
       <button class="btn-primario" id="btn-confirmar-login">Iniciar sesión</button>
     </div>
-
     <div id="datos-cuenta-nueva" style="display:none;width:100%;">
       <div class="caja-datos-cuenta">
         <div><strong>Usuario:</strong> <span id="bienvenida-usuario"></span></div>
@@ -390,7 +419,7 @@
     </div>
   </div>
 
-  <!-- LISTA DE CHATS (solo cuenta principal) -->
+  <!-- LISTA DE CHATS -->
   <div class="pantalla" id="vista-lista">
     <header class="barra">
       <h1>Mensajería</h1>
@@ -414,6 +443,14 @@
       </button>
     </header>
     <div id="mensajes"></div>
+    <!-- Indicador de grabación -->
+    <div class="barra-grabacion" id="barra-grabacion">
+      <div class="punto-grabacion"></div>
+      <span>Grabando…</span>
+      <span class="tiempo-grabacion" id="tiempo-grabacion">0:00</span>
+      <span style="flex:1;"></span>
+      <button class="btn-secundario" id="btn-cancelar-grabacion" style="padding:4px 8px;font-size:13px;">Cancelar</button>
+    </div>
     <div class="barra-entrada">
       <button class="btn-circular" id="btn-adjuntar" aria-label="Adjuntar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.5l-8.5 8.5a4.5 4.5 0 01-6.4-6.4l9-9a3 3 0 014.2 4.2l-9 9a1.5 1.5 0 01-2.1-2.1l8-8"/></svg>
@@ -451,38 +488,27 @@
     <div class="contenido-cuenta">
       <div class="tarjeta">
         <h3>Tus datos</h3>
-        <div class="fila-dato"><span>Usuario</span><span class="valor" id="cuenta-usuario"></span></div>
+        <div class="fila-dato">
+          <span>Usuario</span>
+          <span class="valor" id="cuenta-usuario"></span>
+        </div>
         <div class="fila-dato">
           <span>Contraseña</span>
-          <span><span class="valor" id="cuenta-clave">••••••••</span>
-          <button class="toggle-clave" id="btn-ver-clave">Mostrar</button></span>
+          <span style="display:flex;align-items:center;gap:2px;">
+            <span class="valor" id="cuenta-clave">••••••••</span>
+            <button class="toggle-clave" id="btn-ver-clave">Mostrar</button>
+            <button class="btn-editar-inline" id="btn-editar-clave" aria-label="Cambiar contraseña">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </span>
         </div>
         <div class="fila-dato"><span>Rol</span><span class="valor" id="cuenta-rol"></span></div>
       </div>
 
       <div class="tarjeta">
-        <h3>Cambiar contraseña</h3>
-        <div class="grupo-campo">
-          <label class="etiqueta">Contraseña actual</label>
-          <input class="campo" id="clave-actual" type="password">
-        </div>
-        <div class="grupo-campo">
-          <label class="etiqueta">Nueva contraseña</label>
-          <input class="campo" id="clave-nueva" type="password">
-        </div>
-        <div class="grupo-campo">
-          <label class="etiqueta">Confirmar nueva contraseña</label>
-          <input class="campo" id="clave-confirmar" type="password">
-        </div>
-        <p class="mensaje-error" id="clave-error" style="display:none;"></p>
-        <p class="mensaje-ok" id="clave-ok" style="display:none;"></p>
-        <button class="btn-primario" id="btn-cambiar-clave">Guardar nueva contraseña</button>
-      </div>
-
-      <div class="tarjeta">
-        <h3>Notificaciones</h3>
-        <button class="btn-primario" id="btn-activar-notif">Activar notificaciones</button>
-        <p class="notif-estado" id="estado-notif"></p>
+        <h3>Permisos</h3>
+        <div id="lista-permisos-cuenta"></div>
+        <button class="btn-primario" id="btn-gestionar-permisos" style="margin-top:12px;">Gestionar permisos</button>
       </div>
 
       <div class="tarjeta">
@@ -492,11 +518,44 @@
     </div>
   </div>
 
-  <!-- PANEL VACÍO (solo visible en modo dividido, cuando no hay conversación seleccionada) -->
+  <!-- PANEL VACÍO (modo dividido) -->
   <div class="pantalla" id="panel-vacio">
     <p>Selecciona una conversación de la lista para comenzar a chatear.</p>
   </div>
 
+</div>
+
+<!-- MINI-MODAL CAMBIAR CONTRASEÑA -->
+<div id="modal-clave">
+  <div class="modal-caja">
+    <p class="modal-titulo">Cambiar contraseña</p>
+    <div class="grupo-campo" style="margin-bottom:0;">
+      <label class="etiqueta">Contraseña actual</label>
+      <input class="campo" id="clave-actual" type="password" autocomplete="current-password">
+    </div>
+    <div class="grupo-campo" style="margin-bottom:0;">
+      <label class="etiqueta">Nueva contraseña</label>
+      <input class="campo" id="clave-nueva" type="password" autocomplete="new-password">
+    </div>
+    <div class="grupo-campo" style="margin-bottom:0;">
+      <label class="etiqueta">Confirmar nueva contraseña</label>
+      <input class="campo" id="clave-confirmar" type="password" autocomplete="new-password">
+    </div>
+    <p class="mensaje-error" id="clave-error" style="display:none;"></p>
+    <p class="mensaje-ok" id="clave-ok" style="display:none;"></p>
+    <button class="btn-primario" id="btn-cambiar-clave">Guardar contraseña</button>
+    <button class="btn-secundario" id="btn-cancelar-clave" style="align-self:center;">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL DE PERMISOS -->
+<div id="modal-permisos">
+  <div class="modal-caja">
+    <p class="modal-titulo">Permisos de la app</p>
+    <p class="modal-desc">Para funcionar mejor, la app necesita acceso a lo siguiente. Puedes aceptar o rechazar cada uno.</p>
+    <div class="lista-permisos" id="lista-permisos-modal"></div>
+    <button class="btn-primario" id="btn-cerrar-modal">Listo</button>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -511,28 +570,18 @@ const firebaseConfig = {
   appId: "1:206928265543:web:d15652e8c6f17b38a70c62"
 };
 
-// Elimina cualquier Service Worker viejo (de otra prueba/deploy anterior en este
-// mismo dominio) que pudiera estar interceptando las peticiones de red y
-// provocando que las llamadas a Firestore se queden colgadas.
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.getRegistrations().then((registros) => {
-    registros.forEach((registro) => registro.unregister());
-  }).catch(() => {});
-  if(window.caches && caches.keys){
-    caches.keys().then((nombres) => nombres.forEach((n) => caches.delete(n))).catch(() => {});
-  }
+  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(()=>{});
+  if(window.caches && caches.keys) caches.keys().then(ns => ns.forEach(n => caches.delete(n))).catch(()=>{});
 }
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
-// Nota: se quitó enablePersistence(). Con varias pestañas del sitio abiertas,
-// el candado de IndexedDB entre pestañas (una de ellas congelada por Android)
-// podía dejar la app colgada para siempre esperando la conexión.
 
-const LIMITE_ADJUNTO = 700000; // ~700 KB en base64, margen bajo el límite de 1 MB por documento de Firestore
+const LIMITE_ADJUNTO = 700000;
 
-let cuenta = null; // { username, password, rol }
+let cuenta = null;
 let conversacionAbiertaId = null;
 let primeraCargaLista = true;
 let primeraCargaMensajes = true;
@@ -540,10 +589,47 @@ let desuscribirLista = null;
 let desuscribirMensajes = null;
 let grabador = null;
 let trozosAudio = [];
-const elementosChat = new Map();      // conversacionId -> nodo de la fila en la lista
-const elementosMensaje = new Map();   // mensajeId -> nodo de la burbuja
+let timerGrabacion = null;
+let segundosGrabacion = 0;
+let streamGrabacion = null;
+const elementosChat = new Map();
+const elementosMensaje = new Map();
 
-const $ = (id) => document.getElementById(id);
+const $ = id => document.getElementById(id);
+
+/* ===== UTILIDADES DE FECHA ===== */
+
+function formatoHora(fecha){
+  if(!fecha) return "";
+  const d = fecha.toDate ? fecha.toDate() : new Date(fecha);
+  return d.toLocaleTimeString("es-MX", {hour:"2-digit", minute:"2-digit"});
+}
+
+function clavesDeFecha(fecha){
+  if(!fecha) return null;
+  const d = fecha.toDate ? fecha.toDate() : new Date(fecha);
+  return d.toLocaleDateString("es-MX", {year:"numeric", month:"2-digit", day:"2-digit"});
+}
+
+function etiquetaFecha(fecha){
+  if(!fecha) return "";
+  const d = fecha.toDate ? fecha.toDate() : new Date(fecha);
+  const hoy = new Date();
+  const ayer = new Date(hoy); ayer.setDate(hoy.getDate()-1);
+  const mismaFecha = (a,b) =>
+    a.getFullYear()===b.getFullYear() &&
+    a.getMonth()===b.getMonth() &&
+    a.getDate()===b.getDate();
+  if(mismaFecha(d, hoy)) return "Hoy";
+  if(mismaFecha(d, ayer)) return "Ayer";
+  return d.toLocaleDateString("es-MX", {weekday:"long", day:"numeric", month:"long"});
+}
+
+function inicial(nombre){
+  return (nombre||"?").charAt(0).toUpperCase();
+}
+
+/* ===== LAYOUT ===== */
 
 function mostrarPantalla(id){
   document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
@@ -567,35 +653,132 @@ function actualizarLayout(){
 }
 window.addEventListener("resize", actualizarLayout);
 
-function idAleatorio(longitud, soloDigitos=false){
-  const chars = soloDigitos ? "0123456789" : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let s = "";
-  for(let i=0;i<longitud;i++) s += chars[Math.floor(Math.random()*chars.length)];
-  return s;
+/* ===== PERMISOS ===== */
+
+const PERMISOS = [
+  {
+    id: "notificaciones",
+    nombre: "Notificaciones",
+    desc: "Avisos de mensajes nuevos",
+    icono: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>`,
+    estado: () => {
+      if(!("Notification" in window)) return "no-soportado";
+      return Notification.permission === "granted" ? "concedido"
+           : Notification.permission === "denied" ? "denegado"
+           : "pendiente";
+    },
+    solicitar: async () => {
+      if(!("Notification" in window)) return;
+      await Notification.requestPermission();
+    }
+  },
+  {
+    id: "microfono",
+    nombre: "Micrófono",
+    desc: "Notas de audio en los chats",
+    icono: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 19v3"/></svg>`,
+    estado: async () => {
+      if(!navigator.permissions) return "pendiente";
+      try{
+        const p = await navigator.permissions.query({name:"microphone"});
+        return p.state === "granted" ? "concedido"
+             : p.state === "denied" ? "denegado"
+             : "pendiente";
+      }catch{ return "pendiente"; }
+    },
+    solicitar: async () => {
+      try{
+        const s = await navigator.mediaDevices.getUserMedia({audio:true});
+        s.getTracks().forEach(t => t.stop());
+      }catch{}
+    }
+  }
+];
+
+function etiquetaEstado(estado){
+  if(estado === "concedido") return {texto:"Activo", clase:""};
+  if(estado === "denegado") return {texto:"Bloqueado", clase:"denegado"};
+  return {texto:"Pendiente", clase:"pendiente"};
 }
 
-function formatoHora(fecha){
-  if(!fecha) return "";
-  const d = fecha.toDate ? fecha.toDate() : new Date(fecha);
-  return d.toLocaleTimeString("es-MX", {hour:"2-digit", minute:"2-digit"});
+async function renderizarPermisosModal(){
+  const lista = $("lista-permisos-modal");
+  lista.innerHTML = "";
+  for(const p of PERMISOS){
+    const estado = typeof p.estado === "function" ? await p.estado() : p.estado;
+    if(estado === "no-soportado") continue;
+    const {texto, clase} = etiquetaEstado(estado);
+    const item = document.createElement("div");
+    item.className = "item-permiso";
+    item.innerHTML = `
+      <div class="icono-permiso">${p.icono}</div>
+      <div class="texto-permiso">
+        <strong>${p.nombre}</strong>
+        <span>${p.desc}</span>
+      </div>
+      <span class="estado-permiso ${clase}">${texto}</span>
+    `;
+    if(estado === "pendiente"){
+      item.style.cursor = "pointer";
+      item.addEventListener("click", async () => {
+        await p.solicitar();
+        renderizarPermisosModal();
+        renderizarPermisosCuenta();
+      });
+    }
+    lista.appendChild(item);
+  }
 }
 
-function inicial(nombre){
-  return (nombre||"?").charAt(0).toUpperCase();
+async function renderizarPermisosCuenta(){
+  const lista = $("lista-permisos-cuenta");
+  if(!lista) return;
+  lista.innerHTML = "";
+  for(const p of PERMISOS){
+    const estado = typeof p.estado === "function" ? await p.estado() : p.estado;
+    if(estado === "no-soportado") continue;
+    const {texto, clase} = etiquetaEstado(estado);
+    const fila = document.createElement("div");
+    fila.className = "fila-permiso";
+    fila.innerHTML = `
+      <span class="nombre-permiso">${p.nombre}</span>
+      <span class="chip-estado ${clase}">${texto}</span>
+    `;
+    lista.appendChild(fila);
+  }
 }
 
-/* ---------- Identidad del dispositivo ----------
-   Se guarda el mismo dato en tres lugares independientes para que, si uno
-   se borra (por ejemplo al limpiar el navegador), los otros permitan que
-   el dispositivo se siga reconociendo solo, sin pedir inicio de sesión. */
+async function abrirModalPermisos(){
+  await renderizarPermisosModal();
+  $("modal-permisos").classList.add("visible");
+}
+
+function cerrarModalPermisos(){
+  $("modal-permisos").classList.remove("visible");
+}
+
+$("btn-cerrar-modal").addEventListener("click", cerrarModalPermisos);
+$("modal-permisos").addEventListener("click", e => {
+  if(e.target === $("modal-permisos")) cerrarModalPermisos();
+});
+
+async function solicitarPermisosAlEntrar(){
+  // Solo mostrar si hay algún permiso pendiente
+  let hayPendiente = false;
+  for(const p of PERMISOS){
+    const estado = typeof p.estado === "function" ? await p.estado() : p.estado;
+    if(estado === "pendiente"){ hayPendiente = true; break; }
+  }
+  if(hayPendiente) abrirModalPermisos();
+}
+
+/* ===== IDENTIDAD DEL DISPOSITIVO ===== */
 
 function abrirAlmacenDispositivo(){
   return new Promise((resolve, reject) => {
     const solicitud = indexedDB.open("mensajeria_dispositivo", 1);
     const tope = setTimeout(() => reject(new Error("indexeddb-bloqueada")), 4000);
-    solicitud.onupgradeneeded = () => {
-      solicitud.result.createObjectStore("identidad");
-    };
+    solicitud.onupgradeneeded = () => { solicitud.result.createObjectStore("identidad"); };
     solicitud.onsuccess = () => { clearTimeout(tope); resolve(solicitud.result); };
     solicitud.onerror = () => { clearTimeout(tope); reject(solicitud.error); };
     solicitud.onblocked = () => { clearTimeout(tope); reject(new Error("indexeddb-bloqueada")); };
@@ -605,35 +788,35 @@ function abrirAlmacenDispositivo(){
 async function guardarUsuarioEnIndexedDB(username){
   try{
     const bd = await abrirAlmacenDispositivo();
-    const tx = bd.transaction("identidad", "readwrite");
-    tx.objectStore("identidad").put(username, "usuario");
-  }catch(e){ /* IndexedDB no disponible: seguimos con los otros métodos */ }
+    const tx = bd.transaction("identidad","readwrite");
+    tx.objectStore("identidad").put(username,"usuario");
+  }catch(e){}
 }
 
 async function leerUsuarioDeIndexedDB(){
   try{
     const bd = await abrirAlmacenDispositivo();
-    return await new Promise((resolve) => {
-      const tx = bd.transaction("identidad", "readonly");
-      const solicitud = tx.objectStore("identidad").get("usuario");
-      solicitud.onsuccess = () => resolve(solicitud.result || null);
-      solicitud.onerror = () => resolve(null);
+    return await new Promise(resolve => {
+      const tx = bd.transaction("identidad","readonly");
+      const sol = tx.objectStore("identidad").get("usuario");
+      sol.onsuccess = () => resolve(sol.result||null);
+      sol.onerror = () => resolve(null);
     });
-  }catch(e){ return null; }
+  }catch{ return null; }
 }
 
 function guardarUsuarioEnCookie(username){
-  const diezAnios = 10 * 365 * 24 * 60 * 60;
-  document.cookie = "mensajeria_usuario=" + encodeURIComponent(username) + "; max-age=" + diezAnios + "; path=/; SameSite=Lax";
+  const diezAnios = 10*365*24*60*60;
+  document.cookie = "mensajeria_usuario="+encodeURIComponent(username)+"; max-age="+diezAnios+"; path=/; SameSite=Lax";
 }
 
 function leerUsuarioDeCookie(){
-  const partes = document.cookie.split("; ").find(f => f.startsWith("mensajeria_usuario="));
-  return partes ? decodeURIComponent(partes.split("=")[1]) : null;
+  const p = document.cookie.split("; ").find(f => f.startsWith("mensajeria_usuario="));
+  return p ? decodeURIComponent(p.split("=")[1]) : null;
 }
 
 async function guardarIdentidadDispositivo(username){
-  localStorage.setItem("mensajeria_cuenta", JSON.stringify({ username }));
+  localStorage.setItem("mensajeria_cuenta", JSON.stringify({username}));
   guardarUsuarioEnCookie(username);
   await guardarUsuarioEnIndexedDB(username);
 }
@@ -648,23 +831,26 @@ function olvidarIdentidadDispositivo(){
 
 async function leerIdentidadDispositivo(){
   const local = localStorage.getItem("mensajeria_cuenta");
-  if(local){
-    const datos = JSON.parse(local);
-    if(datos.username) return datos.username;
-  }
+  if(local){ const d = JSON.parse(local); if(d.username) return d.username; }
   const cookie = leerUsuarioDeCookie();
   if(cookie) return cookie;
-  const indexado = await leerUsuarioDeIndexedDB();
-  if(indexado) return indexado;
-  return null;
+  return await leerUsuarioDeIndexedDB();
 }
 
-/* ---------- Arranque ---------- */
+/* ===== ARRANQUE ===== */
+
 function conTiempoLimite(promesa, ms=10000){
   return Promise.race([
     promesa,
-    new Promise((_, reject) => setTimeout(() => reject(Object.assign(new Error("tiempo-agotado"), {code:"tiempo-agotado"})), ms))
+    new Promise((_,reject) => setTimeout(() => reject(Object.assign(new Error("tiempo-agotado"),{code:"tiempo-agotado"})), ms))
   ]);
+}
+
+function idAleatorio(longitud, soloDigitos=false){
+  const chars = soloDigitos ? "0123456789" : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let s="";
+  for(let i=0;i<longitud;i++) s+=chars[Math.floor(Math.random()*chars.length)];
+  return s;
 }
 
 async function iniciar(){
@@ -674,7 +860,7 @@ async function iniciar(){
       const snap = await conTiempoLimite(db.collection("cuentas").doc(username).get());
       if(snap.exists){
         cuenta = snap.data();
-        await guardarIdentidadDispositivo(username); // reforzar en los tres almacenes
+        await guardarIdentidadDispositivo(username);
         entrarAplicacion();
         return;
       }
@@ -683,11 +869,9 @@ async function iniciar(){
     configurarBienvenida();
     const configSnap = await conTiempoLimite(db.collection("config").doc("app").get());
     if(!configSnap.exists){
-      // Esta app nunca se ha usado: se crea la primera cuenta (queda como admin) automáticamente
       $("texto-bienvenida").textContent = "Creando tu cuenta…";
       await crearCuentaNueva();
     }else{
-      // La app ya se ha usado antes: nunca se crea una cuenta sola, hay que iniciar sesión
       $("texto-bienvenida").textContent = "Inicia sesión con tu cuenta.";
       $("form-login-existente").style.display = "block";
     }
@@ -717,9 +901,9 @@ async function iniciarSesionExistente(){
     entrarAplicacion();
   }catch(e){
     console.error(e);
-    $("login-error").textContent = e && e.code === "tiempo-agotado"
+    $("login-error").textContent = e && e.code==="tiempo-agotado"
       ? "Se agotó el tiempo de espera al conectar. Revisa tu internet."
-      : "Error al conectar (" + (e && e.code ? e.code : "error") + "). Intenta de nuevo.";
+      : "Error al conectar ("+(e&&e.code?e.code:"error")+"). Intenta de nuevo.";
     $("login-error").style.display = "block";
   }
 }
@@ -727,14 +911,11 @@ async function iniciarSesionExistente(){
 function mostrarErrorArranque(e){
   console.error(e);
   mostrarPantalla("pantalla-bienvenida");
-  const codigo = e && e.code ? e.code : "error";
-  const mensaje = codigo === "tiempo-agotado"
+  const codigo = e&&e.code ? e.code : "error";
+  const mensaje = codigo==="tiempo-agotado"
     ? "Se agotó el tiempo esperando respuesta de Firestore (10s). Probablemente es tu conexión o un bloqueo de red, no las reglas."
-    : "No se pudo conectar (" + codigo + "). Revisa las reglas de Firestore o tu conexión.";
+    : "No se pudo conectar ("+codigo+"). Revisa las reglas de Firestore o tu conexión.";
   $("texto-bienvenida").textContent = mensaje;
-
-  // Botón de rescate: mostrar el formulario de inicio de sesión manual
-  // sin esperar otra llamada a Firestore (el usuario ya tiene sus credenciales guardadas)
   let btnRescate = $("btn-rescate-error");
   if(!btnRescate){
     btnRescate = document.createElement("button");
@@ -746,7 +927,6 @@ function mostrarErrorArranque(e){
       $("texto-bienvenida").textContent = "Inicia sesión con tu cuenta.";
       $("form-login-existente").style.display = "block";
       btnRescate.style.display = "none";
-      // Asegurarse de que el listener del botón de login esté activo
       $("btn-confirmar-login").onclick = iniciarSesionExistente;
     });
     $("pantalla-bienvenida").appendChild(btnRescate);
@@ -756,106 +936,94 @@ function mostrarErrorArranque(e){
 
 async function crearCuentaNueva(){
   try{
-    const username = "user" + idAleatorio(6, true);
+    const username = "user"+idAleatorio(6,true);
     const password = idAleatorio(9);
     const configRef = db.collection("config").doc("app");
     const configSnap = await conTiempoLimite(configRef.get());
     let rol = "usuario";
     if(!configSnap.exists){
       rol = "propietario";
-      await conTiempoLimite(configRef.set({ ownerUsername: username }));
+      await conTiempoLimite(configRef.set({ownerUsername:username}));
     }
-    const nuevaCuenta = { username, password, rol, creado: firebase.firestore.FieldValue.serverTimestamp() };
+    const nuevaCuenta = {username, password, rol, creado:firebase.firestore.FieldValue.serverTimestamp()};
     await conTiempoLimite(db.collection("cuentas").doc(username).set(nuevaCuenta));
-
-    if(rol === "usuario"){
+    if(rol==="usuario"){
       await conTiempoLimite(db.collection("conversaciones").doc(username).set({
-        participante: username,
-        ultimoMensaje: "Se ha conectado a la aplicación.",
-        ultimoAutor: "sistema",
-        ultimaFecha: firebase.firestore.FieldValue.serverTimestamp()
+        participante:username,
+        ultimoMensaje:"Se ha conectado a la aplicación.",
+        ultimoAutor:"sistema",
+        ultimaFecha:firebase.firestore.FieldValue.serverTimestamp()
       }));
       await conTiempoLimite(db.collection("conversaciones").doc(username).collection("mensajes").add({
-        autor: "sistema", tipo: "sistema", contenido: "Se ha conectado a la aplicación.",
-        fecha: firebase.firestore.FieldValue.serverTimestamp()
+        autor:"sistema", tipo:"sistema", contenido:"Se ha conectado a la aplicación.",
+        fecha:firebase.firestore.FieldValue.serverTimestamp()
       }));
     }
-
-    cuenta = { username, password, rol };
+    cuenta = {username, password, rol};
     await guardarIdentidadDispositivo(username);
-
     $("texto-bienvenida").textContent = "Tu cuenta quedó lista en este dispositivo.";
     $("bienvenida-usuario").textContent = username;
     $("bienvenida-clave").textContent = password;
     $("datos-cuenta-nueva").style.display = "block";
     $("btn-continuar").addEventListener("click", entrarAplicacion);
-  }catch(e){
-    mostrarErrorArranque(e);
-  }
+  }catch(e){ mostrarErrorArranque(e); }
 }
 
-/* ---------- Entrar a la aplicación ---------- */
+/* ===== ENTRADA A LA APP ===== */
+
 function entrarAplicacion(){
   const pantallaGuardada = localStorage.getItem("mensajeria_pantalla_actual");
-  if(cuenta.rol === "propietario"){
+  if(cuenta.rol==="propietario"){
     escucharListaChats();
     const ultima = localStorage.getItem("mensajeria_ultima_conv");
     if(ultima) abrirConversacion(ultima);
     else mostrarPantalla("vista-lista");
-    if(pantallaGuardada === "vista-cuenta") mostrarPantalla("vista-cuenta");
+    if(pantallaGuardada==="vista-cuenta") mostrarPantalla("vista-cuenta");
   }else{
     conversacionAbiertaId = cuenta.username;
     $("titulo-conversacion").textContent = "Mensajería";
     escucharMensajes(conversacionAbiertaId);
     cargarBorrador(conversacionAbiertaId);
-    mostrarPantalla(pantallaGuardada === "vista-cuenta" ? "vista-cuenta" : "vista-conversacion");
+    mostrarPantalla(pantallaGuardada==="vista-cuenta" ? "vista-cuenta" : "vista-conversacion");
   }
-  configurarNotificaciones();
   configurarCuenta();
   configurarConversacion();
+  // Pedir permisos automáticamente al entrar (con pequeño delay para que se vea la app primero)
+  setTimeout(solicitarPermisosAlEntrar, 600);
 }
 
-/* ---------- Lista de chats (propietario), renderizado incremental ---------- */
+/* ===== LISTA DE CHATS ===== */
+
 function escucharListaChats(){
   const contenedor = $("lista-chats");
-  const q = db.collection("conversaciones").orderBy("ultimaFecha", "desc");
-  desuscribirLista = q.onSnapshot((snap) => {
+  const q = db.collection("conversaciones").orderBy("ultimaFecha","desc");
+  desuscribirLista = q.onSnapshot(snap => {
     $("estado-vacio").style.display = snap.empty ? "block" : "none";
-
     snap.docChanges().forEach(cambio => {
       const id = cambio.doc.id;
       const c = cambio.doc.data();
-
-      if(cambio.type === "removed"){
+      if(cambio.type==="removed"){
         const nodo = elementosChat.get(id);
         if(nodo){ nodo.remove(); elementosChat.delete(id); }
         return;
       }
-
       let fila = elementosChat.get(id);
       if(!fila){
         fila = document.createElement("div");
         fila.className = "fila-chat";
         fila.innerHTML = `
           <div class="avatar">${inicial(c.participante)}</div>
-          <div class="info-chat">
-            <div class="nombre"></div>
-            <div class="previa"></div>
-          </div>
-          <div class="meta-chat"><div class="hora-chat"></div></div>
-        `;
+          <div class="info-chat"><div class="nombre"></div><div class="previa"></div></div>
+          <div class="meta-chat"><div class="hora-chat"></div></div>`;
         fila.addEventListener("click", () => abrirConversacion(id));
         elementosChat.set(id, fila);
       }
       fila.querySelector(".nombre").textContent = c.participante;
-      fila.querySelector(".previa").textContent = c.ultimoMensaje || "";
+      fila.querySelector(".previa").textContent = c.ultimoMensaje||"";
       fila.querySelector(".hora-chat").textContent = formatoHora(c.ultimaFecha);
-
-      // Reordenar: siempre al principio de la lista si es el más reciente
       contenedor.prepend(fila);
-
-      if(!primeraCargaLista && c.ultimoAutor && c.ultimoAutor !== cuenta.username && conversacionAbiertaId !== id){
-        notificar("Nuevo mensaje de " + c.participante, c.ultimoMensaje || "");
+      if(!primeraCargaLista && c.ultimoAutor && c.ultimoAutor!==cuenta.username && conversacionAbiertaId!==id){
+        notificar("Nuevo mensaje de "+c.participante, c.ultimoMensaje||"");
       }
     });
     primeraCargaLista = false;
@@ -878,37 +1046,51 @@ $("btn-atras-conv").addEventListener("click", () => {
   if(desuscribirMensajes) desuscribirMensajes();
   conversacionAbiertaId = null;
   localStorage.removeItem("mensajeria_ultima_conv");
-  if(cuenta && cuenta.rol === "propietario"){
-    mostrarPantalla("vista-lista");
-  }
+  if(cuenta && cuenta.rol==="propietario") mostrarPantalla("vista-lista");
 });
 
-/* ---------- Conversación, renderizado incremental ---------- */
+/* ===== CONVERSACIÓN ===== */
+
 function estaCercaDelFondo(cont){
   return cont.scrollHeight - cont.scrollTop - cont.clientHeight < 100;
 }
 
+// Rastrea la última fecha de separador insertado en el DOM
+let ultimaFechaSeparador = null;
+
 function escucharMensajes(id){
   if(desuscribirMensajes) desuscribirMensajes();
+  ultimaFechaSeparador = null;
   const cont = $("mensajes");
   const q = db.collection("conversaciones").doc(id).collection("mensajes").orderBy("fecha");
-  desuscribirMensajes = q.onSnapshot((snap) => {
+  desuscribirMensajes = q.onSnapshot(snap => {
     snap.docChanges().forEach(cambio => {
       const m = cambio.doc.data();
       const mid = cambio.doc.id;
-
-      if(cambio.type === "removed"){
+      if(cambio.type==="removed"){
         const nodo = elementosMensaje.get(mid);
         if(nodo){ nodo.remove(); elementosMensaje.delete(mid); }
         return;
       }
-
       const cercaDelFondo = estaCercaDelFondo(cont);
-      let nodo = elementosMensaje.get(mid);
-      const nuevo = !nodo;
+      const nodoExistente = elementosMensaje.get(mid);
       const construido = construirBurbuja(m);
-      if(nodo){
-        nodo.replaceWith(construido);
+
+      // Separador de fecha solo para mensajes nuevos que se añaden al final
+      if(!nodoExistente && m.fecha){
+        const claveFecha = clavesDeFecha(m.fecha);
+        if(claveFecha && claveFecha !== ultimaFechaSeparador){
+          const sep = document.createElement("div");
+          sep.className = "separador-fecha";
+          sep.setAttribute("data-fecha", claveFecha);
+          sep.textContent = etiquetaFecha(m.fecha);
+          cont.appendChild(sep);
+          ultimaFechaSeparador = claveFecha;
+        }
+      }
+
+      if(nodoExistente){
+        nodoExistente.replaceWith(construido);
       }else{
         cont.appendChild(construido);
       }
@@ -917,9 +1099,8 @@ function escucharMensajes(id){
       if(primeraCargaMensajes || cercaDelFondo){
         cont.scrollTop = cont.scrollHeight;
       }
-
-      if(!primeraCargaMensajes && nuevo && m.autor !== cuenta.username && document.hidden){
-        notificar("Mensaje nuevo", m.tipo === "texto" ? m.contenido : "Adjunto recibido");
+      if(!primeraCargaMensajes && !nodoExistente && m.autor!==cuenta.username && document.hidden){
+        notificar("Mensaje nuevo", m.tipo==="texto" ? m.contenido : "Adjunto recibido");
       }
     });
     primeraCargaMensajes = false;
@@ -928,36 +1109,28 @@ function escucharMensajes(id){
 
 function construirBurbuja(m){
   const div = document.createElement("div");
-  if(m.tipo === "sistema"){
+  if(m.tipo==="sistema"){
     div.className = "burbuja sistema";
     div.textContent = m.contenido;
     return div;
   }
   const esPropio = m.autor === cuenta.username;
-  div.className = "burbuja " + (esPropio ? "propio" : "ajeno");
-
-  if(m.tipo === "texto"){
+  div.className = "burbuja "+(esPropio ? "propio" : "ajeno");
+  if(m.tipo==="texto"){
     div.appendChild(document.createTextNode(m.contenido));
-  }else if(m.tipo === "imagen"){
+  }else if(m.tipo==="imagen"){
     const img = document.createElement("img");
-    img.src = m.contenido;
-    img.loading = "lazy";
-    img.decoding = "async";
-    img.className = "adjunto";
+    img.src = m.contenido; img.loading="lazy"; img.decoding="async"; img.className="adjunto";
     div.appendChild(img);
-  }else if(m.tipo === "audio"){
+  }else if(m.tipo==="audio"){
     const audio = document.createElement("audio");
-    audio.src = m.contenido;
-    audio.controls = true;
-    audio.preload = "none";
+    audio.src = m.contenido; audio.controls=true; audio.preload="none";
     div.appendChild(audio);
-  }else if(m.tipo === "documento"){
+  }else if(m.tipo==="documento"){
     const a = document.createElement("a");
-    a.href = m.contenido;
-    a.download = m.nombreArchivo || "documento";
-    a.className = "archivo";
+    a.href = m.contenido; a.download = m.nombreArchivo||"documento"; a.className="archivo";
     a.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg><span></span>`;
-    a.querySelector("span").textContent = m.nombreArchivo || "Documento";
+    a.querySelector("span").textContent = m.nombreArchivo||"Documento";
     div.appendChild(a);
   }
   const hora = document.createElement("span");
@@ -969,14 +1142,10 @@ function construirBurbuja(m){
 
 function configurarConversacion(){
   $("btn-enviar").addEventListener("click", enviarTexto);
-  $("campo-texto").addEventListener("keydown", (e) => {
-    if(e.key === "Enter") enviarTexto();
-  });
+  $("campo-texto").addEventListener("keydown", e => { if(e.key==="Enter") enviarTexto(); });
   $("campo-texto").addEventListener("input", guardarBorrador);
 
-  $("btn-adjuntar").addEventListener("click", () => {
-    $("menu-adjuntos").classList.toggle("abierto");
-  });
+  $("btn-adjuntar").addEventListener("click", () => $("menu-adjuntos").classList.toggle("abierto"));
   $("opt-imagen").addEventListener("click", () => {
     $("menu-adjuntos").classList.remove("abierto");
     $("input-imagen").click();
@@ -987,9 +1156,8 @@ function configurarConversacion(){
   });
   $("input-imagen").addEventListener("change", manejarImagen);
   $("input-documento").addEventListener("change", manejarDocumento);
-
-  $("btn-audio").addEventListener("click", alternarGrabacion);
-
+  $("btn-audio").addEventListener("click", iniciarGrabacion);
+  $("btn-cancelar-grabacion").addEventListener("click", cancelarGrabacion);
   $("btn-ir-cuenta").addEventListener("click", () => mostrarPantalla("vista-cuenta"));
   $("btn-ir-cuenta-2").addEventListener("click", () => mostrarPantalla("vista-cuenta"));
 }
@@ -1000,15 +1168,13 @@ async function enviarTexto(){
   if(!texto) return;
   campo.value = "";
   borrarBorrador();
+  // Restaurar foco al campo después de enviar
+  setTimeout(() => campo.focus(), 50);
   await enviarMensaje("texto", texto);
 }
 
-function claveBorrador(id){
-  return "mensajeria_borrador_" + id;
-}
-function cargarBorrador(id){
-  $("campo-texto").value = localStorage.getItem(claveBorrador(id)) || "";
-}
+function claveBorrador(id){ return "mensajeria_borrador_"+id; }
+function cargarBorrador(id){ $("campo-texto").value = localStorage.getItem(claveBorrador(id))||""; }
 function guardarBorrador(){
   if(!conversacionAbiertaId) return;
   const texto = $("campo-texto").value;
@@ -1023,21 +1189,16 @@ function manejarImagen(e){
   const archivo = e.target.files[0];
   if(!archivo) return;
   const lector = new FileReader();
-  lector.onload = (ev) => {
+  lector.onload = ev => {
     const img = new Image();
     img.onload = () => {
       const maxAncho = 800;
-      const escala = Math.min(1, maxAncho / img.width);
+      const escala = Math.min(1, maxAncho/img.width);
       const canvas = document.createElement("canvas");
-      canvas.width = img.width * escala;
-      canvas.height = img.height * escala;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.width = img.width*escala; canvas.height = img.height*escala;
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
       const base64 = canvas.toDataURL("image/jpeg", 0.65);
-      if(base64.length > LIMITE_ADJUNTO){
-        alert("La imagen es demasiado grande incluso comprimida. Intenta con otra.");
-        return;
-      }
+      if(base64.length > LIMITE_ADJUNTO){ alert("La imagen es demasiado grande incluso comprimida."); return; }
       enviarMensaje("imagen", base64);
     };
     img.src = ev.target.result;
@@ -1050,92 +1211,141 @@ function manejarDocumento(e){
   const archivo = e.target.files[0];
   if(!archivo) return;
   const lector = new FileReader();
-  lector.onload = (ev) => {
+  lector.onload = ev => {
     const base64 = ev.target.result;
-    if(base64.length > LIMITE_ADJUNTO){
-      alert("El documento supera el tamaño máximo permitido (~500 KB).");
-      return;
-    }
+    if(base64.length > LIMITE_ADJUNTO){ alert("El documento supera el tamaño máximo (~500 KB)."); return; }
     enviarMensaje("documento", base64, archivo.name);
   };
   lector.readAsDataURL(archivo);
   e.target.value = "";
 }
 
-async function alternarGrabacion(){
-  if(grabador && grabador.state === "recording"){
-    grabador.stop();
-    return;
-  }
+/* ===== GRABACIÓN DE AUDIO ===== */
+
+function formatearTiempoGrabacion(seg){
+  const m = Math.floor(seg/60);
+  const s = seg%60;
+  return m+":"+(s<10?"0"+s:s);
+}
+
+async function iniciarGrabacion(){
+  if(grabador && grabador.state==="recording"){ detenerGrabacion(); return; }
   try{
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    grabador = new MediaRecorder(stream);
+    streamGrabacion = await navigator.mediaDevices.getUserMedia({audio:true});
+    grabador = new MediaRecorder(streamGrabacion);
     trozosAudio = [];
-    grabador.ondataavailable = (e) => trozosAudio.push(e.data);
-    grabador.onstop = () => {
-      stream.getTracks().forEach(t => t.stop());
-      $("btn-audio").classList.remove("grabando");
-      const blob = new Blob(trozosAudio, { type: "audio/webm" });
-      const lector = new FileReader();
-      lector.onload = (ev) => {
-        const base64 = ev.target.result;
-        if(base64.length > LIMITE_ADJUNTO){
-          alert("La nota de audio es demasiado larga. Intenta una más breve.");
-          return;
-        }
-        enviarMensaje("audio", base64);
-      };
-      lector.readAsDataURL(blob);
-    };
+    grabador.ondataavailable = e => trozosAudio.push(e.data);
+    grabador.onstop = finalizarGrabacion;
     grabador.start();
+    // Mostrar barra de grabación
+    $("barra-grabacion").classList.add("activa");
     $("btn-audio").classList.add("grabando");
+    segundosGrabacion = 0;
+    $("tiempo-grabacion").textContent = formatearTiempoGrabacion(0);
+    timerGrabacion = setInterval(() => {
+      segundosGrabacion++;
+      $("tiempo-grabacion").textContent = formatearTiempoGrabacion(segundosGrabacion);
+    }, 1000);
   }catch(err){
-    alert("No se pudo acceder al micrófono.");
+    alert("No se pudo acceder al micrófono. Revisa los permisos.");
   }
+}
+
+function detenerGrabacion(){
+  if(grabador && grabador.state==="recording") grabador.stop();
+  clearInterval(timerGrabacion);
+  if(streamGrabacion) streamGrabacion.getTracks().forEach(t => t.stop());
+  $("barra-grabacion").classList.remove("activa");
+  $("btn-audio").classList.remove("grabando");
+}
+
+function cancelarGrabacion(){
+  if(grabador && grabador.state==="recording"){
+    grabador.ondataavailable = null;
+    grabador.onstop = null;
+    grabador.stop();
+  }
+  clearInterval(timerGrabacion);
+  if(streamGrabacion) streamGrabacion.getTracks().forEach(t => t.stop());
+  $("barra-grabacion").classList.remove("activa");
+  $("btn-audio").classList.remove("grabando");
+  trozosAudio = [];
+}
+
+function finalizarGrabacion(){
+  if(streamGrabacion) streamGrabacion.getTracks().forEach(t => t.stop());
+  $("barra-grabacion").classList.remove("activa");
+  $("btn-audio").classList.remove("grabando");
+  const blob = new Blob(trozosAudio, {type:"audio/webm"});
+  const lector = new FileReader();
+  lector.onload = ev => {
+    const base64 = ev.target.result;
+    if(base64.length > LIMITE_ADJUNTO){ alert("La nota de audio es demasiado larga. Intenta una más breve."); return; }
+    enviarMensaje("audio", base64);
+  };
+  lector.readAsDataURL(blob);
 }
 
 async function enviarMensaje(tipo, contenido, nombreArchivo=null){
   if(!conversacionAbiertaId) return;
   const refConv = db.collection("conversaciones").doc(conversacionAbiertaId);
   await refConv.collection("mensajes").add({
-    autor: cuenta.username, tipo, contenido, nombreArchivo, fecha: firebase.firestore.FieldValue.serverTimestamp()
+    autor:cuenta.username, tipo, contenido, nombreArchivo,
+    fecha:firebase.firestore.FieldValue.serverTimestamp()
   });
-  const resumen = tipo === "texto" ? contenido : tipo === "imagen" ? "Imagen" : tipo === "audio" ? "Nota de audio" : "Documento: " + (nombreArchivo || "");
+  const resumen = tipo==="texto" ? contenido
+    : tipo==="imagen" ? "Imagen"
+    : tipo==="audio" ? "Nota de audio"
+    : "Documento: "+(nombreArchivo||"");
   await refConv.set({
-    participante: conversacionAbiertaId,
-    ultimoMensaje: resumen,
-    ultimoAutor: cuenta.username,
-    ultimaFecha: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
+    participante:conversacionAbiertaId,
+    ultimoMensaje:resumen,
+    ultimoAutor:cuenta.username,
+    ultimaFecha:firebase.firestore.FieldValue.serverTimestamp()
+  }, {merge:true});
 }
 
-/* ---------- Cuenta ---------- */
+/* ===== CUENTA ===== */
+
 function configurarCuenta(){
   $("cuenta-usuario").textContent = cuenta.username;
-  $("cuenta-rol").textContent = cuenta.rol === "propietario" ? "Cuenta principal" : "Estándar";
+  $("cuenta-rol").textContent = cuenta.rol==="propietario" ? "Cuenta principal" : "Estándar";
+  renderizarPermisosCuenta();
 
   $("btn-atras-cuenta").addEventListener("click", () => {
-    if(cuenta.rol === "propietario" && !conversacionAbiertaId){
-      mostrarPantalla("vista-lista");
-    }else{
-      mostrarPantalla("vista-conversacion");
-    }
+    if(cuenta.rol==="propietario" && !conversacionAbiertaId) mostrarPantalla("vista-lista");
+    else mostrarPantalla("vista-conversacion");
   });
-
   $("btn-ver-clave").addEventListener("click", () => {
     const span = $("cuenta-clave");
-    const oculto = span.textContent === "••••••••";
+    const oculto = span.textContent==="••••••••";
     span.textContent = oculto ? cuenta.password : "••••••••";
     $("btn-ver-clave").textContent = oculto ? "Ocultar" : "Mostrar";
   });
-
+  $("btn-editar-clave").addEventListener("click", abrirModalClave);
   $("btn-cambiar-clave").addEventListener("click", cambiarClave);
+  $("btn-cancelar-clave").addEventListener("click", cerrarModalClave);
+  $("modal-clave").addEventListener("click", e => { if(e.target===$("modal-clave")) cerrarModalClave(); });
+  $("btn-gestionar-permisos").addEventListener("click", abrirModalPermisos);
   $("btn-cerrar-sesion").addEventListener("click", () => {
     olvidarIdentidadDispositivo();
     sessionStorage.removeItem("mensajeria_aviso_conexion");
     location.reload();
   });
+}
 
+function abrirModalClave(){
+  $("clave-actual").value = "";
+  $("clave-nueva").value = "";
+  $("clave-confirmar").value = "";
+  $("clave-error").style.display = "none";
+  $("clave-ok").style.display = "none";
+  $("modal-clave").classList.add("visible");
+  setTimeout(() => $("clave-actual").focus(), 200);
+}
+
+function cerrarModalClave(){
+  $("modal-clave").classList.remove("visible");
 }
 
 async function cambiarClave(){
@@ -1144,64 +1354,40 @@ async function cambiarClave(){
   const confirmar = $("clave-confirmar").value;
   $("clave-error").style.display = "none";
   $("clave-ok").style.display = "none";
-
-  if(actual !== cuenta.password){
+  if(actual!==cuenta.password){
     $("clave-error").textContent = "La contraseña actual no es correcta.";
-    $("clave-error").style.display = "block";
-    return;
+    $("clave-error").style.display = "block"; return;
   }
-  if(nueva.length < 4){
+  if(nueva.length<4){
     $("clave-error").textContent = "La nueva contraseña debe tener al menos 4 caracteres.";
-    $("clave-error").style.display = "block";
-    return;
+    $("clave-error").style.display = "block"; return;
   }
-  if(nueva !== confirmar){
+  if(nueva!==confirmar){
     $("clave-error").textContent = "Las contraseñas no coinciden.";
-    $("clave-error").style.display = "block";
-    return;
+    $("clave-error").style.display = "block"; return;
   }
-  await db.collection("cuentas").doc(cuenta.username).update({ password: nueva });
+  await db.collection("cuentas").doc(cuenta.username).update({password:nueva});
   cuenta.password = nueva;
-  $("clave-actual").value = "";
-  $("clave-nueva").value = "";
-  $("clave-confirmar").value = "";
-  $("clave-ok").textContent = "Contraseña actualizada correctamente.";
+  $("clave-actual").value = ""; $("clave-nueva").value = ""; $("clave-confirmar").value = "";
+  $("clave-ok").textContent = "Contraseña actualizada.";
   $("clave-ok").style.display = "block";
+  setTimeout(cerrarModalClave, 1200);
 }
 
-/* ---------- Notificaciones ---------- */
-function configurarNotificaciones(){
-  actualizarEstadoNotif();
-  $("btn-activar-notif").addEventListener("click", async () => {
-    if(!("Notification" in window)){
-      $("estado-notif").textContent = "Este navegador no admite notificaciones.";
-      return;
-    }
-    await Notification.requestPermission();
-    actualizarEstadoNotif();
-  });
-}
-
-function actualizarEstadoNotif(){
-  if(!("Notification" in window)){
-    $("estado-notif").textContent = "No disponibles en este navegador.";
-    return;
-  }
-  const estados = { granted: "Activadas.", denied: "Bloqueadas por el navegador.", default: "Aún no activadas." };
-  $("estado-notif").textContent = estados[Notification.permission];
-}
+/* ===== NOTIFICACIONES ===== */
 
 function notificar(titulo, cuerpo){
-  if("Notification" in window && Notification.permission === "granted"){
-    new Notification(titulo, { body: cuerpo || "" });
+  if("Notification" in window && Notification.permission==="granted"){
+    new Notification(titulo, {body:cuerpo||""});
   }
 }
 
-/* ---------- Cerrar menús al tocar fuera ---------- */
-document.addEventListener("click", (e) => {
+/* ===== CERRAR MENÚS AL TOCAR FUERA ===== */
+
+document.addEventListener("click", e => {
   const menu = $("menu-adjuntos");
   const boton = $("btn-adjuntar");
-  if(menu && menu.classList.contains("abierto") && !menu.contains(e.target) && e.target !== boton && !boton.contains(e.target)){
+  if(menu && menu.classList.contains("abierto") && !menu.contains(e.target) && e.target!==boton && !boton.contains(e.target)){
     menu.classList.remove("abierto");
   }
 });
