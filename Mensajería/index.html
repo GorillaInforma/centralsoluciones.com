@@ -513,6 +513,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
 db.enablePersistence({ synchronizeTabs: true }).catch(() => { /* no pasa nada si no está disponible */ });
 
 const LIMITE_ADJUNTO = 700000; // ~700 KB en base64, margen bajo el límite de 1 MB por documento de Firestore
