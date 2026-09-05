@@ -511,10 +511,24 @@ const firebaseConfig = {
   appId: "1:206928265543:web:d15652e8c6f17b38a70c62"
 };
 
+// Elimina cualquier Service Worker viejo (de otra prueba/deploy anterior en este
+// mismo dominio) que pudiera estar interceptando las peticiones de red y
+// provocando que las llamadas a Firestore se queden colgadas.
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.getRegistrations().then((registros) => {
+    registros.forEach((registro) => registro.unregister());
+  }).catch(() => {});
+  if(window.caches && caches.keys){
+    caches.keys().then((nombres) => nombres.forEach((n) => caches.delete(n))).catch(() => {});
+  }
+}
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
-db.enablePersistence({ synchronizeTabs: true }).catch(() => { /* no pasa nada si no está disponible */ });
+// Nota: se quitó enablePersistence(). Con varias pestañas del sitio abiertas,
+// el candado de IndexedDB entre pestañas (una de ellas congelada por Android)
+// podía dejar la app colgada para siempre esperando la conexión.
 
 const LIMITE_ADJUNTO = 700000; // ~700 KB en base64, margen bajo el límite de 1 MB por documento de Firestore
 
@@ -578,11 +592,13 @@ function inicial(nombre){
 function abrirAlmacenDispositivo(){
   return new Promise((resolve, reject) => {
     const solicitud = indexedDB.open("mensajeria_dispositivo", 1);
+    const tope = setTimeout(() => reject(new Error("indexeddb-bloqueada")), 4000);
     solicitud.onupgradeneeded = () => {
       solicitud.result.createObjectStore("identidad");
     };
-    solicitud.onsuccess = () => resolve(solicitud.result);
-    solicitud.onerror = () => reject(solicitud.error);
+    solicitud.onsuccess = () => { clearTimeout(tope); resolve(solicitud.result); };
+    solicitud.onerror = () => { clearTimeout(tope); reject(solicitud.error); };
+    solicitud.onblocked = () => { clearTimeout(tope); reject(new Error("indexeddb-bloqueada")); };
   });
 }
 
