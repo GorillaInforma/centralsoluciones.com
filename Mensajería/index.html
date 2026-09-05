@@ -444,13 +444,9 @@
 
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-import {
-  getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection,
-  query, orderBy, onSnapshot, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
-
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyAsmQ5ZjQUYatWzgxszvmEnHB5Tt9WLI34",
   authDomain: "mensajeria-8b60a.firebaseapp.com",
@@ -460,8 +456,9 @@ const firebaseConfig = {
   appId: "1:206928265543:web:d15652e8c6f17b38a70c62"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.enablePersistence({ synchronizeTabs: true }).catch(() => { /* no pasa nada si no está disponible */ });
 
 const LIMITE_ADJUNTO = 700000; // ~700 KB en base64, margen bajo el límite de 1 MB por documento de Firestore
 
@@ -473,6 +470,8 @@ let desuscribirLista = null;
 let desuscribirMensajes = null;
 let grabador = null;
 let trozosAudio = [];
+const elementosChat = new Map();      // conversacionId -> nodo de la fila en la lista
+const elementosMensaje = new Map();   // mensajeId -> nodo de la burbuja
 
 const $ = (id) => document.getElementById(id);
 
@@ -573,9 +572,8 @@ async function leerIdentidadDispositivo(){
 async function iniciar(){
   const username = await leerIdentidadDispositivo();
   if(username){
-    const ref = doc(db, "cuentas", username);
-    const snap = await getDoc(ref);
-    if(snap.exists()){
+    const snap = await db.collection("cuentas").doc(username).get();
+    if(snap.exists){
       cuenta = snap.data();
       await guardarIdentidadDispositivo(username); // reforzar en los tres almacenes
       entrarAplicacion();
@@ -589,25 +587,26 @@ async function iniciar(){
 async function crearCuentaNueva(){
   const username = "user" + idAleatorio(6, true);
   const password = idAleatorio(9);
-  const configRef = doc(db, "config", "app");
-  const configSnap = await getDoc(configRef);
+  const configRef = db.collection("config").doc("app");
+  const configSnap = await configRef.get();
   let rol = "usuario";
-  if(!configSnap.exists()){
+  if(!configSnap.exists){
     rol = "propietario";
-    await setDoc(configRef, { ownerUsername: username });
+    await configRef.set({ ownerUsername: username });
   }
-  const nuevaCuenta = { username, password, rol, creado: serverTimestamp() };
-  await setDoc(doc(db, "cuentas", username), nuevaCuenta);
+  const nuevaCuenta = { username, password, rol, creado: firebase.firestore.FieldValue.serverTimestamp() };
+  await db.collection("cuentas").doc(username).set(nuevaCuenta);
 
   if(rol === "usuario"){
-    await setDoc(doc(db, "conversaciones", username), {
+    await db.collection("conversaciones").doc(username).set({
       participante: username,
       ultimoMensaje: "Se ha conectado a la aplicación.",
       ultimoAutor: "sistema",
-      ultimaFecha: serverTimestamp()
+      ultimaFecha: firebase.firestore.FieldValue.serverTimestamp()
     });
-    await addDoc(collection(db, "conversaciones", username, "mensajes"), {
-      autor: "sistema", tipo: "sistema", contenido: "Se ha conectado a la aplicación.", fecha: serverTimestamp()
+    await db.collection("conversaciones").doc(username).collection("mensajes").add({
+      autor: "sistema", tipo: "sistema", contenido: "Se ha conectado a la aplicación.",
+      fecha: firebase.firestore.FieldValue.serverTimestamp()
     });
   }
 
@@ -618,13 +617,11 @@ async function crearCuentaNueva(){
   $("bienvenida-usuario").textContent = username;
   $("bienvenida-clave").textContent = password;
   $("datos-cuenta-nueva").style.display = "block";
-  $("opcion-login").style.display = "none";
   $("btn-continuar").addEventListener("click", entrarAplicacion);
 }
 
 /* ---------- Entrar a la aplicación ---------- */
 function entrarAplicacion(){
-  registrarConexion();
   if(cuenta.rol === "propietario"){
     mostrarPantalla("vista-lista");
     escucharListaChats();
@@ -639,50 +636,49 @@ function entrarAplicacion(){
   configurarConversacion();
 }
 
-async function registrarConexion(){
-  // Marca cada apertura de la app por parte de una cuenta normal (no propietario)
-  if(cuenta.rol === "usuario"){
-    const yaAvisoEstaSesion = sessionStorage.getItem("mensajeria_aviso_conexion");
-    if(!yaAvisoEstaSesion){
-      sessionStorage.setItem("mensajeria_aviso_conexion", "1");
-    }
-  }
-}
-
-/* ---------- Lista de chats (propietario) ---------- */
+/* ---------- Lista de chats (propietario), renderizado incremental ---------- */
 function escucharListaChats(){
-  const q = query(collection(db, "conversaciones"), orderBy("ultimaFecha", "desc"));
-  desuscribirLista = onSnapshot(q, (snap) => {
-    const contenedor = $("lista-chats");
-    contenedor.innerHTML = "";
+  const contenedor = $("lista-chats");
+  const q = db.collection("conversaciones").orderBy("ultimaFecha", "desc");
+  desuscribirLista = q.onSnapshot((snap) => {
     $("estado-vacio").style.display = snap.empty ? "block" : "none";
 
-    snap.forEach(docSnap => {
-      const c = docSnap.data();
-      const fila = document.createElement("div");
-      fila.className = "fila-chat";
-      fila.innerHTML = `
-        <div class="avatar">${inicial(c.participante)}</div>
-        <div class="info-chat">
-          <div class="nombre">${c.participante}</div>
-          <div class="previa">${c.ultimoMensaje || ""}</div>
-        </div>
-        <div class="meta-chat">
-          <div class="hora-chat">${formatoHora(c.ultimaFecha)}</div>
-        </div>
-      `;
-      fila.addEventListener("click", () => abrirConversacion(docSnap.id));
-      contenedor.appendChild(fila);
-    });
+    snap.docChanges().forEach(cambio => {
+      const id = cambio.doc.id;
+      const c = cambio.doc.data();
 
-    if(!primeraCargaLista){
-      snap.docChanges().forEach(cambio => {
-        const c = cambio.data();
-        if(c.ultimoAutor && c.ultimoAutor !== cuenta.username && conversacionAbiertaId !== cambio.doc.id){
-          notificar("Nuevo mensaje de " + c.participante, c.ultimoMensaje || "");
-        }
-      });
-    }
+      if(cambio.type === "removed"){
+        const nodo = elementosChat.get(id);
+        if(nodo){ nodo.remove(); elementosChat.delete(id); }
+        return;
+      }
+
+      let fila = elementosChat.get(id);
+      if(!fila){
+        fila = document.createElement("div");
+        fila.className = "fila-chat";
+        fila.innerHTML = `
+          <div class="avatar">${inicial(c.participante)}</div>
+          <div class="info-chat">
+            <div class="nombre"></div>
+            <div class="previa"></div>
+          </div>
+          <div class="meta-chat"><div class="hora-chat"></div></div>
+        `;
+        fila.addEventListener("click", () => abrirConversacion(id));
+        elementosChat.set(id, fila);
+      }
+      fila.querySelector(".nombre").textContent = c.participante;
+      fila.querySelector(".previa").textContent = c.ultimoMensaje || "";
+      fila.querySelector(".hora-chat").textContent = formatoHora(c.ultimaFecha);
+
+      // Reordenar: siempre al principio de la lista si es el más reciente
+      contenedor.prepend(fila);
+
+      if(!primeraCargaLista && c.ultimoAutor && c.ultimoAutor !== cuenta.username && conversacionAbiertaId !== id){
+        notificar("Nuevo mensaje de " + c.participante, c.ultimoMensaje || "");
+      }
+    });
     primeraCargaLista = false;
   });
 }
@@ -691,6 +687,8 @@ function abrirConversacion(id){
   conversacionAbiertaId = id;
   $("titulo-conversacion").textContent = id;
   primeraCargaMensajes = true;
+  elementosMensaje.clear();
+  $("mensajes").innerHTML = "";
   mostrarPantalla("vista-conversacion");
   escucharMensajes(id);
 }
@@ -703,26 +701,45 @@ $("btn-atras-conv").addEventListener("click", () => {
   }
 });
 
-/* ---------- Conversación ---------- */
+/* ---------- Conversación, renderizado incremental ---------- */
+function estaCercaDelFondo(cont){
+  return cont.scrollHeight - cont.scrollTop - cont.clientHeight < 100;
+}
+
 function escucharMensajes(id){
   if(desuscribirMensajes) desuscribirMensajes();
-  const q = query(collection(db, "conversaciones", id, "mensajes"), orderBy("fecha"));
-  desuscribirMensajes = onSnapshot(q, (snap) => {
-    const cont = $("mensajes");
-    cont.innerHTML = "";
-    snap.forEach(docSnap => {
-      cont.appendChild(construirBurbuja(docSnap.data()));
-    });
-    cont.scrollTop = cont.scrollHeight;
+  const cont = $("mensajes");
+  const q = db.collection("conversaciones").doc(id).collection("mensajes").orderBy("fecha");
+  desuscribirMensajes = q.onSnapshot((snap) => {
+    snap.docChanges().forEach(cambio => {
+      const m = cambio.doc.data();
+      const mid = cambio.doc.id;
 
-    if(!primeraCargaMensajes){
-      snap.docChanges().forEach(cambio => {
-        const m = cambio.data();
-        if(cambio.type === "added" && m.autor !== cuenta.username && document.hidden){
-          notificar("Mensaje nuevo", m.tipo === "texto" ? m.contenido : "Adjunto recibido");
-        }
-      });
-    }
+      if(cambio.type === "removed"){
+        const nodo = elementosMensaje.get(mid);
+        if(nodo){ nodo.remove(); elementosMensaje.delete(mid); }
+        return;
+      }
+
+      const cercaDelFondo = estaCercaDelFondo(cont);
+      let nodo = elementosMensaje.get(mid);
+      const nuevo = !nodo;
+      const construido = construirBurbuja(m);
+      if(nodo){
+        nodo.replaceWith(construido);
+      }else{
+        cont.appendChild(construido);
+      }
+      elementosMensaje.set(mid, construido);
+
+      if(primeraCargaMensajes || cercaDelFondo){
+        cont.scrollTop = cont.scrollHeight;
+      }
+
+      if(!primeraCargaMensajes && nuevo && m.autor !== cuenta.username && document.hidden){
+        notificar("Mensaje nuevo", m.tipo === "texto" ? m.contenido : "Adjunto recibido");
+      }
+    });
     primeraCargaMensajes = false;
   });
 }
@@ -738,23 +755,27 @@ function construirBurbuja(m){
   div.className = "burbuja " + (esPropio ? "propio" : "ajeno");
 
   if(m.tipo === "texto"){
-    div.textContent = m.contenido;
+    div.appendChild(document.createTextNode(m.contenido));
   }else if(m.tipo === "imagen"){
     const img = document.createElement("img");
     img.src = m.contenido;
+    img.loading = "lazy";
+    img.decoding = "async";
     img.className = "adjunto";
     div.appendChild(img);
   }else if(m.tipo === "audio"){
     const audio = document.createElement("audio");
     audio.src = m.contenido;
     audio.controls = true;
+    audio.preload = "none";
     div.appendChild(audio);
   }else if(m.tipo === "documento"){
     const a = document.createElement("a");
     a.href = m.contenido;
     a.download = m.nombreArchivo || "documento";
     a.className = "archivo";
-    a.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg><span>${m.nombreArchivo || "Documento"}</span>`;
+    a.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg><span></span>`;
+    a.querySelector("span").textContent = m.nombreArchivo || "Documento";
     div.appendChild(a);
   }
   const hora = document.createElement("span");
@@ -875,15 +896,16 @@ async function alternarGrabacion(){
 
 async function enviarMensaje(tipo, contenido, nombreArchivo=null){
   if(!conversacionAbiertaId) return;
-  await addDoc(collection(db, "conversaciones", conversacionAbiertaId, "mensajes"), {
-    autor: cuenta.username, tipo, contenido, nombreArchivo, fecha: serverTimestamp()
+  const refConv = db.collection("conversaciones").doc(conversacionAbiertaId);
+  await refConv.collection("mensajes").add({
+    autor: cuenta.username, tipo, contenido, nombreArchivo, fecha: firebase.firestore.FieldValue.serverTimestamp()
   });
   const resumen = tipo === "texto" ? contenido : tipo === "imagen" ? "Imagen" : tipo === "audio" ? "Nota de audio" : "Documento: " + (nombreArchivo || "");
-  await setDoc(doc(db, "conversaciones", conversacionAbiertaId), {
+  await refConv.set({
     participante: conversacionAbiertaId,
     ultimoMensaje: resumen,
     ultimoAutor: cuenta.username,
-    ultimaFecha: serverTimestamp()
+    ultimaFecha: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
 }
 
@@ -925,9 +947,8 @@ async function vincularCuentaExistente(){
   const clave = $("vinculo-clave").value;
   $("vinculo-error").style.display = "none";
   if(!usuario || !clave) return;
-  const ref = doc(db, "cuentas", usuario);
-  const snap = await getDoc(ref);
-  if(!snap.exists() || snap.data().password !== clave){
+  const snap = await db.collection("cuentas").doc(usuario).get();
+  if(!snap.exists || snap.data().password !== clave){
     $("vinculo-error").textContent = "Usuario o contraseña incorrectos.";
     $("vinculo-error").style.display = "block";
     return;
@@ -958,7 +979,7 @@ async function cambiarClave(){
     $("clave-error").style.display = "block";
     return;
   }
-  await updateDoc(doc(db, "cuentas", cuenta.username), { password: nueva });
+  await db.collection("cuentas").doc(cuenta.username).update({ password: nueva });
   cuenta.password = nueva;
   $("clave-actual").value = "";
   $("clave-nueva").value = "";
@@ -975,7 +996,7 @@ function configurarNotificaciones(){
       $("estado-notif").textContent = "Este navegador no admite notificaciones.";
       return;
     }
-    const permiso = await Notification.requestPermission();
+    await Notification.requestPermission();
     actualizarEstadoNotif();
   });
 }
