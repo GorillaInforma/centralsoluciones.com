@@ -2,16 +2,16 @@
   "name": "Mensajería",
   "short_name": "Mensajería",
   "description": "Chat en tiempo real",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "/Mensajería/index.html",
+  "scope": "/Mensajería/",
   "display": "standalone",
   "background_color": "#F5F6F8",
   "theme_color": "#16324F",
   "orientation": "portrait",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/Mensajería/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/Mensajería/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/Mensajería/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/Mensajería/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
