@@ -884,7 +884,7 @@ OneSignalDeferred.push(async (OneSignal) => {
   try{
     await OneSignal.init({
       appId: ONESIGNAL_APP_ID,
-      serviceWorkerPath: "OneSignalSDKWorker.js",
+      serviceWorkerPath: "Mensajería/OneSignalSDKWorker.js",
       serviceWorkerParam: { scope: "/Mensajería/" }
     });
     if(typeof actualizarDebug==="function") actualizarDebug("OneSignal.init OK");
