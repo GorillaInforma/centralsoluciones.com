@@ -876,10 +876,16 @@ const db = firebase.firestore();
 db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
 
 // OneSignal se inicializa solo y registra su propio service worker
-// (OneSignalSDKWorker.js, en la raíz del sitio) automáticamente.
+// (OneSignalSDKWorker.js). La app vive en la subcarpeta /Mensajería/, así
+// que le indicamos explícitamente esa ruta y ese scope (por defecto OneSignal
+// busca el archivo en la raíz del dominio, y ahí no está).
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async (OneSignal) => {
-  await OneSignal.init({ appId: ONESIGNAL_APP_ID });
+  await OneSignal.init({
+    appId: ONESIGNAL_APP_ID,
+    serviceWorkerPath: "OneSignalSDKWorker.js",
+    serviceWorkerParam: { scope: "/Mensajería/" }
+  });
 });
 
 const sonidoNotificacion = new Audio("sonido-notificacion.wav");
