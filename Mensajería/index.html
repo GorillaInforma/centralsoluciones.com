@@ -849,6 +849,9 @@
 <!-- BOTÓN FLOTANTE PARA INSTALAR LA APP (PWA) -->
 <button id="btn-instalar-flotante" style="display:none;">⬇ Instalar app</button>
 
+<!-- PANEL TEMPORAL DE DIAGNÓSTICO (quitar después de depurar) -->
+<div id="debug-instalar" style="position:fixed;top:0;left:0;right:0;z-index:2000;background:#111;color:#0f0;font:11px monospace;padding:6px 8px;white-space:pre-wrap;word-break:break-all;"></div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -2432,6 +2435,22 @@ function appYaInstalada(){
   return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 }
 
+// --- PANEL TEMPORAL DE DIAGNÓSTICO ---
+function actualizarDebug(extra){
+  const d = document.getElementById("debug-instalar");
+  if(!d) return;
+  d.textContent =
+    "instalable(standalone): " + appYaInstalada() +
+    " | prompt nativo recibido: " + !!promptInstalacionDiferido +
+    " | sw registrado: " + (navigator.serviceWorker && navigator.serviceWorker.controller ? "sí" : "no") +
+    (extra ? " | " + extra : "");
+}
+window.addEventListener("error", e => {
+  actualizarDebug("ERROR JS: " + e.message + " (línea " + e.lineno + ")");
+});
+setInterval(() => actualizarDebug(), 2000);
+actualizarDebug("cargando…");
+
 // Chrome/Edge/Android avisan que la instalación está disponible con este evento;
 // lo interceptamos para poder disparar el diálogo nativo nosotros, cuando el
 // usuario toque el botón flotante. En Safari/iOS este evento no existe, así
@@ -2440,6 +2459,7 @@ window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   promptInstalacionDiferido = e;
   if(!appYaInstalada()) $("btn-instalar-flotante").style.display = "";
+  actualizarDebug("beforeinstallprompt recibido");
 });
 
 window.addEventListener("appinstalled", () => {
