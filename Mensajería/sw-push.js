@@ -133,7 +133,7 @@ self.addEventListener("push", (evento) => {
 
 self.addEventListener("notificationclick", (evento) => {
   const datos = evento.notification.data || {};
-  const { conversacionId, campoContador, campoLeido, mensajeId, url } = datos;
+  const { conversacionId, campoContador, campoLeido, mensajeId } = datos;
   evento.notification.close();
 
   if(evento.action === "silenciar"){
@@ -152,22 +152,28 @@ self.addEventListener("notificationclick", (evento) => {
   // Clic en el cuerpo o en "Responder": abre/enfoca la app en esa conversación.
   const enfocarRespuesta = evento.action === "responder";
   evento.waitUntil((async () => {
-    await idbDelete("pendientes", conversacionId);
     const listaClientes = await clients.matchAll({ type: "window", includeUncontrolled: true });
     for(const cliente of listaClientes){
-      if(cliente.url.includes("/Mensajería/") && "focus" in cliente){
+      // Comparamos contra self.registration.scope (no un texto fijo con tilde),
+      // porque el navegador puede entregar cliente.url con la tilde codificada
+      // (ej. "%C3%AD") y la comparación literal nunca coincidía.
+      if(cliente.url.startsWith(self.registration.scope) && "focus" in cliente){
         await cliente.focus();
         cliente.postMessage({ tipo: "abrir_conversacion", conversacionId, enfocarRespuesta });
+        idbDelete("pendientes", conversacionId).catch(()=>{});
         return;
       }
     }
+    // App cerrada: en vez de esperar a que cargue y mandarle un mensaje con
+    // temporizador (poco confiable en conexiones lentas), abrimos ya con el
+    // destino directo en la URL para que la propia página lo lea al arrancar.
     if(clients.openWindow){
-      const nuevaVentana = await clients.openWindow(url || "/Mensajería/");
-      // Da tiempo a que la página cargue y registre su listener de mensajes.
-      if(nuevaVentana) setTimeout(() => {
-        nuevaVentana.postMessage({ tipo: "abrir_conversacion", conversacionId, enfocarRespuesta });
-      }, 1500);
+      const parametros = new URLSearchParams();
+      if(conversacionId) parametros.set("conv", conversacionId);
+      if(enfocarRespuesta) parametros.set("responder", "1");
+      await clients.openWindow(self.registration.scope + "?" + parametros.toString());
     }
+    idbDelete("pendientes", conversacionId).catch(()=>{});
   })());
 });
 
