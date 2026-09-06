@@ -1260,14 +1260,16 @@ async function renderizarPermisosModal(){
       </div>
       <span class="estado-permiso ${clase}">${texto}</span>
     `;
-    if(estado === "pendiente"){
-      item.style.cursor = "pointer";
-      item.addEventListener("click", async () => {
-        await p.solicitar();
-        renderizarPermisosModal();
-        renderizarPermisosCuenta();
-      });
-    }
+    item.style.cursor = "pointer";
+    item.addEventListener("click", async () => {
+      if(estado === "denegado"){
+        avisar(`El permiso de ${p.nombre.toLowerCase()} está bloqueado. Actívalo desde los ajustes del sistema/navegador para esta app.`);
+        return;
+      }
+      await p.solicitar();
+      renderizarPermisosModal();
+      renderizarPermisosCuenta();
+    });
     lista.appendChild(item);
   }
 }
