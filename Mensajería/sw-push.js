@@ -1,4 +1,4 @@
-  /* Service worker de Web Push nativo para Mensajería.
+/* Service worker de Web Push nativo para Mensajería.
    - Agrupa mensajes seguidos de la misma conversación en una sola
      notificación (como WhatsApp), en vez de ir apilando avisos sueltos.
    - Agrega botones de acción: Responder, Marcar leído, Silenciar.
@@ -133,7 +133,7 @@ self.addEventListener("push", (evento) => {
 
 self.addEventListener("notificationclick", (evento) => {
   const datos = evento.notification.data || {};
-  const { conversacionId, campoContador, campoLeido, mensajeId } = datos;
+  const { conversacionId, campoContador, campoLeido, mensajeId, url } = datos;
   evento.notification.close();
 
   if(evento.action === "silenciar"){
@@ -152,28 +152,26 @@ self.addEventListener("notificationclick", (evento) => {
   // Clic en el cuerpo o en "Responder": abre/enfoca la app en esa conversación.
   const enfocarRespuesta = evento.action === "responder";
   evento.waitUntil((async () => {
+    await idbDelete("pendientes", conversacionId);
     const listaClientes = await clients.matchAll({ type: "window", includeUncontrolled: true });
     for(const cliente of listaClientes){
-      // Comparamos contra self.registration.scope (no un texto fijo con tilde),
-      // porque el navegador puede entregar cliente.url con la tilde codificada
-      // (ej. "%C3%AD") y la comparación literal nunca coincidía.
-      if(cliente.url.startsWith(self.registration.scope) && "focus" in cliente){
+      if(cliente.url.includes("/Mensajería/") && "focus" in cliente){
         await cliente.focus();
         cliente.postMessage({ tipo: "abrir_conversacion", conversacionId, enfocarRespuesta });
-        idbDelete("pendientes", conversacionId).catch(()=>{});
         return;
       }
     }
-    // App cerrada: en vez de esperar a que cargue y mandarle un mensaje con
-    // temporizador (poco confiable en conexiones lentas), abrimos ya con el
-    // destino directo en la URL para que la propia página lo lea al arrancar.
     if(clients.openWindow){
-      const parametros = new URLSearchParams();
-      if(conversacionId) parametros.set("conv", conversacionId);
-      if(enfocarRespuesta) parametros.set("responder", "1");
-      await clients.openWindow(self.registration.scope + "?" + parametros.toString());
+      const base = url || "/Mensajería/";
+      const separador = base.includes("?") ? "&" : "?";
+      const urlDestino = `${base}${separador}conv=${encodeURIComponent(conversacionId)}${enfocarRespuesta ? "&responder=1" : ""}`;
+      const nuevaVentana = await clients.openWindow(urlDestino);
+      // El postMessage queda como respaldo por si la página ya estaba
+      // registrando su listener cuando abrió (no hace daño duplicarlo).
+      if(nuevaVentana) setTimeout(() => {
+        nuevaVentana.postMessage({ tipo: "abrir_conversacion", conversacionId, enfocarRespuesta });
+      }, 1500);
     }
-    idbDelete("pendientes", conversacionId).catch(()=>{});
   })());
 });
 
