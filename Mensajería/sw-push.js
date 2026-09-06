@@ -1,4 +1,4 @@
-/* Service worker de Web Push nativo para Mensajería.
+  /* Service worker de Web Push nativo para Mensajería.
    - Agrupa mensajes seguidos de la misma conversación en una sola
      notificación (como WhatsApp), en vez de ir apilando avisos sueltos.
    - Agrega botones de acción: Responder, Marcar leído, Silenciar.
@@ -109,6 +109,7 @@ self.addEventListener("push", (evento) => {
       badge: "icon-192.png",
       tag: "conv-" + conversacionId,
       renotify: true,
+      silent: true,
       data: {
         url: datos.url || "/Mensajería/",
         conversacionId,
