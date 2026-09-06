@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Mensajería</title>
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="/Mensajería/manifest.json">
 <meta name="theme-color" content="#16324F">
-<link rel="icon" href="favicon-32.png" sizes="32x32">
-<link rel="apple-touch-icon" href="icon-apple-touch.png">
+<link rel="icon" href="/Mensajería/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/Mensajería/icon-apple-touch.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -513,15 +513,31 @@
   }
   #modal-aviso.visible .modal-caja{ transform:translateY(0); }
 
-  /* Botón flotante para instalar la app */
-  #btn-instalar-flotante{
-    position:fixed;right:16px;bottom:16px;
+  /* Notificación para instalar la aplicación */
+  #noti-instalar{
+    position:fixed;left:8px;right:8px;top:8px;
     z-index:1000;
-    background:#16324F;color:#fff;border:none;
-    padding:12px 18px;border-radius:999px;
-    font-size:14px;font-weight:600;
-    box-shadow:0 4px 14px rgba(0,0,0,0.25);
-    cursor:pointer;
+    background:#16324F;color:#fff;
+    border-radius:14px;
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.3);
+    transform:translateY(-120%);
+    transition:transform 0.3s ease;
+  }
+  #noti-instalar.visible{ transform:translateY(0); }
+  #noti-instalar .noti-icono{
+    width:34px;height:34px;flex-shrink:0;
+    background:rgba(255,255,255,0.15);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #noti-instalar .noti-icono svg{ width:20px;height:20px; }
+  #noti-instalar .noti-texto{ flex:1;font-size:14px;line-height:1.25; }
+  #noti-instalar .noti-texto b{ display:block;font-size:14.5px; }
+  #noti-instalar .noti-texto span{ opacity:0.8;font-size:12px; }
+  #noti-instalar button{
+    background:transparent;border:none;color:#fff;
+    opacity:0.75;font-size:20px;line-height:1;padding:4px 6px;cursor:pointer;
   }
 
   /* Modal acciones de mensaje */
@@ -846,11 +862,21 @@
   </div>
 </div>
 
-<!-- BOTÓN FLOTANTE PARA INSTALAR LA APP (PWA) -->
-<button id="btn-instalar-flotante" style="display:none;">⬇ Instalar app</button>
+<!-- NOTIFICACIÓN PARA INSTALAR LA APLICACIÓN (PWA) -->
+<div id="noti-instalar">
+  <div class="noti-icono">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3v10m0 0l-3.5-3.5M12 13l3.5-3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 16v2a2 2 0 002 2h10a2 2 0 002-2v-2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="noti-texto" id="btn-instalar-flotante">
+    <b>Instalar aplicación</b>
+    <span>Accedé más rápido y recibí notificaciones</span>
+  </div>
+  <button id="btn-cerrar-noti-instalar" aria-label="Cerrar">×</button>
+</div>
 
-<!-- PANEL TEMPORAL DE DIAGNÓSTICO (quitar después de depurar) -->
-<div id="debug-instalar" style="position:fixed;top:0;left:0;right:0;z-index:2000;background:#111;color:#0f0;font:11px monospace;padding:6px 8px;white-space:pre-wrap;word-break:break-all;"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -887,9 +913,8 @@ OneSignalDeferred.push(async (OneSignal) => {
       serviceWorkerPath: "Mensajería/OneSignalSDKWorker.js",
       serviceWorkerParam: { scope: "/Mensajería/" }
     });
-    if(typeof actualizarDebug==="function") actualizarDebug("OneSignal.init OK");
   }catch(e){
-    if(typeof actualizarDebug==="function") actualizarDebug("OneSignal.init ERROR: " + e.message);
+    console.warn("OneSignal.init error:", e);
   }
 });
 
@@ -2438,66 +2463,59 @@ document.addEventListener("click", e => {
   }
 });
 
-/* ===== BOTÓN FLOTANTE PARA INSTALAR LA APP (PWA) ===== */
+/* ===== NOTIFICACIÓN PARA INSTALAR LA APLICACIÓN (PWA) ===== */
 
 let promptInstalacionDiferido = null;
+let notiInstalarCerradaPorUsuario = false;
 
 function appYaInstalada(){
   return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 }
 
-// --- PANEL TEMPORAL DE DIAGNÓSTICO ---
-function actualizarDebug(extra){
-  const d = document.getElementById("debug-instalar");
-  if(!d) return;
-  d.textContent =
-    "instalable(standalone): " + appYaInstalada() +
-    " | prompt nativo recibido: " + !!promptInstalacionDiferido +
-    (extra ? " | " + extra : "");
+function mostrarNotiInstalar(){
+  if(appYaInstalada() || notiInstalarCerradaPorUsuario || !promptInstalacionDiferido) return;
+  $("noti-instalar").classList.add("visible");
 }
-if(navigator.serviceWorker){
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    if(regs.length===0) actualizarDebug("SW registros: NINGUNO");
-    else actualizarDebug("SW registros: " + regs.map(r => r.scope + " -> " + (r.active ? r.active.scriptURL : "inactivo")).join(" ; "));
-  }).catch(e => actualizarDebug("SW getRegistrations ERROR: " + e.message));
+function ocultarNotiInstalar(){
+  $("noti-instalar").classList.remove("visible");
 }
-window.addEventListener("error", e => {
-  actualizarDebug("ERROR JS: " + e.message + " (línea " + e.lineno + ")");
-});
-setInterval(() => {
-  if(navigator.serviceWorker){
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      actualizarDebug(regs.length===0 ? "SW registros: NINGUNO" : "SW registros: " + regs.map(r => r.scope).join(" ; "));
-    });
-  }
-}, 3000);
-actualizarDebug("cargando…");
 
 // Chrome/Edge/Android avisan que la instalación está disponible con este evento;
-// lo interceptamos para poder disparar el diálogo nativo nosotros, cuando el
-// usuario toque el botón flotante. En Safari/iOS este evento no existe, así
-// que ahí el botón nunca aparece (no hay instalador nativo posible).
+// lo interceptamos para poder disparar el diálogo nativo nosotros. En Safari/iOS
+// este evento no existe, así que ahí la notificación nunca aparece (no hay
+// instalador nativo posible en esa plataforma).
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   promptInstalacionDiferido = e;
-  if(!appYaInstalada()) $("btn-instalar-flotante").style.display = "";
-  actualizarDebug("beforeinstallprompt recibido");
+  mostrarNotiInstalar();
 });
 
 window.addEventListener("appinstalled", () => {
   promptInstalacionDiferido = null;
-  $("btn-instalar-flotante").style.display = "none";
+  ocultarNotiInstalar();
 });
+
+// A los 5s de abrir la página: si el navegador ya ofreció el instalador
+// nativo, se muestra. Si todavía no lo ofreció, mostrarNotiInstalar() no
+// hace nada por ahora, y en cuanto llegue el evento beforeinstallprompt
+// (aunque sea más tarde) se muestra en ese momento.
+setTimeout(mostrarNotiInstalar, 5000);
 
 $("btn-instalar-flotante").addEventListener("click", async () => {
   if(!promptInstalacionDiferido) return;
   promptInstalacionDiferido.prompt();
   try{ await promptInstalacionDiferido.userChoice; }catch(e){}
   promptInstalacionDiferido = null;
-  $("btn-instalar-flotante").style.display = "none";
+  ocultarNotiInstalar();
+});
+
+$("btn-cerrar-noti-instalar").addEventListener("click", () => {
+  notiInstalarCerradaPorUsuario = true;
+  ocultarNotiInstalar();
 });
 
 iniciar();
 </script>
+
 </body>
 </html>
