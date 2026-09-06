@@ -896,7 +896,9 @@ const firebaseConfig = {
 // (panel de OneSignal > Settings > Keys & IDs). Con esto alcanza: no hace
 // falta VAPID, ni plan Blaze, ni Cloud Functions, ni Node.js.
 const ONESIGNAL_APP_ID = "430fa1d0-f56f-4255-a19d-4870bf248fba";
-const ONESIGNAL_REST_API_KEY = "os_v2_app_imh2duhvn5bflim5jbyl6jepxlgltf6xz2zudzu3s5ofh3wi3fhnuo3m43w5wjg5ntqwqccudaj7zjp6v2aqbxgs7jpu4bcgxox4umi";
+// La REST API Key ya NO vive aquí: ahora el envío pasa por un Worker de
+// Cloudflare que la guarda como secreto en su propio entorno.
+const WORKER_PUSH_URL = "https://billowing-wildflower-1cfb.santiagobrarcon.workers.dev";
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -943,22 +945,18 @@ async function registrarTokenNotificaciones(){
   }catch(e){ console.warn("No se pudo vincular OneSignal con la cuenta:", e); }
 }
 
-/* Envía el push por la REST API de OneSignal directamente desde el navegador
-   (sin backend). Nota: la REST API Key queda visible en el código fuente de
-   esta página; para un chat chico de dos personas el riesgo es bajo, pero
-   cualquiera que la vea podría usarla para mandar notificaciones a tu app.
-   Si te interesa reducirlo, en OneSignal podés crear una "Restricted Key"
-   con permiso únicamente para enviar mensajes (Settings > Keys & IDs). */
+/* Envía el push a través de un Worker de Cloudflare (proxy) en vez de llamar
+   a la API de OneSignal directamente desde el navegador. OneSignal no
+   permite llamadas CORS desde el navegador a su API de envío, así que antes
+   este fetch fallaba en silencio y el push nunca salía. El Worker guarda la
+   REST API Key como secreto de servidor y reenvía la petición. */
 async function enviarPushOneSignal(destinatario, autor, resumen){
   if(!destinatario || destinatario === autor) return;
   if(!ONESIGNAL_APP_ID || ONESIGNAL_APP_ID.startsWith("PEGA_AQUI")) return;
   try{
-    const resp = await fetch("https://api.onesignal.com/notifications", {
+    const resp = await fetch(WORKER_PUSH_URL, {
       method:"POST",
-      headers:{
-        "Content-Type":"application/json; charset=utf-8",
-        "Authorization":"Key "+ONESIGNAL_REST_API_KEY
-      },
+      headers:{ "Content-Type":"application/json; charset=utf-8" },
       body: JSON.stringify({
         app_id: ONESIGNAL_APP_ID,
         target_channel: "push",
@@ -969,11 +967,11 @@ async function enviarPushOneSignal(destinatario, autor, resumen){
     });
     const datos = await resp.json().catch(()=>null);
     if(!resp.ok || (datos && datos.errors)){
-      console.warn("OneSignal rechazó el push (status "+resp.status+"):", datos);
+      console.warn("El Worker/OneSignal rechazó el push (status "+resp.status+"):", datos);
     }else{
       console.log("Push de OneSignal enviado:", datos);
     }
-  }catch(e){ console.warn("No se pudo enviar el push de OneSignal (red/CORS):", e); }
+  }catch(e){ console.warn("No se pudo enviar el push (red/Worker caído):", e); }
 }
 
 const LIMITE_ADJUNTO = 900000;
