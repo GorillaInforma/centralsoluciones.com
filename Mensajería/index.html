@@ -881,11 +881,16 @@ db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
 // busca el archivo en la raíz del dominio, y ahí no está).
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async (OneSignal) => {
-  await OneSignal.init({
-    appId: ONESIGNAL_APP_ID,
-    serviceWorkerPath: "OneSignalSDKWorker.js",
-    serviceWorkerParam: { scope: "/Mensajería/" }
-  });
+  try{
+    await OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      serviceWorkerPath: "OneSignalSDKWorker.js",
+      serviceWorkerParam: { scope: "/Mensajería/" }
+    });
+    if(typeof actualizarDebug==="function") actualizarDebug("OneSignal.init OK");
+  }catch(e){
+    if(typeof actualizarDebug==="function") actualizarDebug("OneSignal.init ERROR: " + e.message);
+  }
 });
 
 const sonidoNotificacion = new Audio("sonido-notificacion.wav");
@@ -2448,13 +2453,24 @@ function actualizarDebug(extra){
   d.textContent =
     "instalable(standalone): " + appYaInstalada() +
     " | prompt nativo recibido: " + !!promptInstalacionDiferido +
-    " | sw registrado: " + (navigator.serviceWorker && navigator.serviceWorker.controller ? "sí" : "no") +
     (extra ? " | " + extra : "");
+}
+if(navigator.serviceWorker){
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    if(regs.length===0) actualizarDebug("SW registros: NINGUNO");
+    else actualizarDebug("SW registros: " + regs.map(r => r.scope + " -> " + (r.active ? r.active.scriptURL : "inactivo")).join(" ; "));
+  }).catch(e => actualizarDebug("SW getRegistrations ERROR: " + e.message));
 }
 window.addEventListener("error", e => {
   actualizarDebug("ERROR JS: " + e.message + " (línea " + e.lineno + ")");
 });
-setInterval(() => actualizarDebug(), 2000);
+setInterval(() => {
+  if(navigator.serviceWorker){
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      actualizarDebug(regs.length===0 ? "SW registros: NINGUNO" : "SW registros: " + regs.map(r => r.scope).join(" ; "));
+    });
+  }
+}, 3000);
 actualizarDebug("cargando…");
 
 // Chrome/Edge/Android avisan que la instalación está disponible con este evento;
