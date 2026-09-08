@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Descifrador de cadenas binarias</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#fafafa;
+    --panel-2:#f2f3f5;
+    --line:#e0e2e6;
+    --text:#1c1f24;
+    --dim:#6b7280;
+    --accent:#1a56db;
+    --accent-soft:#e8eefc;
+    --bad:#c0392b;
+    --good:#1f8a55;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    padding:40px 20px 60px;
+    line-height:1.55;
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{
+    font-size:1.4rem;
+    margin:0 0 26px;
+    color:var(--text);
+    font-weight:600;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:14px;
+  }
+  @media(max-width:640px){.grid{grid-template-columns:1fr;}}
+  label{
+    display:block;
+    font-size:.82rem;
+    color:var(--dim);
+    margin-bottom:6px;
+  }
+  input[type=number], input[type=text], textarea{
+    width:100%;
+    background:#ffffff;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:16px;
+    padding:10px 12px;
+    border-radius:6px;
+  }
+  input:focus, textarea:focus, select:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  textarea{resize:vertical;min-height:70px;grid-column:1/-1;}
+  .field-full{grid-column:1/-1;}
+  button{
+    background:var(--accent);
+    color:#ffffff;
+    border:none;
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:.9rem;
+    padding:11px 20px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  button:hover{filter:brightness(1.08);}
+  button:disabled{background:#c6ccd6;cursor:not-allowed;}
+  button.secondary{
+    background:#ffffff;
+    color:var(--accent);
+    border:1px solid var(--accent);
+  }
+  button.secondary:hover{background:var(--accent-soft);}
+  .btn-row{display:flex;gap:10px;margin:16px 0 28px;flex-wrap:wrap;align-items:center;}
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:20px;
+  }
+  .panel h2{
+    font-size:.95rem;
+    color:var(--text);
+    margin:0 0 14px;
+    font-weight:600;
+  }
+  .stats{display:flex;gap:26px;flex-wrap:wrap;font-size:.9rem;}
+  .stat b{display:block;font-size:1.3rem;color:var(--text);font-weight:600;}
+  .stat span.lbl{color:var(--dim);font-size:.8rem;}
+  .ok{color:var(--good);}
+  .warn{color:var(--bad);}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;}
+  th,td{
+    text-align:left;
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  th{color:var(--dim);font-weight:600;font-size:.8rem;}
+  td.code{color:var(--accent);font-weight:600;}
+  td.freq{color:var(--dim);}
+  select{
+    width:100%;
+    background:#ffffff;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:16px;
+    padding:7px 9px;
+    border-radius:6px;
+  }
+  .output{
+    font-size:1.2rem;
+    letter-spacing:.02em;
+    word-break:break-all;
+    background:#ffffff;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px;
+    min-height:50px;
+  }
+  .output .missing{color:var(--dim);}
+  .seq-view{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:16px;
+  }
+  .chip{
+    background:#ffffff;
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:4px 8px;
+    font-size:.78rem;
+    color:var(--dim);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .chip b{color:var(--accent);font-weight:600;}
+  .msg{font-size:.85rem;margin-top:8px;}
+  .check-row{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:6px;}
+  .check-item{display:flex;align-items:center;gap:7px;font-size:.88rem;color:var(--text);}
+  .check-item input{width:auto;}
+  .gen-summary{font-size:.88rem;margin:10px 0 16px;}
+  .gen-summary b{color:var(--text);}
+  .resultTable td{font-size:.95rem;}
+  .resultTable td.idx{color:var(--dim);width:60px;}
+  .scroll-list-wrap{border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  .scroll-list-header{display:flex;background:var(--panel-2);border-bottom:1px solid var(--line);font-size:.8rem;color:var(--dim);font-weight:600;}
+  .scroll-list-header .col-idx, .vrow .col-idx{width:70px;flex:none;padding:8px 12px;box-sizing:border-box;}
+  .scroll-list-header .col-val, .vrow .col-val{flex:1;padding:8px 12px;box-sizing:border-box;word-break:break-all;}
+  .scroll-list{height:480px;overflow-y:auto;position:relative;background:#fff;
+    /* Virtual scrolling: aquí solo viven las ~15-20 filas visibles en pantalla,
+       nunca las decenas de miles generadas. El alto total lo simula #virtualSpacer. */
+  }
+  .vrow{display:flex;align-items:center;border-bottom:1px solid var(--line);font-size:.95rem;box-sizing:border-box;}
+  .vrow .col-idx{color:var(--dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1 id="tituloApp">Descifrador de cadenas binarias</h1>
+
+  <div class="panel">
+    <h2>Parámetros</h2>
+    <div class="grid">
+      <div>
+        <label>Caracteres únicos</label>
+        <input type="number" id="inUnique" placeholder="ej. 9" min="1">
+      </div>
+      <div>
+        <label>Total de letras/símbolos en la secuencia</label>
+        <input type="number" id="inTotal" placeholder="ej. 15" min="1">
+      </div>
+      <div>
+        <label>Bits por código</label>
+        <input type="number" id="inBits" placeholder="ej. 4" min="1" max="16">
+      </div>
+      <div>
+        <label>Idioma para sugerencia de frecuencia</label>
+        <select id="inLang">
+          <option value="es">Español</option>
+          <option value="en">Inglés</option>
+        </select>
+      </div>
+      <div class="field-full">
+        <label>Cadena binaria completa</label>
+        <textarea id="inBin" placeholder="0000 0001 0010 0011 ..."></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="secondary" onclick="limpiarAsignaciones()">Limpiar</button>
+    </div>
+    <div id="validation"></div>
+  </div>
+
+  <div class="panel" id="panelStats" style="display:none;">
+    <h2>Resumen</h2>
+    <div class="stats" id="statsBox"></div>
+  </div>
+
+  <div class="panel" id="panelGen" style="display:none;">
+    <h2>Todas las combinaciones posibles</h2>
+    <div class="check-row">
+      <label class="check-item"><input type="checkbox" id="chkLetras" checked> Letras (A–Z, Ñ)</label>
+      <label class="check-item"><input type="checkbox" id="chkNumeros"> Números (0–9)</label>
+      <label class="check-item"><input type="checkbox" id="chkSimbolos"> Símbolos</label>
+      <label class="check-item"><input type="checkbox" id="chkEspacio" checked> Espacio (espaciado)</label>
+    </div>
+    <div class="gen-summary" id="genSummary"></div>
+    <div class="btn-row" style="align-items:center;">
+      <label style="font-size:.82rem;color:var(--dim);">Ordenar resultados por:</label>
+      <select id="inOrdenGen" onchange="cambiarOrden(this.value)">
+        <option value="orden">Generación (A-Z)</option>
+        <option value="coherencia">Coherencia en español (solo palabras reales)</option>
+      </select>
+    </div>
+    <div class="msg" id="dictStatus"></div>
+    <div class="btn-row">
+      <button class="secondary" id="btnDownloadAll" onclick="descargarTodoCompleto()" style="display:none;">Descargar TODO lo generado</button>
+      <button class="secondary" id="btnClear" onclick="copiarGenerados()" style="display:none;">Copiar</button>
+    </div>
+    <div class="gen-summary" id="genProgress"></div>
+    <div id="genResults"></div>
+  </div>
+
+
+</div>
+
+<script>
+const LETRAS = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
+const NUMEROS = '0123456789'.split('');
+const SIMBOLOS = ['-','!','@','#','$','%','^','&','*','(',')',"'",'"',':',';',',','?','.'];
+const ESPACIO = [' '];
+
+// ==== Orden por "coherencia en español" ====
+// Heurística simple, sin diccionario: premia la alternancia consonante-vocal
+// (que es como suenan la mayoría de palabras en español) y castiga las rachas
+// largas de consonantes seguidas (poco naturales en español).
+const VOCALES_ES = new Set(['A','E','I','O','U','Á','É','Í','Ó','Ú','Ü']);
+let ordenResultados = 'orden'; // 'orden' = como se generó (A-Z) | 'coherencia' = heurística de español
+
+function tipoCaracter(ch){
+  const c = ch.toUpperCase();
+  if (VOCALES_ES.has(c)) return 'vocal';
+  if (c >= 'A' && c <= 'Z' || c === 'Ñ') return 'consonante';
+  return 'otro'; // dígitos, símbolos, espacio: no cuentan como racha ni como par
+}
+
+function puntajeCoherencia(palabra){
+  let pares = 0;
+  let penalizacion = 0;
+  let racha = 0;
+  let anterior = null;
+  for (let i = 0; i < palabra.length; i++){
+    const tipo = tipoCaracter(palabra[i]);
+    if (tipo === 'consonante'){
+      racha++;
+    } else {
+      if (racha > 1) penalizacion += (racha - 1) * (racha - 1);
+      racha = 0;
+    }
+    if (anterior && ((anterior === 'consonante' && tipo === 'vocal') || (anterior === 'vocal' && tipo === 'consonante'))){
+      pares++;
+    }
+    anterior = tipo;
+  }
+  if (racha > 1) penalizacion += (racha - 1) * (racha - 1);
+  return pares - penalizacion;
+}
+
+function ordenarPorCoherencia(lista){
+  return lista
+    .map((palabra, i) => ({palabra, i, puntaje: puntajeCoherencia(palabra)}))
+    .sort((a, b) => (b.puntaje - a.puntaje) || (a.i - b.i))
+    .map(x => x.palabra);
+}
+
+// ==== Diccionario real de español (para el modo "Coherencia en español") ====
+// Se carga UNA sola vez desde el navegador (no desde este servidor) al elegir
+// el modo "Coherencia en español". Es el diccionario hunspell de LibreOffice
+// (el mismo que usan LibreOffice/Firefox para el corrector ortográfico),
+// público y sin necesidad de API key. Si la primera fuente falla, se intenta
+// una de respaldo. Cada línea del archivo .dic es "palabra" o "palabra/FLAGS";
+// solo nos interesa la palabra, los FLAGS son reglas de conjugación/plural
+// que no necesitamos aquí.
+const DICCIONARIO_URLS = [
+  'https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/es_ES.dic',
+  'https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/es_MX.dic'
+];
+
+let dictPalabras = null;   // Set con todas las palabras válidas (normalizadas) una vez cargado
+let dictCargando = false;
+let dictError = null;
+let dictVersion = 0;       // se incrementa cuando cambia el estado del diccionario, para invalidar cachés
+
+function normalizarParaDiccionario(str){
+  // Mayúsculas y sin tildes en vocales (el generador nunca produce tildes),
+  // pero la Ñ se conserva tal cual porque es una letra propia, no un acento.
+  return str.toUpperCase()
+    .replace(/Á/g,'A').replace(/É/g,'E').replace(/Í/g,'I').replace(/Ó/g,'O').replace(/Ú/g,'U').replace(/Ü/g,'U');
+}
+
+function actualizarEstadoDiccionario(){
+  const el = document.getElementById('dictStatus');
+  if (!el) return;
+  if (ordenResultados !== 'coherencia'){ el.innerHTML = ''; return; }
+  if (dictCargando){
+    el.innerHTML = 'Cargando diccionario de español (una sola vez, luego queda en memoria)…';
+  } else if (dictError){
+    el.innerHTML = `<span class="warn">${dictError}</span>`;
+  } else if (dictPalabras){
+    const encontradas = getListaOrdenada().length;
+    el.innerHTML = `<span class="ok">Diccionario cargado (${dictPalabras.size.toLocaleString('es-MX')} palabras).</span> Mostrando solo palabras reales encontradas: <b>${encontradas.toLocaleString('es-MX')}</b> de ${genCumulativeCount.toLocaleString('es-MX')} combinaciones generadas.`;
+  }
+}
+
+async function cargarDiccionario(){
+  if (dictPalabras || dictCargando) return;
+  dictCargando = true;
+  dictError = null;
+  actualizarEstadoDiccionario();
+  renderGenList();
+
+  for (const url of DICCIONARIO_URLS){
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) continue;
+      const buffer = await resp.arrayBuffer();
+      // Los diccionarios hunspell antiguos vienen en ISO-8859-1; si al leerlos
+      // como UTF-8 aparecen caracteres de reemplazo, se vuelve a decodificar.
+      let texto = new TextDecoder('utf-8').decode(buffer);
+      if (texto.indexOf('\uFFFD') !== -1){
+        texto = new TextDecoder('iso-8859-1').decode(buffer);
+      }
+      const lineas = texto.split(/\r?\n/);
+      const set = new Set();
+      for (let i = 1; i < lineas.length; i++){ // línea 0 es el conteo de palabras del formato .dic, se salta
+        const linea = lineas[i];
+        if (!linea) continue;
+        const palabra = linea.split('/')[0].trim();
+        if (palabra) set.add(normalizarParaDiccionario(palabra));
+      }
+      if (set.size > 1000){
+        dictPalabras = set;
+        dictCargando = false;
+        dictVersion++;
+        actualizarEstadoDiccionario();
+        renderGenList();
+        return;
+      }
+    } catch (e){
+      // se intenta con la siguiente fuente de respaldo
+    }
+  }
+
+  dictCargando = false;
+  dictError = 'No se pudo cargar el diccionario (revisa tu conexión a internet). No se está filtrando por palabras reales.';
+  dictVersion++;
+  actualizarEstadoDiccionario();
+  renderGenList();
+}
+
+// Cache de la lista a mostrar: evita recalcular filtro+orden en cada scroll
+// si no cambió ni la cantidad de resultados generados ni el estado del diccionario.
+let cacheOrdenClave = null;
+let cacheOrdenLargo = -1;
+let cacheOrdenDictVersion = -1;
+let cacheOrdenLista = null;
+
+function getListaOrdenada(){
+  if (ordenResultados !== 'coherencia') return genDisplayResults; // ya está en orden de generación, no hace falta copiar
+
+  if (cacheOrdenClave === ordenResultados && cacheOrdenLargo === genDisplayResults.length && cacheOrdenDictVersion === dictVersion){
+    return cacheOrdenLista;
+  }
+
+  // Si el diccionario ya cargó: solo palabras reales. Si todavía no carga
+  // (o falló), se muestra la lista completa ordenada por la heurística, para
+  // no dejar la pantalla vacía mientras se descarga.
+  let base = genDisplayResults;
+  if (dictPalabras){
+    base = base.filter(palabra => dictPalabras.has(normalizarParaDiccionario(palabra)));
+  }
+  cacheOrdenLista = ordenarPorCoherencia(base);
+  cacheOrdenClave = ordenResultados;
+  cacheOrdenLargo = genDisplayResults.length;
+  cacheOrdenDictVersion = dictVersion;
+  return cacheOrdenLista;
+}
+
+function cambiarOrden(valor){
+  ordenResultados = valor;
+  const selGen = document.getElementById('inOrdenGen');
+  if (selGen) selGen.value = valor;
+  guardarParametrosLocales();
+  if (valor === 'coherencia') cargarDiccionario();
+  actualizarEstadoDiccionario();
+  renderGenList();
+}
+
+const FREQ_ES = ['E','A','O','S','R','N','I','D','L','C','T','U','M','P','B','G','Y','V','Q','H','F','Z','J','Ñ','X','W','K',' ','-'];
+const FREQ_EN = ['E','T','A','O','I','N','S','H','R','D','L','C','U','M','W','F','G','Y','P','B','V','K','J','X','Q','Z',' ','-'];
+
+const DISPLAY_LIMIT = 150000; // tope de seguridad: totales normales (miles/decenas de miles) se muestran completos; solo frena ante totales verdaderamente enormes (millones), para no congelar el navegador
+const TICK_SIZE = 500;      // cuántos se procesan por ciclo, para no congelar la pestaña
+const RENDER_LIST_THROTTLE_MS = 200; // no redibujar la tabla más seguido que esto, para dejar espacio al scroll
+
+let genPool = null;        // conjunto de caracteres disponible para la corrida actual
+let genUltimoRenderListMs = 0; // marca de tiempo del último redibujo de la tabla
+
+let state = {
+  codes: [],
+  unique: [],
+  freq: {},
+  assign: {}
+};
+
+let genDisplayResults = []; // TODO lo generado en esta sesión, de la palabra 1 a la última (solo en memoria, no se guarda)
+let genTotalTheoretical = null;
+let genGenerator = null;
+let genContext = null;
+let genCumulativeCount = 0;
+let genDone = false;
+let genLimiteAlcanzado = false; // true si se paró por llegar a DISPLAY_LIMIT sin terminar
+let genRunToken = 0;
+
+function factorialPerm(n, r){
+  if (r > n) return null;
+  let result = 1n;
+  for (let i = 0; i < r; i++) result *= BigInt(n - i);
+  return result.toString();
+}
+
+function formatBigNumber(str){
+  if (str.length > 21){
+    const exp = str.length - 1;
+    const mantissa = str[0] + '.' + str.slice(1, 4);
+    return mantissa + ' × 10^' + exp;
+  }
+  return str.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function analizar(){
+  const bitsVal = parseInt(document.getElementById('inBits').value, 10);
+  const uniqueVal = parseInt(document.getElementById('inUnique').value, 10);
+  const totalVal = parseInt(document.getElementById('inTotal').value, 10);
+  const rawBin = document.getElementById('inBin').value.replace(/[^01]/g, '');
+  const valBox = document.getElementById('validation');
+  valBox.innerHTML = '';
+
+  if (!bitsVal || bitsVal < 1){
+    valBox.innerHTML = '<div class="msg warn">Indica cuántos bits tiene cada código.</div>';
+    return;
+  }
+  if (!rawBin){
+    valBox.innerHTML = '<div class="msg warn">Pega la cadena binaria a analizar.</div>';
+    return;
+  }
+  if (rawBin.length % bitsVal !== 0){
+    valBox.innerHTML = `<div class="msg warn">La cadena tiene ${rawBin.length} bits, que no es múltiplo de ${bitsVal}. Revisa la cadena o el tamaño de código.</div>`;
+    return;
+  }
+
+  const codes = [];
+  for (let i = 0; i < rawBin.length; i += bitsVal){
+    codes.push(rawBin.slice(i, i + bitsVal));
+  }
+
+  const freq = {};
+  const uniqueOrdered = [];
+  codes.forEach(c => {
+    if (!(c in freq)){ freq[c] = 0; uniqueOrdered.push(c); }
+    freq[c]++;
+  });
+
+  state.codes = codes;
+  state.unique = uniqueOrdered;
+  state.freq = freq;
+  const newAssign = {};
+  uniqueOrdered.forEach(c => { newAssign[c] = state.assign[c] || ''; });
+  state.assign = newAssign;
+
+  let msgs = [];
+  if (totalVal && totalVal !== codes.length){
+    msgs.push(`<span class="warn">Esperabas ${totalVal} símbolos en total, pero la cadena produce ${codes.length}.</span>`);
+  } else if (totalVal){
+    msgs.push(`<span class="ok">Total de símbolos coincide (${codes.length}).</span>`);
+  }
+  if (uniqueVal && uniqueVal !== uniqueOrdered.length){
+    msgs.push(`<span class="warn">Esperabas ${uniqueVal} caracteres únicos, pero se encontraron ${uniqueOrdered.length}.</span>`);
+  } else if (uniqueVal){
+    msgs.push(`<span class="ok">Caracteres únicos coinciden (${uniqueOrdered.length}).</span>`);
+  }
+  valBox.innerHTML = msgs.map(m => `<div class="msg">${m}</div>`).join('');
+
+  renderStats(bitsVal, codes.length, uniqueOrdered.length);
+  renderTable();
+  renderOutput();
+  document.getElementById('panelGen').style.display = 'block';
+  restartGeneration();
+}
+
+function renderStats(bits, total, uniqueCount){
+  document.getElementById('panelStats').style.display = 'block';
+  const maxPossible = Math.pow(2, bits);
+  document.getElementById('statsBox').innerHTML = `
+    <div class="stat"><b>${total}</b><span class="lbl">símbolos totales</span></div>
+    <div class="stat"><b>${uniqueCount}</b><span class="lbl">códigos únicos</span></div>
+    <div class="stat"><b>${bits}</b><span class="lbl">bits por código</span></div>
+    <div class="stat"><b>${maxPossible}</b><span class="lbl">combinaciones posibles</span></div>
+    <div class="stat"><b>${maxPossible - uniqueCount}</b><span class="lbl">códigos sin usar</span></div>
+  `;
+}
+
+function renderTable(){
+  // Sección de "Asignación manual (opcional)" eliminada; función queda sin efecto.
+}
+
+function renderOutput(){
+  // Sección de "Resultado con la asignación manual" eliminada; función queda sin efecto.
+}
+
+function limpiarAsignaciones(){
+  state.unique.forEach(c => state.assign[c] = '');
+  renderTable();
+  renderOutput();
+  restartGeneration();
+}
+
+function activeCharset(){
+  let chars = [];
+  if (document.getElementById('chkLetras').checked) chars = chars.concat(LETRAS);
+  if (document.getElementById('chkNumeros').checked) chars = chars.concat(NUMEROS);
+  if (document.getElementById('chkSimbolos').checked) chars = chars.concat(SIMBOLOS);
+  if (document.getElementById('chkEspacio').checked) chars = chars.concat(ESPACIO);
+  return chars;
+}
+
+function updateGenSummary(){
+  if (!state.unique.length) return;
+  const assignedCodes = state.unique.filter(c => state.assign[c]);
+  const unassignedCodes = state.unique.filter(c => !state.assign[c]);
+  const usedSymbols = new Set(assignedCodes.map(c => state.assign[c]));
+  const pool = activeCharset().filter(ch => !usedSymbols.has(ch));
+
+  const r = unassignedCodes.length;
+  const n = pool.length;
+  const summary = document.getElementById('genSummary');
+
+  if (r === 0){
+    summary.innerHTML = 'Todos los códigos ya tienen símbolo asignado manualmente. Revisa el resultado arriba.';
+    return null;
+  }
+  if (n < r){
+    summary.innerHTML = `<span class="warn">El conjunto de caracteres seleccionado (${n}) es menor que los códigos sin asignar (${r}). Marca más categorías.</span>`;
+    return null;
+  }
+
+  const total = factorialPerm(n, r);
+  genTotalTheoretical = total;
+
+  summary.innerHTML = `
+    Códigos fijados manualmente: <b>${assignedCodes.length}</b> ·
+    Códigos por resolver: <b>${r}</b> ·
+    Caracteres disponibles: <b>${n}</b> ·
+    Combinaciones posibles en total: <b>${formatBigNumber(total)}</b>
+  `;
+  return {assignedCodes, unassignedCodes, pool};
+}
+
+['chkLetras','chkNumeros','chkSimbolos','chkEspacio'].forEach(id => {
+  document.getElementById(id).addEventListener('change', restartGeneration);
+});
+
+function* permute(arr, r, used, current){
+  if (current.length === r){
+    yield current.slice();
+    return;
+  }
+  for (let i = 0; i < arr.length; i++){
+    if (used[i]) continue;
+    used[i] = true;
+    current.push(arr[i]);
+    yield* permute(arr, r, used, current);
+    current.pop();
+    used[i] = false;
+  }
+}
+
+function restartGeneration(){
+  genRunToken++;
+  const token = genRunToken;
+
+  genGenerator = null;
+  genContext = null;
+  genPool = null;
+  genCumulativeCount = 0;
+  genDone = false;
+  genLimiteAlcanzado = false;
+  genDisplayResults = [];
+  genUltimoRenderListMs = 0;
+  document.getElementById('genResults').innerHTML = '';
+  document.getElementById('genProgress').innerHTML = '';
+  document.getElementById('btnDownloadAll').style.display = 'none';
+  document.getElementById('btnClear').style.display = 'none';
+
+  const ctx = updateGenSummary();
+  if (!ctx) return;
+
+  genContext = {assignedCodes: ctx.assignedCodes, unassignedCodes: ctx.unassignedCodes};
+  genPool = ctx.pool;
+
+  const used = new Array(genPool.length).fill(false);
+  genGenerator = permute(genPool, genContext.unassignedCodes.length, used, []);
+  runTick(token);
+}
+
+function runTick(token){
+  if (token !== genRunToken) return; // se canceló por un cambio nuevo
+  if (!genGenerator) return;
+
+  const {assignedCodes, unassignedCodes} = genContext;
+  let count = 0;
+  while (count < TICK_SIZE){
+    if (genDisplayResults.length >= DISPLAY_LIMIT){
+      genDone = true;
+      genLimiteAlcanzado = true;
+      break;
+    }
+    const next = genGenerator.next();
+    if (next.done){ genDone = true; break; }
+    const combo = next.value;
+    const mapping = {};
+    assignedCodes.forEach(c => mapping[c] = state.assign[c]);
+    unassignedCodes.forEach((c, i) => mapping[c] = combo[i]);
+    const word = state.codes.map(c => mapping[c]).join('');
+    genDisplayResults.push(word);
+    genCumulativeCount++;
+    count++;
+  }
+
+  renderGenProgress();
+
+  // Redibujar la tabla completa es costoso (más mientras más resultados hay) y,
+  // si se hace en cada ciclo, no deja tiempo al navegador para atender el scroll
+  // del usuario. Por eso solo se redibuja cada cierto tiempo, o al terminar.
+  const ahora = Date.now();
+  if (genDone || (ahora - genUltimoRenderListMs) >= RENDER_LIST_THROTTLE_MS){
+    genUltimoRenderListMs = ahora;
+    renderGenList();
+  }
+
+  document.getElementById('btnDownloadAll').style.display = genDisplayResults.length ? 'inline-block' : 'none';
+  document.getElementById('btnClear').style.display = genDisplayResults.length ? 'inline-block' : 'none';
+
+  if (genDone) return;
+
+  // requestAnimationFrame en vez de setTimeout(...,0): encadena los ciclos al
+  // ritmo de refresco de la pantalla, dejando huecos reales entre ciclo y ciclo
+  // para que el navegador procese el scroll/touch en vez de quedar bloqueado.
+  requestAnimationFrame(() => runTick(token));
+}
+
+function renderGenProgress(){
+  const el = document.getElementById('genProgress');
+  const totalStr = genTotalTheoretical ? formatBigNumber(genTotalTheoretical) : '?';
+  el.innerHTML = `
+    <div>Generados en total: <b>${genCumulativeCount.toLocaleString('es-MX')}</b> de <b>${totalStr}</b> posibles
+    ${genDone && !genLimiteAlcanzado ? ' — <span class="ok">generación completa</span>' : ''}</div>
+    ${genLimiteAlcanzado ? `<div class="msg warn">Se alcanzó el límite de ${DISPLAY_LIMIT.toLocaleString('es-MX')} resultados mostrados en pantalla (nada se guarda, todo vive en la memoria de esta pestaña). Descarga o copia lo generado; para ver más, achica el conjunto de caracteres.</div>` : ''}
+  `;
+}
+
+const ROW_HEIGHT = 37;       // alto fijo de cada fila, en px (debe coincidir con el CSS de .vrow)
+const VISIBLE_BUFFER = 8;    // filas extra renderizadas arriba/abajo del viewport, para que no se note el borde al hacer scroll rápido
+
+// Lista con virtual scrolling: sin importar si hay 500 o 150,000 resultados,
+// el DOM solo contiene las ~20 filas que caben en el viewport visible (más un
+// pequeño colchón). El resto del "alto" de la lista lo simula #virtualSpacer,
+// así la barra de scroll se comporta como si todas las filas existieran.
+// Esto es lo que evita que el scroll se trabe y que cada tanda de 500 sienta
+// pesada: antes, cada tick reconstruía TODA la tabla acumulada.
+function renderGenList(){
+  const container = document.getElementById('genResults');
+  actualizarEstadoDiccionario();
+
+  if (!genDisplayResults.length){
+    container.innerHTML = '';
+    return;
+  }
+
+  const listaPrevia = getListaOrdenada();
+  if (!listaPrevia.length){
+    container.innerHTML = (ordenResultados === 'coherencia' && !dictCargando)
+      ? '<div class="msg">Todavía no aparece ninguna palabra real del diccionario entre lo generado.</div>'
+      : '';
+    return;
+  }
+
+  let scrollBox = document.getElementById('scrollList');
+  if (!scrollBox){
+    container.innerHTML = `
+      <div class="scroll-list-wrap">
+        <div class="scroll-list-header"><div class="col-idx"></div><div class="col-val">Resultado</div></div>
+        <div class="scroll-list" id="scrollList">
+          <div id="virtualSpacer" style="position:relative;">
+            <div id="virtualContent" style="position:absolute;top:0;left:0;right:0;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    scrollBox = document.getElementById('scrollList');
+    scrollBox.addEventListener('scroll', () => {
+      requestAnimationFrame(actualizarVentanaVirtual);
+    });
+  }
+
+  const lista = getListaOrdenada();
+  document.getElementById('virtualSpacer').style.height = (lista.length * ROW_HEIGHT) + 'px';
+  actualizarVentanaVirtual();
+}
+
+function actualizarVentanaVirtual(){
+  const scrollBox = document.getElementById('scrollList');
+  const content = document.getElementById('virtualContent');
+  if (!scrollBox || !content) return;
+
+  const lista = getListaOrdenada();
+  if (!lista.length) return;
+
+  const scrollTop = scrollBox.scrollTop;
+  const alturaVisible = scrollBox.clientHeight || 480;
+
+  let start = Math.floor(scrollTop / ROW_HEIGHT) - VISIBLE_BUFFER;
+  let end = Math.ceil((scrollTop + alturaVisible) / ROW_HEIGHT) + VISIBLE_BUFFER;
+  start = Math.max(0, start);
+  end = Math.min(lista.length, end);
+
+  let rows = '';
+  for (let i = start; i < end; i++){
+    rows += `<div class="vrow" style="height:${ROW_HEIGHT}px;"><div class="col-idx">${(i + 1).toLocaleString('es-MX')}</div><div class="col-val">${escapeHtml(lista[i])}</div></div>`;
+  }
+  content.style.transform = `translateY(${start * ROW_HEIGHT}px)`;
+  content.innerHTML = rows;
+}
+
+function escapeHtml(str){
+  return str.replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
+}
+
+// Descarga TODO lo generado (de la palabra 1 a la última) usando lo que ya
+// está acumulado en memoria en genDisplayResults. No se guarda en ningún lado,
+// así que si recargas la página se pierde y hay que generar de nuevo.
+function descargarTodoCompleto(){
+  const todas = getListaOrdenada();
+  if (!todas.length){
+    alert(ordenResultados === 'coherencia'
+      ? 'Todavía no hay palabras reales del diccionario para descargar.'
+      : 'Todavía no hay resultados generados para descargar.');
+    return;
+  }
+  const blob = new Blob([todas.join('\n')], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `combinaciones_completas_1_a_${todas.length}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copiarGenerados(){
+  const lista = getListaOrdenada();
+  if (!lista.length) return;
+  const texto = lista.join('\n');
+  const btn = document.getElementById('btnClear');
+  const feedback = (ok) => {
+    const original = 'Copiar';
+    btn.textContent = ok ? '¡Copiado!' : 'No se pudo copiar';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(() => feedback(true)).catch(() => feedback(false));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      feedback(true);
+    } catch (e) {
+      feedback(false);
+    }
+    document.body.removeChild(ta);
+  }
+}
+function bitsActuales(){
+  const bits = parseInt(document.getElementById('inBits').value, 10);
+  return (bits && bits >= 1 && bits <= 16) ? bits : null;
+}
+
+function actualizarPlaceholderBin(){
+  const bits = bitsActuales();
+  const inBin = document.getElementById('inBin');
+  if (bits){
+    const ejemplos = [];
+    for (let i = 0; i < 4; i++){
+      ejemplos.push(i.toString(2).padStart(bits, '0'));
+    }
+    inBin.placeholder = ejemplos.join(' ') + ' ...';
+  } else {
+    inBin.placeholder = '0000 0001 0010 0011 ...';
+  }
+}
+
+function reformatearBin(preservarCursor){
+  const ta = document.getElementById('inBin');
+  const start = preservarCursor ? ta.selectionStart : null;
+
+  let permitidosAntesCursor = 0;
+  if (preservarCursor){
+    for (let i = 0; i < start; i++){
+      if (ta.value[i] === '0' || ta.value[i] === '1' || ta.value[i] === ' ') permitidosAntesCursor++;
+    }
+  }
+
+  // Solo se permiten 0, 1 y espacio. El espaciado entre grupos lo pone el usuario a mano,
+  // aquí solo se evita que queden dos o más espacios seguidos.
+  const formateado = ta.value.replace(/[^01 ]/g, '').replace(/ {2,}/g, ' ');
+
+  ta.value = formateado;
+
+  if (preservarCursor){
+    const nuevaPos = Math.min(permitidosAntesCursor, formateado.length);
+    ta.setSelectionRange(nuevaPos, nuevaPos);
+  }
+}
+
+document.getElementById('inBin').addEventListener('input', () => {
+  reformatearBin(true);
+  guardarParametrosLocales();
+  programarAnalisisAutomatico();
+});
+document.getElementById('inBits').addEventListener('input', () => {
+  actualizarPlaceholderBin();
+  reformatearBin(false);
+  guardarParametrosLocales();
+  programarAnalisisAutomatico();
+});
+document.getElementById('inUnique').addEventListener('input', () => {
+  guardarParametrosLocales();
+  programarAnalisisAutomatico();
+});
+document.getElementById('inTotal').addEventListener('input', () => {
+  guardarParametrosLocales();
+  programarAnalisisAutomatico();
+});
+document.getElementById('inLang').addEventListener('change', guardarParametrosLocales);
+['chkLetras','chkNumeros','chkSimbolos','chkEspacio'].forEach(id => {
+  document.getElementById(id).addEventListener('change', guardarParametrosLocales);
+});
+actualizarPlaceholderBin();
+
+let analizarTimer = null;
+function programarAnalisisAutomatico(){
+  clearTimeout(analizarTimer);
+  const valBox = document.getElementById('validation');
+  valBox.innerHTML = '<div class="msg">Esperando a que termines de escribir…</div>';
+  analizarTimer = setTimeout(() => {
+    analizar();
+  }, 2000);
+}
+
+// ==== Persistencia local de los parámetros (para que sobreviva a recargar la página) ====
+// Las combinaciones generadas NO se guardan en ningún lado (ni localStorage ni
+// servidor); esto solo recuerda qué escribiste, para no tener que volver a
+// teclear todo al recargar. Al recargar, la generación arranca de cero.
+const LOCAL_PARAMS_KEY = 'descifrador_parametros_v1';
+
+function guardarParametrosLocales(){
+  try {
+    const datos = {
+      inBin: document.getElementById('inBin').value,
+      inBits: document.getElementById('inBits').value,
+      inUnique: document.getElementById('inUnique').value,
+      inTotal: document.getElementById('inTotal').value,
+      inLang: document.getElementById('inLang').value,
+      chkLetras: document.getElementById('chkLetras').checked,
+      chkNumeros: document.getElementById('chkNumeros').checked,
+      chkSimbolos: document.getElementById('chkSimbolos').checked,
+      chkEspacio: document.getElementById('chkEspacio').checked,
+      ordenResultados: ordenResultados
+    };
+    localStorage.setItem(LOCAL_PARAMS_KEY, JSON.stringify(datos));
+  } catch (e){
+    console.warn('No se pudieron guardar los parámetros localmente', e);
+  }
+}
+
+function cargarParametrosLocales(){
+  let datos = null;
+  try {
+    const raw = localStorage.getItem(LOCAL_PARAMS_KEY);
+    if (raw) datos = JSON.parse(raw);
+  } catch (e){
+    console.warn('No se pudieron leer los parámetros guardados localmente', e);
+  }
+  if (!datos) return false;
+
+  if (typeof datos.inBin === 'string') document.getElementById('inBin').value = datos.inBin;
+  if (typeof datos.inBits === 'string') document.getElementById('inBits').value = datos.inBits;
+  if (typeof datos.inUnique === 'string') document.getElementById('inUnique').value = datos.inUnique;
+  if (typeof datos.inTotal === 'string') document.getElementById('inTotal').value = datos.inTotal;
+  if (typeof datos.inLang === 'string') document.getElementById('inLang').value = datos.inLang;
+  if (typeof datos.chkLetras === 'boolean') document.getElementById('chkLetras').checked = datos.chkLetras;
+  if (typeof datos.chkNumeros === 'boolean') document.getElementById('chkNumeros').checked = datos.chkNumeros;
+  if (typeof datos.chkSimbolos === 'boolean') document.getElementById('chkSimbolos').checked = datos.chkSimbolos;
+  if (typeof datos.chkEspacio === 'boolean') document.getElementById('chkEspacio').checked = datos.chkEspacio;
+  if (datos.ordenResultados === 'orden' || datos.ordenResultados === 'coherencia'){
+    ordenResultados = datos.ordenResultados;
+    const selGen = document.getElementById('inOrdenGen');
+    if (selGen) selGen.value = ordenResultados;
+  }
+
+  return !!(datos.inBin && datos.inBin.replace(/[^01]/g, '').length);
+}
+
+// Al abrir o recargar la página: recupera lo que ya se había escrito y, si hay una
+// cadena válida, reanuda el análisis y la generación de inmediato (sin esperar los 2s
+// ni requerir que el usuario vuelva a teclear nada).
+actualizarPlaceholderBin();
+if (cargarParametrosLocales()){
+  actualizarPlaceholderBin();
+  analizar();
+}
+if (ordenResultados === 'coherencia'){
+  cargarDiccionario();
+}
+</script>
+</body>
+</html>
