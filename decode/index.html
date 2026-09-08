@@ -196,6 +196,10 @@
           <option value="en">Inglés</option>
         </select>
       </div>
+      <div>
+        <label>Total de palabras a buscar (modo "Coherencia en español")</label>
+        <input type="number" id="inTotalPalabras" min="1" max="8" value="1" placeholder="1">
+      </div>
       <div class="field-full">
         <label>Cadena binaria completa</label>
         <textarea id="inBin" placeholder="0000 0001 0010 0011 ..."></textarea>
@@ -227,6 +231,17 @@
         <option value="orden">Generación (A-Z)</option>
         <option value="coherencia">Coherencia en español (solo palabras reales)</option>
       </select>
+    </div>
+    <div class="msg" style="color:var(--dim);margin-bottom:2px;">
+      Con <b>Total de palabras</b> en 1, cada resultado debe ser exactamente una palabra real completa. Con un número mayor, se intenta partir esa misma cadena en esa cantidad de palabras reales (o menos) y se muestra como frase con espacios.
+    </div>
+    <div class="check-row" id="segEspecialesRow">
+      <label class="check-item"><input type="checkbox" id="chkSegEspacio" checked> Espacio cuenta como palabra</label>
+      <label class="check-item"><input type="checkbox" id="chkSegNumeros"> Números cuentan como palabra</label>
+      <label class="check-item"><input type="checkbox" id="chkSegSimbolos"> Símbolos cuentan como palabra</label>
+    </div>
+    <div class="msg" style="color:var(--dim);margin-bottom:8px;">
+      (Estas 3 casillas solo aplican cuando <b>Total de palabras</b> es mayor a 1. Si están marcadas, un número, símbolo o espacio suelto en la cadena cuenta como una "palabra" más dentro de la frase, sin necesidad de estar en el diccionario.)
     </div>
     <div class="msg" id="dictStatus"></div>
     <div class="btn-row">
@@ -324,7 +339,11 @@ function actualizarEstadoDiccionario(){
     el.innerHTML = `<span class="warn">${dictError}</span>`;
   } else if (dictPalabras){
     const encontradas = getListaOrdenada().length;
-    el.innerHTML = `<span class="ok">Diccionario cargado (${dictPalabras.size.toLocaleString('es-MX')} palabras).</span> Mostrando solo palabras reales encontradas: <b>${encontradas.toLocaleString('es-MX')}</b> de ${genCumulativeCount.toLocaleString('es-MX')} combinaciones generadas.`;
+    const maxPalabras = totalPalabrasActual();
+    const modoTexto = maxPalabras <= 1
+      ? 'palabras reales encontradas'
+      : `frases de hasta ${maxPalabras} palabra(s) real(es) encontradas`;
+    el.innerHTML = `<span class="ok">Diccionario cargado (${dictPalabras.size.toLocaleString('es-MX')} palabras).</span> Mostrando solo ${modoTexto}: <b>${encontradas.toLocaleString('es-MX')}</b> de ${genCumulativeCount.toLocaleString('es-MX')} combinaciones generadas.`;
   }
 }
 
@@ -374,31 +393,131 @@ async function cargarDiccionario(){
   renderGenList();
 }
 
+// ==== Segmentación en palabras (para permitir frases de varias palabras) ====
+// Dada una cadena decodificada completa, busca la forma de partirla en la
+// MENOR cantidad posible de palabras reales del diccionario (cubriendo la
+// cadena entera, sin sobrantes). La menor cantidad de palabras es una
+// propiedad fija de la cadena (no depende de "Total de palabras"): ese
+// parámetro solo se usa después, como tope para aceptar o no el resultado.
+// Si la mínima segmentación ya necesita más palabras que el tope, no hay
+// forma de que una segmentación distinta (siempre con igual o más partes)
+// quepa en el tope, así que se descarta.
+const MIN_LONGITUD_PALABRA = 2; // evita cortes en letras sueltas sin sentido
+const MAX_LONGITUD_SEGMENTACION = 60; // cadenas más largas no se segmentan, por costo computacional
+const segmentacionCache = new Map(); // cadena cruda -> array de palabras | null, memoiza para no repetir trabajo
+const NUMEROS_SET = new Set(NUMEROS);
+const SIMBOLOS_SET = new Set(SIMBOLOS);
+
+// Determina si un carácter suelto es espacio/número/símbolo (nunca una letra).
+// Devuelve la clave de la opción correspondiente, o null si es letra u otro.
+function tipoSegmentoEspecial(ch){
+  if (ch === ' ') return 'espacio';
+  if (NUMEROS_SET.has(ch)) return 'numero';
+  if (SIMBOLOS_SET.has(ch)) return 'simbolo';
+  return null;
+}
+
+function opcionesSegmentacionActuales(){
+  return {
+    espacio: document.getElementById('chkSegEspacio').checked,
+    numero: document.getElementById('chkSegNumeros').checked,
+    simbolo: document.getElementById('chkSegSimbolos').checked
+  };
+}
+
+function buscarSegmentacionMinima(str, dictSet, opciones){
+  const memo = new Map();
+  function resolver(pos){
+    if (pos === str.length) return [];
+    if (memo.has(pos)) return memo.get(pos);
+    let mejor = null;
+    for (let fin = pos + 1; fin <= str.length; fin++){
+      const trozo = str.slice(pos, fin);
+      let esValido = false;
+      if (trozo.length === 1){
+        const tipo = tipoSegmentoEspecial(trozo);
+        if (tipo && opciones[tipo]) esValido = true;
+      }
+      if (!esValido && trozo.length >= MIN_LONGITUD_PALABRA && dictSet.has(normalizarParaDiccionario(trozo))){
+        esValido = true;
+      }
+      if (!esValido) continue;
+      const resto = resolver(fin);
+      if (resto === null) continue;
+      if (!mejor || resto.length + 1 < mejor.length){
+        mejor = [trozo, ...resto];
+        if (mejor.length === 1) break; // ya no se puede mejorar más
+      }
+    }
+    memo.set(pos, mejor);
+    return mejor;
+  }
+  return resolver(0);
+}
+
+function mejorSegmentacion(str, dictSet, opciones){
+  const clave = JSON.stringify(opciones) + '::' + str;
+  if (segmentacionCache.has(clave)) return segmentacionCache.get(clave); // procesamiento incremental: cada cadena se resuelve una sola vez
+  const resultado = (str.length <= MAX_LONGITUD_SEGMENTACION) ? buscarSegmentacionMinima(str, dictSet, opciones) : null;
+  segmentacionCache.set(clave, resultado);
+  return resultado;
+}
+
+function totalPalabrasActual(){
+  const v = parseInt(document.getElementById('inTotalPalabras').value, 10);
+  return (v && v >= 1) ? Math.min(v, 8) : 1;
+}
+
 // Cache de la lista a mostrar: evita recalcular filtro+orden en cada scroll
-// si no cambió ni la cantidad de resultados generados ni el estado del diccionario.
+// si no cambió ni la cantidad de resultados generados, ni el estado del
+// diccionario, ni el tope de "Total de palabras".
 let cacheOrdenClave = null;
 let cacheOrdenLargo = -1;
 let cacheOrdenDictVersion = -1;
+let cacheOrdenMaxPalabras = -1;
 let cacheOrdenLista = null;
 
 function getListaOrdenada(){
   if (ordenResultados !== 'coherencia') return genDisplayResults; // ya está en orden de generación, no hace falta copiar
 
-  if (cacheOrdenClave === ordenResultados && cacheOrdenLargo === genDisplayResults.length && cacheOrdenDictVersion === dictVersion){
+  const maxPalabras = totalPalabrasActual();
+  if (cacheOrdenClave === ordenResultados && cacheOrdenLargo === genDisplayResults.length && cacheOrdenDictVersion === dictVersion && cacheOrdenMaxPalabras === maxPalabras){
     return cacheOrdenLista;
   }
 
-  // Si el diccionario ya cargó: solo palabras reales. Si todavía no carga
-  // (o falló), se muestra la lista completa ordenada por la heurística, para
-  // no dejar la pantalla vacía mientras se descarga.
-  let base = genDisplayResults;
-  if (dictPalabras){
-    base = base.filter(palabra => dictPalabras.has(normalizarParaDiccionario(palabra)));
+  let base;
+  if (!dictPalabras){
+    // Diccionario aún no cargado (o falló): se muestra la lista completa
+    // ordenada por la heurística, para no dejar la pantalla vacía mientras carga.
+    base = ordenarPorCoherencia(genDisplayResults);
+  } else if (maxPalabras <= 1){
+    // Comportamiento original: la cadena entera debe ser una sola palabra real.
+    base = ordenarPorCoherencia(genDisplayResults.filter(p => dictPalabras.has(normalizarParaDiccionario(p))));
+  } else {
+    // Modo frase: cada cadena se intenta partir en su mínima cantidad de
+    // palabras reales; se acepta si esa mínima cabe dentro del tope elegido.
+    // Se ordena primero por menos palabras (más "natural") y luego por la
+    // heurística de coherencia sumada entre las palabras encontradas.
+    const encontrados = [];
+    const opciones = opcionesSegmentacionActuales();
+    for (const cruda of genDisplayResults){
+      const seg = mejorSegmentacion(cruda, dictPalabras, opciones);
+      if (!seg || seg.length > maxPalabras) continue;
+      encontrados.push({
+        texto: seg.join(' '),
+        numPalabras: seg.length,
+        puntaje: seg.reduce((acc, w) => acc + puntajeCoherencia(w), 0)
+      });
+    }
+    encontrados.sort((a, b) => (a.numPalabras - b.numPalabras) || (b.puntaje - a.puntaje));
+    base = encontrados.map(x => x.texto);
   }
-  cacheOrdenLista = ordenarPorCoherencia(base);
+
+  cacheOrdenLista = base;
   cacheOrdenClave = ordenResultados;
   cacheOrdenLargo = genDisplayResults.length;
   cacheOrdenDictVersion = dictVersion;
+  cacheOrdenMaxPalabras = maxPalabras;
   return cacheOrdenLista;
 }
 
@@ -613,6 +732,7 @@ function restartGeneration(){
   genLimiteAlcanzado = false;
   genDisplayResults = [];
   genUltimoRenderListMs = 0;
+  segmentacionCache.clear();
   document.getElementById('genResults').innerHTML = '';
   document.getElementById('genProgress').innerHTML = '';
   document.getElementById('btnDownloadAll').style.display = 'none';
@@ -874,6 +994,18 @@ document.getElementById('inTotal').addEventListener('input', () => {
   programarAnalisisAutomatico();
 });
 document.getElementById('inLang').addEventListener('change', guardarParametrosLocales);
+document.getElementById('inTotalPalabras').addEventListener('input', () => {
+  guardarParametrosLocales();
+  actualizarEstadoDiccionario();
+  renderGenList();
+});
+['chkSegEspacio','chkSegNumeros','chkSegSimbolos'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    guardarParametrosLocales();
+    actualizarEstadoDiccionario();
+    renderGenList();
+  });
+});
 ['chkLetras','chkNumeros','chkSimbolos','chkEspacio'].forEach(id => {
   document.getElementById(id).addEventListener('change', guardarParametrosLocales);
 });
@@ -903,6 +1035,10 @@ function guardarParametrosLocales(){
       inUnique: document.getElementById('inUnique').value,
       inTotal: document.getElementById('inTotal').value,
       inLang: document.getElementById('inLang').value,
+      inTotalPalabras: document.getElementById('inTotalPalabras').value,
+      chkSegEspacio: document.getElementById('chkSegEspacio').checked,
+      chkSegNumeros: document.getElementById('chkSegNumeros').checked,
+      chkSegSimbolos: document.getElementById('chkSegSimbolos').checked,
       chkLetras: document.getElementById('chkLetras').checked,
       chkNumeros: document.getElementById('chkNumeros').checked,
       chkSimbolos: document.getElementById('chkSimbolos').checked,
@@ -930,6 +1066,10 @@ function cargarParametrosLocales(){
   if (typeof datos.inUnique === 'string') document.getElementById('inUnique').value = datos.inUnique;
   if (typeof datos.inTotal === 'string') document.getElementById('inTotal').value = datos.inTotal;
   if (typeof datos.inLang === 'string') document.getElementById('inLang').value = datos.inLang;
+  if (typeof datos.inTotalPalabras === 'string') document.getElementById('inTotalPalabras').value = datos.inTotalPalabras;
+  if (typeof datos.chkSegEspacio === 'boolean') document.getElementById('chkSegEspacio').checked = datos.chkSegEspacio;
+  if (typeof datos.chkSegNumeros === 'boolean') document.getElementById('chkSegNumeros').checked = datos.chkSegNumeros;
+  if (typeof datos.chkSegSimbolos === 'boolean') document.getElementById('chkSegSimbolos').checked = datos.chkSegSimbolos;
   if (typeof datos.chkLetras === 'boolean') document.getElementById('chkLetras').checked = datos.chkLetras;
   if (typeof datos.chkNumeros === 'boolean') document.getElementById('chkNumeros').checked = datos.chkNumeros;
   if (typeof datos.chkSimbolos === 'boolean') document.getElementById('chkSimbolos').checked = datos.chkSimbolos;
