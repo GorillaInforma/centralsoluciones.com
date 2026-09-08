@@ -157,8 +157,16 @@
   .gen-summary b{color:var(--text);}
   .resultTable td{font-size:.95rem;}
   .resultTable td.idx{color:var(--dim);width:60px;}
-  .scroll-list{max-height:520px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;}
-  .scroll-list table{margin:0;}
+  .scroll-list-wrap{border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  .scroll-list-header{display:flex;background:var(--panel-2);border-bottom:1px solid var(--line);font-size:.8rem;color:var(--dim);font-weight:600;}
+  .scroll-list-header .col-idx, .vrow .col-idx{width:70px;flex:none;padding:8px 12px;box-sizing:border-box;}
+  .scroll-list-header .col-val, .vrow .col-val{flex:1;padding:8px 12px;box-sizing:border-box;word-break:break-all;}
+  .scroll-list{height:480px;overflow-y:auto;position:relative;background:#fff;
+    /* Virtual scrolling: aquí solo viven las ~15-20 filas visibles en pantalla,
+       nunca las decenas de miles generadas. El alto total lo simula #virtualSpacer. */
+  }
+  .vrow{display:flex;align-items:center;border-bottom:1px solid var(--line);font-size:.95rem;box-sizing:border-box;}
+  .vrow .col-idx{color:var(--dim);}
 </style>
 </head>
 <body>
@@ -562,37 +570,84 @@ function renderGenProgress(){
   `;
 }
 
+const ROW_HEIGHT = 37;       // alto fijo de cada fila, en px (debe coincidir con el CSS de .vrow)
+const VISIBLE_BUFFER = 8;    // filas extra renderizadas arriba/abajo del viewport, para que no se note el borde al hacer scroll rápido
+
+// Cache de la lista ordenada: evita volver a ordenar (costoso en modo "coherencia")
+// en cada scroll o cada tick si ni el orden ni la cantidad de resultados cambiaron.
+let cacheOrdenClave = null;
+let cacheOrdenLargo = -1;
+let cacheOrdenLista = null;
+
+function getListaOrdenada(){
+  if (ordenResultados === 'orden') return genDisplayResults; // ya está en orden de generación, no hace falta copiar ni ordenar
+  if (cacheOrdenClave === ordenResultados && cacheOrdenLargo === genDisplayResults.length){
+    return cacheOrdenLista;
+  }
+  cacheOrdenLista = ordenarLista(genDisplayResults);
+  cacheOrdenClave = ordenResultados;
+  cacheOrdenLargo = genDisplayResults.length;
+  return cacheOrdenLista;
+}
+
+// Lista con virtual scrolling: sin importar si hay 500 o 150,000 resultados,
+// el DOM solo contiene las ~20 filas que caben en el viewport visible (más un
+// pequeño colchón). El resto del "alto" de la lista lo simula #virtualSpacer,
+// así la barra de scroll se comporta como si todas las filas existieran.
+// Esto es lo que evita que el scroll se trabe y que cada tanda de 500 sienta
+// pesada: antes, cada tick reconstruía TODA la tabla acumulada.
 function renderGenList(){
   const container = document.getElementById('genResults');
   if (!genDisplayResults.length){
     container.innerHTML = '';
     return;
   }
-  // Se guarda el scroll actual porque innerHTML destruye y recrea el div con
-  // scroll; sin esto, cada redibujo (mientras se sigue generando) mandaba la
-  // lista de vuelta arriba y daba la sensación de que el scroll estaba trabado.
-  const scrollBoxPrevio = container.querySelector('.scroll-list');
-  const scrollTopPrevio = scrollBoxPrevio ? scrollBoxPrevio.scrollTop : 0;
 
-  // genDisplayResults ya contiene TODO lo generado, de la palabra 1 a la última
-  // (todos los lotes juntos), así que el índice es simplemente la posición en
-  // esta lista completa.
-  const lista = ordenarLista(genDisplayResults);
-  let rows = '';
-  for (let i = 0; i < lista.length; i++){
-    rows += `<tr><td class="idx">${(i + 1).toLocaleString('es-MX')}</td><td>${escapeHtml(lista[i])}</td></tr>`;
+  let scrollBox = document.getElementById('scrollList');
+  if (!scrollBox){
+    container.innerHTML = `
+      <div class="scroll-list-wrap">
+        <div class="scroll-list-header"><div class="col-idx"></div><div class="col-val">Resultado</div></div>
+        <div class="scroll-list" id="scrollList">
+          <div id="virtualSpacer" style="position:relative;">
+            <div id="virtualContent" style="position:absolute;top:0;left:0;right:0;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    scrollBox = document.getElementById('scrollList');
+    scrollBox.addEventListener('scroll', () => {
+      requestAnimationFrame(actualizarVentanaVirtual);
+    });
   }
-  container.innerHTML = `
-    <div class="scroll-list">
-      <table class="resultTable">
-        <thead><tr><th></th><th>Resultado</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  `;
 
-  const scrollBoxNuevo = container.querySelector('.scroll-list');
-  if (scrollBoxNuevo) scrollBoxNuevo.scrollTop = scrollTopPrevio;
+  const lista = getListaOrdenada();
+  document.getElementById('virtualSpacer').style.height = (lista.length * ROW_HEIGHT) + 'px';
+  actualizarVentanaVirtual();
+}
+
+function actualizarVentanaVirtual(){
+  const scrollBox = document.getElementById('scrollList');
+  const content = document.getElementById('virtualContent');
+  if (!scrollBox || !content) return;
+
+  const lista = getListaOrdenada();
+  if (!lista.length) return;
+
+  const scrollTop = scrollBox.scrollTop;
+  const alturaVisible = scrollBox.clientHeight || 480;
+
+  let start = Math.floor(scrollTop / ROW_HEIGHT) - VISIBLE_BUFFER;
+  let end = Math.ceil((scrollTop + alturaVisible) / ROW_HEIGHT) + VISIBLE_BUFFER;
+  start = Math.max(0, start);
+  end = Math.min(lista.length, end);
+
+  let rows = '';
+  for (let i = start; i < end; i++){
+    rows += `<div class="vrow" style="height:${ROW_HEIGHT}px;"><div class="col-idx">${(i + 1).toLocaleString('es-MX')}</div><div class="col-val">${escapeHtml(lista[i])}</div></div>`;
+  }
+  content.style.transform = `translateY(${start * ROW_HEIGHT}px)`;
+  content.innerHTML = rows;
 }
 
 function escapeHtml(str){
