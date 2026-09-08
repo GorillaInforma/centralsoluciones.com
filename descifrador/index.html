@@ -654,6 +654,16 @@ function cargarTodoElHistoricoEnPantalla(token){
       renderGenList();
       document.getElementById('btnDownloadAll').style.display = genDisplayResults.length ? 'inline-block' : 'none';
       document.getElementById('btnClear').style.display = genDisplayResults.length ? 'inline-block' : 'none';
+
+      // Si el progreso guardado dice que ya se generó cierto total pero los lotes
+      // recuperados no llegan a esa cantidad, es que a esta configuración le
+      // faltan lotes en Firestore (por ejemplo, por el borrado automático que
+      // existía antes de corregirlo). En vez de dejar la pantalla vacía sin
+      // explicación, se avisa y se sugiere usar el reinicio (5 taps al título).
+      if (genCumulativeCount > 0 && genDisplayResults.length < genCumulativeCount){
+        genEstadoMsg = `<span class="warn">Faltan lotes guardados para esta configuración (se recuperaron ${genDisplayResults.length.toLocaleString('es-MX')} de ${genCumulativeCount.toLocaleString('es-MX')}). Es probable que se hayan perdido antes de una corrección reciente. Toca 5 veces seguidas el título "Descifrador de cadenas binarias" para reiniciar esta configuración en Firebase y generarla de nuevo completa.</span>`;
+        renderGenProgress();
+      }
     })
     .catch(err => console.warn('No se pudo cargar el histórico completo guardado', err));
 }
