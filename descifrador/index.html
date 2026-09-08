@@ -170,7 +170,7 @@
     <h2>Parámetros</h2>
     <div class="grid">
       <div>
-        <label>Combinaciones únicas usadas</label>
+        <label>Caracteres únicos</label>
         <input type="number" id="inUnique" placeholder="ej. 9" min="1">
       </div>
       <div>
@@ -292,7 +292,7 @@ function cambiarOrden(valor){
 const FREQ_ES = ['E','A','O','S','R','N','I','D','L','C','T','U','M','P','B','G','Y','V','Q','H','F','Z','J','Ñ','X','W','K',' ','-'];
 const FREQ_EN = ['E','T','A','O','I','N','S','H','R','D','L','C','U','M','W','F','G','Y','P','B','V','K','J','X','Q','Z',' ','-'];
 
-const DISPLAY_LIMIT = 5000; // tope de resultados generados/mostrados en pantalla (no se guarda nada, todo vive en memoria del navegador)
+const DISPLAY_LIMIT = 150000; // tope de seguridad: totales normales (miles/decenas de miles) se muestran completos; solo frena ante totales verdaderamente enormes (millones), para no congelar el navegador
 const TICK_SIZE = 500;      // cuántos se procesan por ciclo, para no congelar la pestaña
 
 let genPool = null;        // conjunto de caracteres disponible para la corrida actual
@@ -376,9 +376,9 @@ function analizar(){
     msgs.push(`<span class="ok">Total de símbolos coincide (${codes.length}).</span>`);
   }
   if (uniqueVal && uniqueVal !== uniqueOrdered.length){
-    msgs.push(`<span class="warn">Esperabas ${uniqueVal} combinaciones únicas, pero se encontraron ${uniqueOrdered.length}.</span>`);
+    msgs.push(`<span class="warn">Esperabas ${uniqueVal} caracteres únicos, pero se encontraron ${uniqueOrdered.length}.</span>`);
   } else if (uniqueVal){
-    msgs.push(`<span class="ok">Combinaciones únicas coinciden (${uniqueOrdered.length}).</span>`);
+    msgs.push(`<span class="ok">Caracteres únicos coinciden (${uniqueOrdered.length}).</span>`);
   }
   valBox.innerHTML = msgs.map(m => `<div class="msg">${m}</div>`).join('');
 
