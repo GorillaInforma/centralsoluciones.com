@@ -83,6 +83,52 @@ async function marcarLeidoRemoto(conversacionId, campoContador, campoLeido, mens
   }catch(e){ console.warn("No se pudo marcar leído en segundo plano:", e); }
 }
 
+/* ===== Foto de perfil real del remitente (si la tiene puesta) ===== */
+
+async function obtenerFotoAutor(autor){
+  if(!autor) return null;
+  try{
+    const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/cuentas/${encodeURIComponent(autor)}?key=${API_KEY}`;
+    const resp = await fetch(url);
+    if(!resp.ok) return null;
+    const doc = await resp.json();
+    return (doc && doc.fields && doc.fields.foto && doc.fields.foto.stringValue) || null;
+  }catch(e){ return null; } // sin conexión o sin foto: seguimos con el avatar de inicial
+}
+
+/* ===== Avatar generado (inicial + color) para el ícono grande de la notificación,
+   usado solo cuando el remitente no tiene foto de perfil puesta ===== */
+
+function colorParaNombre(nombre){
+  const colores = ["#16324F","#3A6EA5","#C0504D","#4F8A57","#8064A2","#D9822B","#2E8B8B"];
+  let hash = 0;
+  for(let i=0;i<(nombre||"").length;i++) hash = (hash*31 + nombre.charCodeAt(i)) >>> 0;
+  return colores[hash % colores.length];
+}
+
+async function generarAvatarIniciales(nombre){
+  try{
+    if(typeof OffscreenCanvas === "undefined") return "icon-192.png";
+    const letra = (nombre || "?").trim().charAt(0).toUpperCase() || "?";
+    const tam = 192;
+    const lienzo = new OffscreenCanvas(tam, tam);
+    const ctx = lienzo.getContext("2d");
+    ctx.fillStyle = colorParaNombre(nombre);
+    ctx.beginPath();
+    ctx.arc(tam/2, tam/2, tam/2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold " + Math.round(tam*0.5) + "px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(letra, tam/2, tam/2 + tam*0.05);
+    const blob = await lienzo.convertToBlob({ type: "image/png" });
+    return URL.createObjectURL(blob);
+  }catch(e){
+    return "icon-192.png"; // si el navegador no soporta OffscreenCanvas, usa el logo
+  }
+}
+
 /* ===== Push entrante ===== */
 
 self.addEventListener("push", (evento) => {
@@ -103,13 +149,15 @@ self.addEventListener("push", (evento) => {
     const lista = [...previos, nuevaLinea].slice(-5);
     await idbSet("pendientes", conversacionId, lista);
 
+    const iconoAvatar = (await obtenerFotoAutor(datos.autor)) || (await generarAvatarIniciales(datos.autor));
+
     const opciones = {
       body: lista.join("\n"),
-      icon: "icon-192.png",
-      badge: "icon-192.png",
+      icon: iconoAvatar,   // avatar con inicial del remitente (ícono grande)
+      badge: "icon-192.png", // logo de la app (ícono pequeño, monocromo en la barra)
       tag: "conv-" + conversacionId,
       renotify: true,
-      silent: true,
+      vibrate: [200, 100, 200],
       data: {
         url: datos.url || "/chat/",
         conversacionId,
