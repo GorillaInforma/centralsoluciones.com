@@ -111,7 +111,7 @@ self.addEventListener("push", (evento) => {
       renotify: true,
       silent: true,
       data: {
-        url: datos.url || "/Mensajería/",
+        url: datos.url || "/chat/",
         conversacionId,
         autor: datos.autor || "",
         mensajeId: datos.mensajeId || null,
@@ -155,14 +155,14 @@ self.addEventListener("notificationclick", (evento) => {
     await idbDelete("pendientes", conversacionId);
     const listaClientes = await clients.matchAll({ type: "window", includeUncontrolled: true });
     for(const cliente of listaClientes){
-      if(cliente.url.includes("/Mensajería/") && "focus" in cliente){
+      if(cliente.url.includes("/chat/") && "focus" in cliente){
         await cliente.focus();
         cliente.postMessage({ tipo: "abrir_conversacion", conversacionId, enfocarRespuesta });
         return;
       }
     }
     if(clients.openWindow){
-      const base = url || "/Mensajería/";
+      const base = url || "/chat/";
       const separador = base.includes("?") ? "&" : "?";
       const urlDestino = `${base}${separador}conv=${encodeURIComponent(conversacionId)}${enfocarRespuesta ? "&responder=1" : ""}`;
       const nuevaVentana = await clients.openWindow(urlDestino);
