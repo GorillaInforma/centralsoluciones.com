@@ -11,6 +11,42 @@ const PROJECT_ID = "mensajeria-8b60a";
 const API_KEY = "AIzaSyAsmQ5ZjQUYatWzgxszvmEnHB5Tt9WLI34";
 const HORAS_SILENCIO = 8; // duración del "Silenciar" por conversación
 
+/* ===== Ciclo de vida del service worker =====
+   Sin esto, cuando subes una versión nueva de este archivo, el navegador
+   la deja "esperando" hasta que cierres todas las pestañas/instancias de
+   la app, así que puede tardar mucho en activarse. skipWaiting() +
+   clients.claim() hacen que la versión nueva tome control de inmediato. */
+
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (evento) => {
+  evento.waitUntil(self.clients.claim());
+});
+
+/* ===== Evitar que la app quede pegada a una versión vieja =====
+   Este service worker no guarda caché propio, pero sin este manejador
+   de "fetch" el navegador puede seguir sirviendo index.html y los demás
+   archivos desde su caché HTTP normal (según las cabeceras del hosting),
+   y una app ya instalada nunca se entera de que subiste cambios nuevos.
+   Aquí forzamos que la página y los archivos de la app se pidan siempre
+   directo a la red; si no hay conexión, se cae de vuelta al caché del
+   navegador como respaldo (no se pierde el modo sin conexión). */
+
+self.addEventListener("fetch", (evento) => {
+  const peticion = evento.request;
+  if(peticion.method !== "GET") return;
+  const esNavegacion = peticion.mode === "navigate";
+  const esArchivoDeLaApp = new URL(peticion.url).origin === self.location.origin
+    && peticion.url.includes("/chat/");
+  if(!esNavegacion && !esArchivoDeLaApp) return;
+
+  evento.respondWith(
+    fetch(peticion, { cache: "no-store" }).catch(() => caches.match(peticion))
+  );
+});
+
 /* ===== Mini almacén en IndexedDB (mensajes pendientes por conversación + silencios) ===== */
 
 function abrirBD(){
