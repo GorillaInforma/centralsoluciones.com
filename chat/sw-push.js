@@ -14,32 +14,39 @@ const HORAS_SILENCIO = 8; // duración del "Silenciar" por conversación
 /* ===== Ciclo de vida del service worker + caché del "shell" de la app
    (para poder abrirla sin conexión, como una app instalada de verdad) ===== */
 
-const CACHE_APP_SHELL = "gorilla-chat-shell-v1";
+const CACHE_APP_SHELL = "gorilla-chat-shell-v2";
+// Rutas resueltas contra el scope real del service worker (más seguro que
+// escribir "/chat/..." a mano, por si algún día cambia dónde vive la app).
+const RUTA_SHELL = new URL("index.html", self.registration.scope).href;
 const ARCHIVOS_APP_SHELL = [
-  "/chat/",
-  "/chat/index.html",
-  "/chat/manifest.json",
-  "/chat/favicon-32.png",
-  "/chat/icon-192.png",
-  "/chat/icon-512.png",
-  "/chat/icon-apple-touch.png",
-  "/chat/sonido-notificacion.wav"
+  self.registration.scope,
+  RUTA_SHELL,
+  new URL("manifest.json", self.registration.scope).href,
+  new URL("favicon-32.png", self.registration.scope).href,
+  new URL("icon-192.png", self.registration.scope).href,
+  new URL("icon-512.png", self.registration.scope).href,
+  new URL("icon-apple-touch.png", self.registration.scope).href,
+  new URL("sonido-notificacion.wav", self.registration.scope).href
 ];
 
 self.addEventListener("install", (evento) => {
   evento.waitUntil((async () => {
-    try{
-      const cache = await caches.open(CACHE_APP_SHELL);
-      await cache.addAll(ARCHIVOS_APP_SHELL);
-    }catch(e){ console.warn("No se pudo precargar el shell offline:", e); }
+    const cache = await caches.open(CACHE_APP_SHELL);
+    // Se guarda cada archivo por separado: si uno falla, no se cae toda
+    // la instalación y al menos queda a salvo lo más importante (el shell).
+    await Promise.all(ARCHIVOS_APP_SHELL.map(async (url) => {
+      try{
+        const respuesta = await fetch(url, { cache: "no-store" });
+        if(respuesta && respuesta.ok) await cache.put(url, respuesta);
+      }catch(e){ console.warn("No se pudo precargar para uso offline:", url, e); }
+    }));
     self.skipWaiting();
   })());
 });
 
 self.addEventListener("activate", (evento) => {
   evento.waitUntil((async () => {
-    // Borra cachés de versiones anteriores del shell (si algún día subes
-    // otra con un nombre CACHE_APP_SHELL distinto).
+    // Borra cachés de versiones anteriores del shell.
     const nombres = await caches.keys();
     await Promise.all(
       nombres.filter(n => n.startsWith("gorilla-chat-shell-") && n !== CACHE_APP_SHELL)
@@ -54,29 +61,31 @@ self.addEventListener("activate", (evento) => {
    Con conexión: siempre pide la página y los archivos de la app directo
    a la red (ignorando la caché HTTP normal), y guarda una copia fresca
    en la caché del service worker.
-   Sin conexión: sirve esa última copia guardada, para que la app abra
-   igual, muestre lo que ya tenía cargado, y puedas seguir escribiendo. */
+   Sin conexión: sirve esa última copia guardada; si la ruta exacta no
+   estaba guardada (por ejemplo entraste con un enlace con parámetros),
+   se cae de vuelta al shell principal (index.html) para que la app abra
+   igual, en vez de mostrar la pantalla de "sin conexión" del navegador. */
 
 self.addEventListener("fetch", (evento) => {
   const peticion = evento.request;
   if(peticion.method !== "GET") return;
   const esNavegacion = peticion.mode === "navigate";
-  const esArchivoDeLaApp = new URL(peticion.url).origin === self.location.origin
-    && peticion.url.includes("/chat/");
+  let mismoOrigen = false;
+  try{ mismoOrigen = new URL(peticion.url).origin === self.location.origin; }catch(e){}
+  const esArchivoDeLaApp = mismoOrigen && peticion.url.includes("/chat/");
   if(!esNavegacion && !esArchivoDeLaApp) return;
 
   evento.respondWith((async () => {
+    const cache = await caches.open(CACHE_APP_SHELL);
     try{
       const respuestaRed = await fetch(peticion, { cache: "no-store" });
-      const cache = await caches.open(CACHE_APP_SHELL);
-      cache.put(peticion, respuestaRed.clone());
+      if(respuestaRed && respuestaRed.ok) cache.put(peticion, respuestaRed.clone());
       return respuestaRed;
     }catch(e){
-      const cache = await caches.open(CACHE_APP_SHELL);
-      const enCache = await cache.match(peticion);
+      const enCache = await cache.match(peticion, { ignoreSearch: true });
       if(enCache) return enCache;
       if(esNavegacion){
-        const shell = await cache.match("/chat/index.html");
+        const shell = await cache.match(RUTA_SHELL);
         if(shell) return shell;
       }
       throw e;
