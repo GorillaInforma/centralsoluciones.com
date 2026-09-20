@@ -11,28 +11,51 @@ const PROJECT_ID = "mensajeria-8b60a";
 const API_KEY = "AIzaSyAsmQ5ZjQUYatWzgxszvmEnHB5Tt9WLI34";
 const HORAS_SILENCIO = 8; // duración del "Silenciar" por conversación
 
-/* ===== Ciclo de vida del service worker =====
-   Sin esto, cuando subes una versión nueva de este archivo, el navegador
-   la deja "esperando" hasta que cierres todas las pestañas/instancias de
-   la app, así que puede tardar mucho en activarse. skipWaiting() +
-   clients.claim() hacen que la versión nueva tome control de inmediato. */
+/* ===== Ciclo de vida del service worker + caché del "shell" de la app
+   (para poder abrirla sin conexión, como una app instalada de verdad) ===== */
 
-self.addEventListener("install", () => {
-  self.skipWaiting();
+const CACHE_APP_SHELL = "gorilla-chat-shell-v1";
+const ARCHIVOS_APP_SHELL = [
+  "/chat/",
+  "/chat/index.html",
+  "/chat/manifest.json",
+  "/chat/favicon-32.png",
+  "/chat/icon-192.png",
+  "/chat/icon-512.png",
+  "/chat/icon-apple-touch.png",
+  "/chat/sonido-notificacion.wav"
+];
+
+self.addEventListener("install", (evento) => {
+  evento.waitUntil((async () => {
+    try{
+      const cache = await caches.open(CACHE_APP_SHELL);
+      await cache.addAll(ARCHIVOS_APP_SHELL);
+    }catch(e){ console.warn("No se pudo precargar el shell offline:", e); }
+    self.skipWaiting();
+  })());
 });
 
 self.addEventListener("activate", (evento) => {
-  evento.waitUntil(self.clients.claim());
+  evento.waitUntil((async () => {
+    // Borra cachés de versiones anteriores del shell (si algún día subes
+    // otra con un nombre CACHE_APP_SHELL distinto).
+    const nombres = await caches.keys();
+    await Promise.all(
+      nombres.filter(n => n.startsWith("gorilla-chat-shell-") && n !== CACHE_APP_SHELL)
+        .map(n => caches.delete(n))
+    );
+    await self.clients.claim();
+  })());
 });
 
-/* ===== Evitar que la app quede pegada a una versión vieja =====
-   Este service worker no guarda caché propio, pero sin este manejador
-   de "fetch" el navegador puede seguir sirviendo index.html y los demás
-   archivos desde su caché HTTP normal (según las cabeceras del hosting),
-   y una app ya instalada nunca se entera de que subiste cambios nuevos.
-   Aquí forzamos que la página y los archivos de la app se pidan siempre
-   directo a la red; si no hay conexión, se cae de vuelta al caché del
-   navegador como respaldo (no se pierde el modo sin conexión). */
+/* ===== Evitar que la app quede pegada a una versión vieja, y que
+   funcione sin conexión =====
+   Con conexión: siempre pide la página y los archivos de la app directo
+   a la red (ignorando la caché HTTP normal), y guarda una copia fresca
+   en la caché del service worker.
+   Sin conexión: sirve esa última copia guardada, para que la app abra
+   igual, muestre lo que ya tenía cargado, y puedas seguir escribiendo. */
 
 self.addEventListener("fetch", (evento) => {
   const peticion = evento.request;
@@ -42,9 +65,23 @@ self.addEventListener("fetch", (evento) => {
     && peticion.url.includes("/chat/");
   if(!esNavegacion && !esArchivoDeLaApp) return;
 
-  evento.respondWith(
-    fetch(peticion, { cache: "no-store" }).catch(() => caches.match(peticion))
-  );
+  evento.respondWith((async () => {
+    try{
+      const respuestaRed = await fetch(peticion, { cache: "no-store" });
+      const cache = await caches.open(CACHE_APP_SHELL);
+      cache.put(peticion, respuestaRed.clone());
+      return respuestaRed;
+    }catch(e){
+      const cache = await caches.open(CACHE_APP_SHELL);
+      const enCache = await cache.match(peticion);
+      if(enCache) return enCache;
+      if(esNavegacion){
+        const shell = await cache.match("/chat/index.html");
+        if(shell) return shell;
+      }
+      throw e;
+    }
+  })());
 });
 
 /* ===== Mini almacén en IndexedDB (mensajes pendientes por conversación + silencios) ===== */
