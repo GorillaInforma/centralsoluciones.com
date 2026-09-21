@@ -23,6 +23,7 @@
     --ochre:#0EA5E9;
     --red:#A8412F;
     --muted:#666F69;
+    --fit:1;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -35,29 +36,32 @@
     font-family:'Inter', sans-serif;
     font-size:15px;
     line-height:1.5;
-    padding-bottom:60px;
+    padding-bottom:12px;
   }
   /* En móvil, evita que Safari/Chrome hagan zoom automático al enfocar
      un input/select (eso es lo que "mueve" la pantalla). */
   @media (hover:none) and (pointer:coarse){
     input, select{ font-size:16px; }
   }
-  /* Compacta el espaciado en móvil (sin transformar nada) para que el
-     formulario necesite menos alto y sea menos probable tener que
-     hacer scroll. No afecta el comportamiento normal de los inputs. */
+  /* Compacta el espaciado en móvil (sin transformar nada, todo con
+     tamaños reales) para que el formulario quepa en una sola pantalla.
+     --fit lo ajusta JS según el alto real disponible del dispositivo;
+     nunca toca el tamaño de los inputs, así el teclado se comporta normal. */
   @media (hover:none) and (pointer:coarse), (max-width:600px){
-    header{padding:10px 16px 8px 16px;}
-    nav.tabs{margin:8px 16px 0 16px;max-width:calc(100% - 32px);}
-    nav.tabs button{padding:8px 14px;}
-    main{padding:10px 16px 16px;}
-    .card{padding:14px;margin-bottom:12px;}
-    .card h2{font-size:16px;margin-bottom:10px;}
-    .field{margin-bottom:8px;}
-    .grid{gap:10px;}
-    label{margin-bottom:2px;font-size:12px;}
-    input, select{padding:7px 9px;}
-    .live-results{gap:8px;padding:8px;margin-bottom:12px;}
-    .live-results .stat{padding:5px 4px;}
+    body{padding-bottom:calc(6px * var(--fit));}
+    header{padding:calc(10px * var(--fit)) 16px calc(8px * var(--fit)) 16px;}
+    nav.tabs{margin:calc(8px * var(--fit)) 16px 0 16px;max-width:calc(100% - 32px);}
+    nav.tabs button{padding:calc(8px * var(--fit)) 14px;}
+    main{padding:calc(10px * var(--fit)) 16px calc(12px * var(--fit));}
+    .card{padding:calc(14px * var(--fit));margin-bottom:calc(10px * var(--fit));}
+    .card h2{font-size:calc(16px * var(--fit));margin-bottom:calc(9px * var(--fit));}
+    .macro-subtitle{font-size:calc(13px * var(--fit));}
+    .field{margin-bottom:calc(7px * var(--fit));}
+    .grid{gap:calc(9px * var(--fit));}
+    label{margin-bottom:2px;font-size:calc(12px * var(--fit));}
+    input, select{padding:calc(6px * var(--fit)) 9px;}
+    .live-results{gap:6px;padding:calc(7px * var(--fit));margin-bottom:calc(10px * var(--fit));}
+    .live-results .stat{padding:calc(4px * var(--fit)) 4px;}
     .live-results .stat .num{font-size:17px;}
   }
   /* Vista de escritorio: más espacio, sin necesidad de comprimir. */
@@ -728,8 +732,52 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.getElementById(btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab === 'historial') mostrarVistaRegistros('lista');
     saveSession();
+    ajustarFitCalculadora();
   });
 });
+
+/* ---------- AJUSTE "SIN SCROLL" (con tamaños reales, sin transform) ---------- */
+// Reduce el espaciado real (padding/gap/margen) de la calculadora en
+// móvil hasta que todo el contenido quepa en el alto visible de la
+// pantalla. No usa transform ni afecta el tamaño de los inputs, así
+// el teclado y el foco se comportan de forma normal.
+const FIT_MIN = 0.55;
+function esMovil(){
+  return !(window.matchMedia('(hover:hover) and (pointer:fine)').matches
+        && window.innerWidth >= 900);
+}
+let fitAjustando = false;
+function ajustarFitCalculadora(){
+  if(fitAjustando) return;
+  const calcSection = document.getElementById('calc');
+  if(!calcSection || !calcSection.classList.contains('active')) return;
+
+  if(!esMovil()){
+    document.documentElement.style.setProperty('--fit', '1');
+    return;
+  }
+
+  fitAjustando = true;
+  document.documentElement.style.setProperty('--fit', '1');
+
+  requestAnimationFrame(()=>{
+    const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+    let fit = 1;
+    for(let i=0; i<6; i++){
+      const alturaTotal = document.documentElement.scrollHeight;
+      if(alturaTotal <= vh) break;
+      fit = Math.max(FIT_MIN, fit * (vh / alturaTotal) * 0.98);
+      document.documentElement.style.setProperty('--fit', String(fit));
+      if(fit <= FIT_MIN) break;
+    }
+    fitAjustando = false;
+  });
+}
+window.addEventListener('resize', ()=>requestAnimationFrame(ajustarFitCalculadora));
+window.addEventListener('orientationchange', ()=>setTimeout(ajustarFitCalculadora, 200));
+if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>requestAnimationFrame(ajustarFitCalculadora));
+document.addEventListener('DOMContentLoaded', ajustarFitCalculadora);
+window.addEventListener('load', ajustarFitCalculadora);
 
 /* ---------- CALCULADORA ---------- */
 function calcular(){
@@ -1643,4 +1691,3 @@ loadSession(); // restaura lo último que estabas trabajando, incluso sin haberl
 </script>
 </body>
 </html>
-
