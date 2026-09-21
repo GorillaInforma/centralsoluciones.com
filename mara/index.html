@@ -23,7 +23,6 @@
     --ochre:#0EA5E9;
     --red:#A8412F;
     --muted:#666F69;
-    --fit:1;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -36,32 +35,29 @@
     font-family:'Inter', sans-serif;
     font-size:15px;
     line-height:1.5;
-    padding-bottom:12px;
+    padding-bottom:60px;
   }
   /* En móvil, evita que Safari/Chrome hagan zoom automático al enfocar
      un input/select (eso es lo que "mueve" la pantalla). */
   @media (hover:none) and (pointer:coarse){
     input, select{ font-size:16px; }
   }
-  /* Compacta el espaciado en móvil (sin transformar nada, todo con
-     tamaños reales) para que el formulario quepa en una sola pantalla.
-     --fit lo ajusta JS según el alto real disponible del dispositivo;
-     nunca toca el tamaño de los inputs, así el teclado se comporta normal. */
+  /* Compacta el espaciado en móvil (sin transformar nada) para que el
+     formulario necesite menos alto y sea menos probable tener que
+     hacer scroll. No afecta el comportamiento normal de los inputs. */
   @media (hover:none) and (pointer:coarse), (max-width:600px){
-    body{padding-bottom:calc(6px * var(--fit));}
-    header{padding:calc(10px * var(--fit)) 16px calc(8px * var(--fit)) 16px;}
-    nav.tabs{margin:calc(8px * var(--fit)) 16px 0 16px;max-width:calc(100% - 32px);}
-    nav.tabs button{padding:calc(8px * var(--fit)) 14px;}
-    main{padding:calc(10px * var(--fit)) 16px calc(12px * var(--fit));}
-    .card{padding:calc(14px * var(--fit));margin-bottom:calc(10px * var(--fit));}
-    .card h2{font-size:calc(16px * var(--fit));margin-bottom:calc(9px * var(--fit));}
-    .macro-subtitle{font-size:calc(13px * var(--fit));}
-    .field{margin-bottom:calc(7px * var(--fit));}
-    .grid{gap:calc(9px * var(--fit));}
-    label{margin-bottom:2px;font-size:calc(12px * var(--fit));}
-    input, select{padding:calc(6px * var(--fit)) 9px;}
-    .live-results{gap:6px;padding:calc(7px * var(--fit));margin-bottom:calc(10px * var(--fit));}
-    .live-results .stat{padding:calc(4px * var(--fit)) 4px;}
+    header{padding:10px 16px 8px 16px;}
+    nav.tabs{margin:8px 16px 0 16px;max-width:calc(100% - 32px);}
+    nav.tabs button{padding:8px 14px;}
+    main{padding:10px 16px 16px;}
+    .card{padding:14px;margin-bottom:12px;}
+    .card h2{font-size:16px;margin-bottom:10px;}
+    .field{margin-bottom:8px;}
+    .grid{gap:10px;}
+    label{margin-bottom:2px;font-size:12px;}
+    input, select{padding:7px 9px;}
+    .live-results{gap:8px;padding:8px;margin-bottom:12px;}
+    .live-results .stat{padding:5px 4px;}
     .live-results .stat .num{font-size:17px;}
   }
   /* Vista de escritorio: más espacio, sin necesidad de comprimir. */
@@ -436,6 +432,97 @@
   .view-name{font-family:'Sora',sans-serif;font-weight:600;font-size:17px;line-height:1.2;}
   .view-sub{font-size:12.5px;color:var(--muted);}
   .view-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+  /* Pantalla de conexión con Firebase (tapa la app hasta que los datos estén cargados) */
+  #cargando{
+    position:fixed; inset:0; z-index:100;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; padding:24px; text-align:center;
+    background:var(--bg); color:var(--ink);
+  }
+  #cargando[hidden]{display:none;}
+  #cargando .spin{
+    width:30px; height:30px; border-radius:50%;
+    border:3px solid var(--teal-light); border-top-color:var(--teal);
+    animation:giro .8s linear infinite;
+  }
+  #cargando.error .spin{display:none;}
+  #cargando .msg{font-size:15px; max-width:320px;}
+  #cargando .detalle{font-size:12.5px; color:var(--muted); max-width:320px;}
+  #cargando button{display:none;}
+  #cargando.error button{display:inline-block;}
+  @keyframes giro{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion:reduce){ #cargando .spin{animation-duration:2s;} }
+
+  /* ===== Calculadora en móvil: pantalla estática que cabe completa =====
+     La página no se desplaza: encabezado, pestañas, resultados y datos de la
+     persona quedan fijos y ocupan exactamente el alto visible. Solo la pestaña
+     Registros (listas largas) conserva el scroll normal. */
+  @media (hover:none) and (pointer:coarse), (max-width:600px){
+    html:has(#calc.active), body:has(#calc.active){overflow:hidden;}
+    body:has(#calc.active){
+      position:fixed;
+      top:0; left:0; right:0;
+      height:100%;
+      height:100dvh;
+      display:flex;
+      flex-direction:column;
+      padding-bottom:0;
+    }
+    body:has(#calc.active) header{flex:none;padding:8px 16px 6px;}
+    body:has(#calc.active) header h1{font-size:14px;}
+    body:has(#calc.active) nav.tabs{flex:none;position:static;margin:6px 16px 0;}
+    body:has(#calc.active) nav.tabs button{padding:6px 14px;}
+    body:has(#calc.active) main{
+      flex:1 1 auto;
+      min-height:0;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      padding:8px 16px 10px;
+    }
+    /* Solo si el teléfono es tan bajito que no cabe, se desplaza dentro de la sección
+       (así no se mueve toda la pantalla). Si cabe, no hay scroll. */
+    #calc.active{
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      overflow-y:auto;
+      overscroll-behavior:contain;
+      animation:none;
+    }
+    #calc .live-results{position:static;flex:none;margin-bottom:8px;box-shadow:none;}
+    #calc .card{flex:none;margin-bottom:0;padding:10px 12px;}
+    #calc .card h2{font-size:15px;margin-bottom:8px;}
+    #calc .grid{grid-template-columns:1fr 1fr;gap:0 10px;}
+    #calc .field{margin-bottom:7px;}
+    #calc .macro-title{margin-top:6px !important;}
+    #calc .macro-subtitle{display:inline;margin-left:6px;}
+    #calc .note{margin:2px 0 0;font-size:12px;}
+    #calc .note:empty{display:none;}
+    #calc .card > div[style*="justify-content:center"]{margin-top:8px !important;}
+    #calc button.action{padding:11px 24px !important;font-size:15px !important;}
+  }
+  /* Teléfonos de pantalla corta: compacta un poco más */
+  @media (hover:none) and (pointer:coarse) and (max-height:620px), (max-width:600px) and (max-height:620px){
+    body:has(#calc.active) header{padding:6px 16px 4px;}
+    #calc .live-results{padding:5px;margin-bottom:6px;}
+    #calc .live-results .stat .num{font-size:15px;}
+    #calc .card{padding:8px 12px;}
+    #calc .field{margin-bottom:5px;}
+    #calc input, #calc select{padding:5px 9px;}
+    #calc button.action{padding:9px 24px !important;}
+  }
+  @media (hover:none) and (pointer:coarse) and (max-height:570px), (max-width:600px) and (max-height:570px){
+    body:has(#calc.active) nav.tabs{margin-top:4px;}
+    body:has(#calc.active) main{padding-top:6px;padding-bottom:6px;}
+    #calc .card h2{margin-bottom:4px;}
+    #calc .field{margin-bottom:3px;}
+    #calc label{font-size:11px;margin-bottom:1px;}
+    #calc .macro-title{margin-top:2px !important;}
+    #calc .card > div[style*="justify-content:center"]{margin-top:6px !important;}
+  }
 </style>
 </head>
 <body>
@@ -663,6 +750,13 @@
 
 <div id="toast" role="status"></div>
 
+<div id="cargando" role="status" aria-live="polite">
+  <div class="spin"></div>
+  <div class="msg" id="cargandoMsg">Cargando, por favor espera…</div>
+  <div class="detalle" id="cargandoDetalle"></div>
+  <button class="action" id="cargandoReintentar" onclick="window.reintentarConexion && window.reintentarConexion()">Reintentar</button>
+</div>
+
 <script>
 /* ---------- DATOS BASE: Sistema Mexicano de Alimentos Equivalentes (SMAE, valores aproximados) ---------- */
 const DEFAULT_GROUPS = [
@@ -706,16 +800,17 @@ const MEAL_WEIGHTS = [0.25, 0.10, 0.35, 0.10, 0.20];
 let groups = [];
 let targets = null; // {kcal, prot, carb, fat}
 
-/* ---------- PERSISTENCIA ---------- */
+/* ---------- PERSISTENCIA ----------
+   Todo se guarda en Firebase (Firestore). No se usa localStorage.
+   Los datos llegan ya cargados en APPDATA desde el módulo de Firebase (ver al final). */
+let APPDATA = {historial:[], groups:null, session:null};
+let appListo = false;   // los guardados de sesión solo empiezan cuando la app terminó de cargar
+
 function loadGroups(){
-  try{
-    const saved = localStorage.getItem('geb_get_groups');
-    if(saved){ groups = JSON.parse(saved); return; }
-  }catch(e){}
-  groups = JSON.parse(JSON.stringify(DEFAULT_GROUPS));
+  groups = JSON.parse(JSON.stringify(APPDATA.groups || DEFAULT_GROUPS));
 }
 function saveGroups(){
-  try{ localStorage.setItem('geb_get_groups', JSON.stringify(groups)); }catch(e){}
+  if(window.DB) DB.saveGroups(groups);
 }
 function resetGroups(){
   groups = JSON.parse(JSON.stringify(DEFAULT_GROUPS));
@@ -732,52 +827,8 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.getElementById(btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab === 'historial') mostrarVistaRegistros('lista');
     saveSession();
-    ajustarFitCalculadora();
   });
 });
-
-/* ---------- AJUSTE "SIN SCROLL" (con tamaños reales, sin transform) ---------- */
-// Reduce el espaciado real (padding/gap/margen) de la calculadora en
-// móvil hasta que todo el contenido quepa en el alto visible de la
-// pantalla. No usa transform ni afecta el tamaño de los inputs, así
-// el teclado y el foco se comportan de forma normal.
-const FIT_MIN = 0.55;
-function esMovil(){
-  return !(window.matchMedia('(hover:hover) and (pointer:fine)').matches
-        && window.innerWidth >= 900);
-}
-let fitAjustando = false;
-function ajustarFitCalculadora(){
-  if(fitAjustando) return;
-  const calcSection = document.getElementById('calc');
-  if(!calcSection || !calcSection.classList.contains('active')) return;
-
-  if(!esMovil()){
-    document.documentElement.style.setProperty('--fit', '1');
-    return;
-  }
-
-  fitAjustando = true;
-  document.documentElement.style.setProperty('--fit', '1');
-
-  requestAnimationFrame(()=>{
-    const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
-    let fit = 1;
-    for(let i=0; i<6; i++){
-      const alturaTotal = document.documentElement.scrollHeight;
-      if(alturaTotal <= vh) break;
-      fit = Math.max(FIT_MIN, fit * (vh / alturaTotal) * 0.98);
-      document.documentElement.style.setProperty('--fit', String(fit));
-      if(fit <= FIT_MIN) break;
-    }
-    fitAjustando = false;
-  });
-}
-window.addEventListener('resize', ()=>requestAnimationFrame(ajustarFitCalculadora));
-window.addEventListener('orientationchange', ()=>setTimeout(ajustarFitCalculadora, 200));
-if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>requestAnimationFrame(ajustarFitCalculadora));
-document.addEventListener('DOMContentLoaded', ajustarFitCalculadora);
-window.addEventListener('load', ajustarFitCalculadora);
 
 /* ---------- CALCULADORA ---------- */
 function calcular(){
@@ -1023,14 +1074,10 @@ const ICON = {
 };
 
 function loadHistorial(){
-  try{
-    const saved = localStorage.getItem('geb_get_historial');
-    if(saved){ historial = JSON.parse(saved); }
-  }catch(e){ historial = []; }
+  historial = JSON.parse(JSON.stringify(APPDATA.historial || []));
 }
-function saveHistorialStorage(){
-  try{ localStorage.setItem('geb_get_historial', JSON.stringify(historial)); }catch(e){}
-}
+function guardarRegistroNube(rec){ if(window.DB && rec) DB.saveRegistro(rec); }
+function borrarRegistroNube(id){ if(window.DB) DB.deleteRegistro(id); }
 
 function leerFormularioPersona(){
   return {
@@ -1058,6 +1105,7 @@ function guardarEnHistorial(){
   const get = document.getElementById('rGET').textContent;
   const targetsGuardados = targets ? {...targets} : null;
   const rec = currentRecordId ? historial.find(r=>r.id===currentRecordId) : null;
+  let recGuardado = rec;
 
   if(rec){
     // si cambiaron las metas, el menú anterior ya no corresponde
@@ -1069,7 +1117,7 @@ function guardarEnHistorial(){
     rec.actualizado = ahora;
   } else {
     currentRecordId = 'p_' + Date.now();
-    historial.push({
+    recGuardado = {
       id: currentRecordId,
       ...datos,
       geb, get,
@@ -1077,9 +1125,10 @@ function guardarEnHistorial(){
       creado: ahora,
       actualizado: ahora,
       menuSnapshot: null,
-    });
+    };
+    historial.push(recGuardado);
   }
-  saveHistorialStorage();
+  guardarRegistroNube(recGuardado);
   renderHistorial();
   updateSaveHints();
   saveSession();
@@ -1130,7 +1179,7 @@ function eliminarRegistro(id){
   historial = historial.filter(r=>r.id!==id);
   if(currentRecordId===id){ nuevoRegistro(); }
   if(menuRecordId===id){ menuRecordId = null; }
-  saveHistorialStorage();
+  borrarRegistroNube(id);
   renderHistorial();
 }
 
@@ -1375,7 +1424,7 @@ function generarMenuRegistro(){
   const { mealsData, achieved } = construirMenu(rec.targets);
   rec.menuSnapshot = { mealsData, achieved, targetsUsed: {...rec.targets} };
   rec.actualizado = new Date().toISOString();
-  saveHistorialStorage();
+  guardarRegistroNube(rec);
   renderVistaMenu();
   renderHistorial();
   mostrarAviso('Menú generado');
@@ -1611,25 +1660,20 @@ function descargarPdfEquivalencias(){
 const SESSION_FIELD_IDS = ['nombrePersona','sexo','edad','peso','estatura','actividad','formula','pctCarb','pctProt','pctGrasa'];
 
 function saveSession(){
-  try{
-    const data = {};
-    SESSION_FIELD_IDS.forEach(id=>{
-      const el = document.getElementById(id);
-      if(el) data[id] = el.value;
-    });
-    data.currentRecordId = currentRecordId;
-    const activeBtn = document.querySelector('.tab-btn.active');
-    data.activeTab = activeBtn ? activeBtn.dataset.tab : 'calc';
-    localStorage.setItem('geb_get_session', JSON.stringify(data));
-  }catch(e){}
+  if(!appListo || !window.DB) return;
+  const data = {};
+  SESSION_FIELD_IDS.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) data[id] = el.value;
+  });
+  data.currentRecordId = currentRecordId || null;
+  const activeBtn = document.querySelector('.tab-btn.active');
+  data.activeTab = activeBtn ? activeBtn.dataset.tab : 'calc';
+  DB.saveSession(data);
 }
 
 function loadSession(){
-  let s = null;
-  try{
-    const raw = localStorage.getItem('geb_get_session');
-    if(raw) s = JSON.parse(raw);
-  }catch(e){ s = null; }
+  const s = APPDATA.session || null;
   if(!s){ calcular(); return; }
 
   SESSION_FIELD_IDS.forEach(id=>{
@@ -1649,45 +1693,210 @@ function loadSession(){
 }
 
 
-/* ---------- INIT ---------- */
-loadGroups();
-renderGroups();
-loadHistorial();
-renderHistorial();
-updateSaveHints();
+/* ---------- INIT ----------
+   Ya no arranca solo: espera a que el módulo de Firebase cargue los datos y llame a startApp(). */
+window.startApp = function(datos){
+  APPDATA = datos || {historial:[], groups:null, session:null};
+  loadGroups();
+  renderGroups();
+  loadHistorial();
+  renderHistorial();
+  updateSaveHints();
 
-const CALC_FIELD_IDS = ['sexo','edad','peso','estatura','actividad','formula','pctGrasa'];
-CALC_FIELD_IDS.forEach(id=>{
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.addEventListener('input', calcular);
-  el.addEventListener('change', calcular);
-});
+  const CALC_FIELD_IDS = ['sexo','edad','peso','estatura','actividad','formula','pctGrasa'];
+  CALC_FIELD_IDS.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', calcular);
+    el.addEventListener('change', calcular);
+  });
 
-// La grasa se completa sola con lo que falte para 100%, y se puede editar a mano
-function onMacroPctChange(){
-  const carbEl = document.getElementById('pctCarb');
-  const protEl = document.getElementById('pctProt');
-  const grasaEl = document.getElementById('pctGrasa');
-  if(carbEl.value === '' && protEl.value === ''){
-    grasaEl.value = '';
-  } else {
-    const c = parseFloat(carbEl.value)||0;
-    const p = parseFloat(protEl.value)||0;
-    grasaEl.value = Math.max(0, Math.round((100 - c - p)*100)/100);
+  // La grasa se completa sola con lo que falte para 100%, y se puede editar a mano
+  function onMacroPctChange(){
+    const carbEl = document.getElementById('pctCarb');
+    const protEl = document.getElementById('pctProt');
+    const grasaEl = document.getElementById('pctGrasa');
+    if(carbEl.value === '' && protEl.value === ''){
+      grasaEl.value = '';
+    } else {
+      const c = parseFloat(carbEl.value)||0;
+      const p = parseFloat(protEl.value)||0;
+      grasaEl.value = Math.max(0, Math.round((100 - c - p)*100)/100);
+    }
+    calcular();
   }
-  calcular();
-}
-['pctCarb','pctProt'].forEach(id=>{
-  const el = document.getElementById(id);
-  el.addEventListener('input', onMacroPctChange);
-  el.addEventListener('change', onMacroPctChange);
-});
+  ['pctCarb','pctProt'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.addEventListener('input', onMacroPctChange);
+    el.addEventListener('change', onMacroPctChange);
+  });
 
-document.getElementById('nombrePersona').addEventListener('input', saveSession);
-document.getElementById('nombrePersona').addEventListener('input', updateSaveHints);
+  document.getElementById('nombrePersona').addEventListener('input', saveSession);
+  document.getElementById('nombrePersona').addEventListener('input', updateSaveHints);
 
-loadSession(); // restaura lo último que estabas trabajando, incluso sin haberlo guardado en el historial
+  loadSession(); // restaura lo último que estabas trabajando, incluso sin haberlo guardado en el historial
+  appListo = true;   // desde aquí, los cambios de la sesión sí se guardan
+};
+</script>
+
+<!-- Firebase (Firestore): aquí vive TODA la información de la app. Nada se guarda en localStorage. -->
+<script type="module">
+  const VERSION = '12.19.0';
+  const BASE = 'https://www.gstatic.com/firebasejs/' + VERSION + '/';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBJCbjdSa-pLOMrsZ4uXx7Z69khlBGV030",
+    authDomain: "mara-cdb8c.firebaseapp.com",
+    projectId: "mara-cdb8c",
+    storageBucket: "mara-cdb8c.firebasestorage.app",
+    messagingSenderId: "304384639955",
+    appId: "1:304384639955:web:d300881ee4794767656526",
+    measurementId: "G-RPBE7S525M"
+  };
+
+  /* Estructura en Firestore:
+       registros/{id}      -> un documento por persona guardada (incluye su menú)
+       ajustes/groups      -> { lista: [...] }   equivalencias de alimentos editadas
+       ajustes/session     -> borrador de lo que estás capturando en la Calculadora          */
+  let app, db, F;   // F = funciones de firebase-firestore
+
+  const $ = id => document.getElementById(id);
+  const limpiar = o => JSON.parse(JSON.stringify(o));   // quita undefined (Firestore no lo acepta)
+
+  function mostrarError(msg, detalle){
+    const ov = $('cargando');
+    ov.hidden = false;
+    ov.classList.add('error');
+    $('cargandoMsg').textContent = msg;
+    $('cargandoDetalle').textContent = detalle || '';
+  }
+  function mostrarCargando(){
+    const ov = $('cargando');
+    ov.hidden = false;
+    ov.classList.remove('error');
+    $('cargandoMsg').textContent = 'Cargando, por favor espera…';
+    $('cargandoDetalle').textContent = '';
+  }
+  function describirError(e){
+    const code = (e && e.code) || '';
+    if(code === 'permission-denied')
+      return ['No se pudo acceder a los datos.', 'Revisa las reglas de la base de datos en la consola (deben permitir las colecciones "registros" y "ajustes").'];
+    if(code === 'unavailable' || /offline|network|Failed to fetch|import/i.test(String(e && e.message)))
+      return ['No hay conexión.', 'Revisa tu internet y vuelve a intentar.'];
+    if(code === 'failed-precondition' || code === 'not-found')
+      return ['La base de datos aún no está creada.', 'Créala en la consola (Firestore Database → Crear base de datos) y vuelve a intentar.'];
+    return ['No se pudieron cargar los datos.', String((e && (e.code || e.message)) || e)];
+  }
+  function avisoErrorGuardado(e){
+    console.error('Error al guardar en Firebase:', e);
+    const [msg] = describirError(e);
+    if(window.mostrarAviso) window.mostrarAviso('⚠ No se guardó: ' + msg);
+  }
+  function guardar(promesa){
+    promesa.catch(avisoErrorGuardado);   // no bloquea la interfaz
+    return promesa;
+  }
+
+  async function conectar(){
+    if(db) return;
+    const [{initializeApp}, firestore] = await Promise.all([
+      import(BASE + 'firebase-app.js'),
+      import(BASE + 'firebase-firestore.js')
+    ]);
+    F = firestore;
+    app = initializeApp(firebaseConfig);
+    window.firebaseApp = app;
+    // Sin caché en disco: por defecto Firestore usa solo memoria, así que nada queda guardado en el dispositivo.
+    db = F.initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+
+    // Analytics es opcional: si falla, no afecta a la app
+    Promise.all([import(BASE + 'firebase-analytics.js')]).then(([{getAnalytics, isSupported}])=>{
+      return isSupported().then(ok=>{ if(ok) window.firebaseAnalytics = getAnalytics(app); });
+    }).catch(()=>{});
+  }
+
+  async function cargarTodo(){
+    const [regs, g, ses] = await Promise.all([
+      F.getDocs(F.collection(db, 'registros')),
+      F.getDoc(F.doc(db, 'ajustes', 'groups')),
+      F.getDoc(F.doc(db, 'ajustes', 'session'))
+    ]);
+    return {
+      historial: regs.docs.map(d => d.data()),
+      groups: g.exists() ? g.data().lista : null,
+      session: ses.exists() ? ses.data() : null,
+      hayDatos: !regs.empty || g.exists() || ses.exists()
+    };
+  }
+
+  /* Migración de una sola vez: si en este dispositivo quedaron datos de la versión anterior
+     (localStorage) y Firebase está vacío, se suben a Firebase y se borran del dispositivo. */
+  async function migrarDesdeLocalStorage(datos){
+    if(datos.hayDatos) return datos;
+    let h = null, g = null, s = null;
+    try{
+      h = JSON.parse(localStorage.getItem('geb_get_historial') || 'null');
+      g = JSON.parse(localStorage.getItem('geb_get_groups') || 'null');
+      s = JSON.parse(localStorage.getItem('geb_get_session') || 'null');
+    }catch(e){ return datos; }
+    const hayRegs = Array.isArray(h) && h.length;
+    if(!hayRegs && !g && !s) return datos;
+
+    const ops = [];
+    if(hayRegs) h.forEach(r => { if(r && r.id) ops.push([F.doc(db,'registros',r.id), limpiar(r)]); });
+    if(g) ops.push([F.doc(db,'ajustes','groups'), {lista: limpiar(g)}]);
+    if(s) ops.push([F.doc(db,'ajustes','session'), limpiar(s)]);
+    for(let i=0; i<ops.length; i+=400){
+      const batch = F.writeBatch(db);
+      ops.slice(i, i+400).forEach(([ref, data]) => batch.set(ref, data));
+      await batch.commit();
+    }
+    ['geb_get_historial','geb_get_groups','geb_get_session'].forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+    return {
+      historial: hayRegs ? h.filter(r=>r && r.id) : [],
+      groups: g || null,
+      session: s || null
+    };
+  }
+
+  /* Puente que usa la app para guardar */
+  let sesionPendiente = null, sesionTimer = null;
+  function enviarSesion(){
+    clearTimeout(sesionTimer);
+    if(!sesionPendiente) return;
+    const data = sesionPendiente; sesionPendiente = null;
+    guardar(F.setDoc(F.doc(db,'ajustes','session'), limpiar(data)));
+  }
+  window.DB = {
+    saveRegistro(rec){ return guardar(F.setDoc(F.doc(db,'registros',rec.id), limpiar(rec))); },
+    deleteRegistro(id){ return guardar(F.deleteDoc(F.doc(db,'registros',id))); },
+    saveGroups(lista){ return guardar(F.setDoc(F.doc(db,'ajustes','groups'), {lista: limpiar(lista)})); },
+    saveSession(data){          // se agrupa para no escribir en cada tecla
+      sesionPendiente = data;
+      clearTimeout(sesionTimer);
+      sesionTimer = setTimeout(enviarSesion, 700);
+    }
+  };
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') enviarSesion(); });
+  window.addEventListener('pagehide', enviarSesion);
+
+  async function iniciar(){
+    mostrarCargando();
+    try{
+      await conectar();
+      let datos = await cargarTodo();
+      datos = await migrarDesdeLocalStorage(datos);
+      window.startApp(datos);
+      $('cargando').hidden = true;
+    }catch(e){
+      console.error(e);
+      const [msg, det] = describirError(e);
+      mostrarError(msg, det);
+    }
+  }
+  window.reintentarConexion = iniciar;
+  iniciar();
 </script>
 </body>
 </html>
+
